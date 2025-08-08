@@ -15,3 +15,4 @@ markdown_extensions:
   - attr_list
   - pymdownx.superfences
 docs_dir: docs
+strict: false

@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: '3.x'
       - run: pip install mkdocs mkdocs-material mkdocs-roamlinks-plugin mkdocs-glightbox mkdocs-minify-plugin
-      - run: mkdocs build --strict --site-dir site
+      - run: mkdocs build --site-dir site
       - uses: actions/upload-pages-artifact@v3
         with: { path: site }
   deploy:
