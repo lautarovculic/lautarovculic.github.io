@@ -176,3 +176,33 @@ html, body, .md-content, .md-content__inner { background: var(--lauti-bg) !impor
 }
 
 .md-overlay { background: rgba(0,0,0,.6); }
+
+@media (max-width: 76.25em) {
+  .md-sidebar--secondary { display: none !important; }
+
+  .md-sidebar--primary {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: min(85vw, 22rem);
+    max-width: 22rem;
+    transform: translateX(-100%) !important;
+    transition: transform .2s ease;
+    background: #000 !important;
+    border-right: 1px solid var(--lauti-border);
+    z-index: 9999;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    box-shadow: none !important;
+    clip-path: none !important;
+  }
+
+  #__drawer:checked ~ .md-container .md-sidebar--primary {
+    transform: translateX(0) !important;
+  }
+
+  .md-sidebar__scrollwrap { height: 100%; background: #000 !important; }
+  .md-nav, .md-nav__list { background: #000 !important; }
+  .md-overlay { background: rgba(0,0,0,.6) !important; }
+}
