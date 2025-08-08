@@ -1,4 +1,3 @@
-#ctf #broadcast #services #theft-file #examples #java #android-programming 
 **Description**: Tired of worrying about your device security? AndroPseudoProtect offers comprehensive protection with just a tap!
 
 **Link**: https://academy.8ksec.io/course/android-application-exploitation-challenges

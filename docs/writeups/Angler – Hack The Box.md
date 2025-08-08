@@ -1,4 +1,3 @@
-#ctf #adb #intents-extra #broadcast #rev-libraries #frida #hook 
 ![[angler1.png]]
 **Difficult:** Medium
 **Category**: Mobile

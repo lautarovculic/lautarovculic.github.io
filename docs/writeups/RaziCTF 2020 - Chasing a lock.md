@@ -1,4 +1,3 @@
-#ctf #smali #patching 
 **Description**: As locks are so popular many will chase them but why? maybe a flag :)
 
 **Download**: https://lautarovculic.com/my_files/chasingALook.apk

@@ -1,4 +1,3 @@
-#ctf #malware #smali #patching #crypto #obfuscation 
 ![[joker1.png]]
 **Difficult:** Hard
 **Category**: Mobile

@@ -1,4 +1,3 @@
-#ctf #python #strings 
 **Description**: A paid android app for THC began to be developed, unfortunately its development stalled. In the end, it was never possible to buy this app, but be the first to unlock the app's premium features by finding a valid key.
 
 **Download**: https://lautarovculic.com/my_files/THC.apk

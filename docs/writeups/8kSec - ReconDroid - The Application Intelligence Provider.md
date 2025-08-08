@@ -1,4 +1,3 @@
-#ctf #deep-links #theft-file #intents 
 **Description**: Ever wondered what secrets your Android device holds? Meet ReconDroid! A powerful application analysis tool that gives you unprecedented insight into your device's ecosystem.
 
 **Link**: https://academy.8ksec.io/course/android-application-exploitation-challenges

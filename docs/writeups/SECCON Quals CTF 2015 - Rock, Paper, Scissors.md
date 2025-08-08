@@ -1,4 +1,3 @@
-#ctf #rev-libraries #smali #patching 
 **Description**: Please win 1000 times in rock-paper-scissors
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
 For example, an **ARM Translator**.

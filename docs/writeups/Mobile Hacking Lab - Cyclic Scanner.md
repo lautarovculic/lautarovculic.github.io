@@ -1,4 +1,3 @@
-#ctf #code-execution #logs #logcat 
 **Description**: Welcome to the Cyclic Scanner Challenge! This lab is designed to mimic real-world scenarios where vulnerabilities within Android services lead to exploitable situations. Participants will have the opportunity to exploit these vulnerabilities to achieve remote code execution (RCE) on an Android device.
 
 **Download**: https://lautarovculic.com/my_files/cyclicScanner.apk

@@ -1,4 +1,3 @@
-#ctf #smali #python #patching 
 ### AHE16 : Android Hacking Events 2016
 For this challenge, we need install some things into our Android 5.1 device with Genymotion.
 For example, an **ARM Translator**.

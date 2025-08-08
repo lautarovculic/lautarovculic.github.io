@@ -1,4 +1,3 @@
-#ctf #smali #patching #vuln 
 ![[fastjson1.png]]
 **Difficult:** Easy
 **Category**: Mobile

@@ -1,4 +1,3 @@
-#ctf #frida #adb #rev-libraries #hook 
 ## Baby Android 1
 **Description**: If you've never reverse engineered an Android application, now is the time!! Get to it, already!! Learn how they work!!
 **Download**: https://lautarovculic.com/my_files/baby-android-1.apk

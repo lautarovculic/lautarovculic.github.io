@@ -1,4 +1,3 @@
-#ctf #crypto #frida #intents #activity #adb #intents-extra #fridump #strings 
 **Description**: Welcome to the **Strings** Challenge! In this lab,your goal is to find the flag. The flag's format should be "`MHL{...}`". The challenge will give you a clear idea of how intents and intent filters work on android also you will get a hands-on experience using Frida APIs.
 
 **Download**: https://lautarovculic.com/my_files/strings-MHL.apk

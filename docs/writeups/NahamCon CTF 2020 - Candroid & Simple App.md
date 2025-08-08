@@ -1,4 +1,3 @@
-#ctf #strings #smali #patching 
 ## Candroid
 **Description**: I think I can, I think I can!
 **Download**: https://lautarovculic.com/my_files/candroid.apk

@@ -1,4 +1,3 @@
-#ctf #forensic #crypto #SQLite 
 ![[investigator1.png]]
 **Difficult:** Medium
 **Category**: Mobile

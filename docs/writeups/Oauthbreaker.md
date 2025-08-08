@@ -1,4 +1,3 @@
-#ctf #burpsuite #webviews #adb #js-interface 
 ![[oauth1.png]]
 **Difficulty:** Moderate
 **Skills:** Android

@@ -1,4 +1,3 @@
-#ctf #SQLite #react #python #deobfuscation 
 ## To Do
 
 **Description**: I made my own app to remind me of all the things I need to do.

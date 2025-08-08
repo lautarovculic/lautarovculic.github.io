@@ -1,4 +1,3 @@
-#ctf #frida #crypto 
 **Description**
 Evermars says he is good at repackaging Android applications.
 

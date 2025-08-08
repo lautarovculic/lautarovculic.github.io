@@ -1,4 +1,3 @@
-#ctf #frida #python #strings #firebase #hook 
 **Description**: Descriptions are boring, just solve the challenge meh!
 **Download content**: https://lautarovculic.com/my_files/firestorm.zip
 

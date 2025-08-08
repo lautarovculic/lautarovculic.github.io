@@ -1,4 +1,3 @@
-#ctf #crypto #smali #patching 
 ![[apkey1.png]]
 **Difficult:** Easy
 **Category**: Mobile

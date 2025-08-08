@@ -1,4 +1,3 @@
-#ctf #logs #logcat #rev-libraries 
 **Description**: Someone chopped up the flag and hide it through out this challenge! Can you find all the parts and put them back together?
 
 Download **APK**: https://lautarovculic.com/my_files/challenge1_h1-702.apk

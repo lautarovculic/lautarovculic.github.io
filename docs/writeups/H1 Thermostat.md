@@ -1,4 +1,3 @@
-#ctf #burpsuite #strings 
 ![[h1tmsts.png]]
 **Flags:** 2
 **Difficulty:** Easy

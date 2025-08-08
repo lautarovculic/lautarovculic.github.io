@@ -1,4 +1,3 @@
-#ctf #deep-links #code-execution #java #adb #webviews 
 **Description**: Welcome to the "**Guess Me**" Deep Link Exploitation Challenge! Immerse yourself in the world of cybersecurity with this hands-on lab. This challenge revolves around a fictitious "Guess Me" app, shedding light on a critical security flaw related to deep links that can lead to remote code execution within the app's framework.
 
 **Download**: https://lautarovculic.com/my_files/guessMe.apk

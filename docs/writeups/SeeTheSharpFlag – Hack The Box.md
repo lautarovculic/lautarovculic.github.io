@@ -1,4 +1,3 @@
-#ctf #xamarin #rev-dll #patching 
 ![[stsflag1.png]]
 **Difficult:** Medium
 **Category**: Mobile

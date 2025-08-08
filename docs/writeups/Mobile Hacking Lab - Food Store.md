@@ -1,4 +1,3 @@
-#ctf #SQLi #SQLite 
 **Description**: Welcome to the **Android App Security Lab: SQL Injection Challenge**! Dive into the world of cybersecurity with our hands-on lab. This challenge is centered around a fictitious "Food Store" app, highlighting the critical security flaw of SQL Injection (SQLi) within the app's framework.
 
 **Download**: https://lautarovculic.com/my_files/foodStore.apk

@@ -1,4 +1,3 @@
-#ctf #strings 
 ## Andra
 **Description**: You know what to do. :)
 **Download**: https://lautarovculic.com/my_files/andra.apk

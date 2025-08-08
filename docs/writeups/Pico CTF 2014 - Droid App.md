@@ -1,4 +1,3 @@
-#ctf #smali #patching #logs #logcat 
 **Category**: Forensics
 **Description**: An Android application was released for the toaster bots, but it seems like this one is some sort of debug version. Can you discover the presence of any debug information being stored, so we can plug this? You can download the apk here.
 

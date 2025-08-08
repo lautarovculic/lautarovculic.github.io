@@ -1,4 +1,3 @@
-#ctf #adb #intents-extra #rev-libraries #frida #hook #deobfuscation 
 ![[saw1.png]]
 **Difficult:** Medium
 **Category**: Mobile

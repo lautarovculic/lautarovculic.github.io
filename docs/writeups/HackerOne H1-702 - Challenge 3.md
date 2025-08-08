@@ -1,4 +1,3 @@
-#ctf #dex #odex #crypto 
 **Description**: We could not find the original apk, but we got this. Can you make sense of it?
 
 Download **APK**: https://lautarovculic.com/my_files/challenge3_h1-702.zip

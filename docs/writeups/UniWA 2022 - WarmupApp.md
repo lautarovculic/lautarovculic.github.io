@@ -1,4 +1,3 @@
-#ctf #strings #smali #patching 
 **Description**: A new game is released, but not everyone are allowed to play. Can you get the access code?
 
 **Download**: https://lautarovculic.com/my_files/WarmupApp-signed.apk

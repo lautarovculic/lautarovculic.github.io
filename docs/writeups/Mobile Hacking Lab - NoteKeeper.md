@@ -1,4 +1,3 @@
-#ctf #bof #code-execution #rev-libraries #python #frida #hook 
 **Description**: Welcome to the **NoteKeeper** Application, where users can create and encode short notes. However, lurking within the app is a critical buffer overflow vulnerability. Your mission is to uncover this vulnerability and exploit it to achieve remote code execution.
 
 **Download**: https://lautarovculic.com/my_files/notekeeper.apk

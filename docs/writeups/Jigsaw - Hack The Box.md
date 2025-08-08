@@ -1,4 +1,3 @@
-#ctf #dart #rev-libraries #python #frida #invoking #crypto 
 ![[jigsaw1.png]]
 **Difficult:** Easy
 **Category**: Mobile

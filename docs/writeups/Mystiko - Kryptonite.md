@@ -1,4 +1,3 @@
-#ctf #crypto #SQLite 
 **Category**: Crypto
 **Description**: This challenge intends to show how to enumerate android apps in search for hidden information.
 

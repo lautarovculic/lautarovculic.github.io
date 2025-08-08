@@ -1,4 +1,3 @@
-#ctf #malware #obfuscation #broadcast #rev-libraries #adb #python 
 ![[wondersms1.png]]
 **Difficult:** Hard
 **Category**: Mobile

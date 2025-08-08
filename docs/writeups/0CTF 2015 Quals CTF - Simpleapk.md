@@ -1,4 +1,3 @@
-#ctf #adb 
 **Description**
 This is a simple apk, Could you find the flag?
 

@@ -1,4 +1,3 @@
-#ctf #forensic 
 **Description**: Last night, most employees' mobile devices were compromised, putting them at significant risk of leaking personal and private information. We require your expertise in digital forensics to help investigate this breach.
 **Difficulty**: Easy
 **Category**: Mobile / Forensics

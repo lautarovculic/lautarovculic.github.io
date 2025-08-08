@@ -1,4 +1,3 @@
-#ctf #crypto #smali #patching 
 ![[apkrypt1.png]]
 **Difficult:** Easy
 **Category**: Mobile

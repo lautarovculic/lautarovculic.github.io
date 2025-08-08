@@ -1,4 +1,3 @@
-#ctf #python #frida #smali #logs #logcat 
 **Description**: Looks like this app is all locked up. Think you can figure out the combination?
 
 Download **APK**: https://lautarovculic.com/my_files/challenge2_h1-702.apk

@@ -1,4 +1,3 @@
-#ctf #content-provider #python #adb #intents-extra #content-resolver #strings 
 **Description**: Welcome to the **Secure Notes Challenge**! This lab immerses you in the intricacies of Android content providers, challenging you to crack a PIN code protected by a content provider within an Android application. It's an excellent opportunity to explore Android's data management and security features.
 
 **Download**: https://lautarovculic.com/my_files/secureNotes.apk

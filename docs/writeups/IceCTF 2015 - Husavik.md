@@ -1,4 +1,3 @@
-#ctf #smali #patching 
 **Description**: This handy Android App is supposed to display the flag, but it's not working!
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
 For example, an **ARM Translator**.

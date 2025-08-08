@@ -1,4 +1,3 @@
-#ctf #burpsuite #proxy #patching #trusted-certificates 
 ![[anchored1.png]]
 **Difficult:** Easy
 **Category**: Mobile

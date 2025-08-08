@@ -1,4 +1,3 @@
-#ctf #frida #hook #smali #patching 
 ![[market1.png]]
 **Difficult:** Medium
 **Category**: Mobile

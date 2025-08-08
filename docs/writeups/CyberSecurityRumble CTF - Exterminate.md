@@ -1,4 +1,3 @@
-#ctf #rev-libraries #frida #hook #crypto 
 **Description**: Daleks have invaded the earth and the Doctor is nowhere to be seen. Now it's up to you to find out how they are built and which code can stop the extermination of all humankind.
 
 **Download**: https://lautarovculic.com/my_files/exterminate.apk

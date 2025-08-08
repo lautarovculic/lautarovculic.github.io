@@ -1,4 +1,3 @@
-#ctf #adb #vuln #filesystem 
 ![[explore1.png]]
 
 ----

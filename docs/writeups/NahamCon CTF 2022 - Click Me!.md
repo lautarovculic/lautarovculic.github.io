@@ -1,4 +1,3 @@
-#ctf #smali #patching 
 **Description**: I created a cookie clicker application to pass the time. There's a special prize that I can't seem to get.
 
 **Download**: https://lautarovculic.com/my_files/click_me.apk

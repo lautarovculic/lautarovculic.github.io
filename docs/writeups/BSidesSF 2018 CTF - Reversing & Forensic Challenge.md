@@ -1,4 +1,3 @@
-#ctf #forensic #crypto #frida #hook #SQLite 
 Download **content**: https://lautarovculic.com/my_files/bsides_2018.zip
 
 ![[bsides2018_1.png]]

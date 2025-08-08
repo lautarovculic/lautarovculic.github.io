@@ -1,4 +1,3 @@
-#ctf #javascript #react 
 ![[overreact1.png]]
 **Difficult:** Very Easy
 **Category**: Mobile

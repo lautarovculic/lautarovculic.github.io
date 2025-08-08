@@ -1,4 +1,3 @@
-#ctf #pinning-bypass #proxy #burpsuite 
 ![[pinned1.png]]
 **Difficult:** Easy
 **Category**: Mobile

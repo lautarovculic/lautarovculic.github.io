@@ -1,4 +1,3 @@
-#ctf #adb #intents-extra #python #crypto 
 **Description**: The flag file is built into this Android application APK file.
 The flag is encrypted using five keys.
 Below is shown the status of each of the five keys. Red is locked, green is unlocked.

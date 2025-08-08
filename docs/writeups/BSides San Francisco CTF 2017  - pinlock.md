@@ -1,4 +1,3 @@
-#ctf #adb #SQLite #patching #crypto #activity #logs 
 **Description**: It's the developer's first mobile application. They are trying their hand at storing secrets securely. Could one of them be the flag?
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
 For example, an **ARM Translator**.

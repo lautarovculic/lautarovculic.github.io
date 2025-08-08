@@ -1,4 +1,3 @@
-#ctf #malware #crypto #obfuscation #python 
 ![[pedometer1.png]]**Difficult:** Hard
 **Category**: Mobile
 **OS**: Android

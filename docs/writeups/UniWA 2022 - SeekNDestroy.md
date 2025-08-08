@@ -1,4 +1,3 @@
-#ctf #crypto #frida #hook #patching #smali #invoking 
 **Description**: James Hetfield has applied a position in Squid Game 2022, but in order to take part into the game, he was asked to bypass the login screen of this app. Help him do this and he might find you a free ticket for the concert.
 
 **Download**: https://lautarovculic.com/my_files/Seek_N_Destroy.apk

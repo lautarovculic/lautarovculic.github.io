@@ -1,4 +1,3 @@
-#ctf #rev-libraries #crypto #python 
 ![[waiting1.png]]
 **Difficult:** Medium
 **Category**: Mobile

@@ -1,4 +1,3 @@
-#ctf #crypto #SQLite 
 **Category**: Crypto
 **Description**: Flag is a serial number.
 

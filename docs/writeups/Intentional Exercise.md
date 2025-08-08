@@ -1,4 +1,3 @@
-#ctf #webviews #smali #python #patching 
 ![[ieCTF1.png]]
 **Difficulty:** Moderate
 **Skills:** Android

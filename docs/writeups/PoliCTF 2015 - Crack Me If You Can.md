@@ -1,4 +1,3 @@
-#ctf #strings #python #obfuscation 
 **Description**: John bets nobody can find the passphrase to login!
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
 For example, an **ARM Translator**.

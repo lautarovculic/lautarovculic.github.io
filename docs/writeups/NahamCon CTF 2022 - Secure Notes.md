@@ -1,4 +1,3 @@
-#ctf #python #crypto #SQLite 
 **Description**: None of the free note taking app offer encryption... So I made my own!
 
 **Download**: https://lautarovculic.com/my_files/secure_notes.apk

@@ -1,4 +1,3 @@
-#ctf #rev-libraries #python #crypto 
 **Download**: https://lautarovculic.com/my_files/PasswordCheckerAPKs.zip
 
 ![[bsides_2019-passwordChecker1.png]]

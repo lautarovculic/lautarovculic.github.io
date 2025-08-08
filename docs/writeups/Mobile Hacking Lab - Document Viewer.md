@@ -1,4 +1,3 @@
-#ctf #code-execution #path-traversal #adb #intents 
 **Description**: Welcome to the **Remote Code Execution** (RCE) Challenge! This lab provides a real-world scenario where you'll explore vulnerabilities in popular software. Your mission is to exploit a path traversal vulnerability combined with dynamic code loading to achieve remote code execution.
 
 **Download**: https://lautarovculic.com/my_files/documentViewer.apk

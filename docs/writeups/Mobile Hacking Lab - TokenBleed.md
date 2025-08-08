@@ -1,4 +1,3 @@
-#ctf #deep-links #ato #intents #js-interface 
 **Description**: This challenge is centered around a fictitious Crypto exchange app, highlighting a critical security flaw related to an insecure web view implementation which can lead to exfiltration of sensitive data and 1-click account takeover.
 
 **Link**: https://www.mobilehackinglab.com/course/lab-tokenbleed

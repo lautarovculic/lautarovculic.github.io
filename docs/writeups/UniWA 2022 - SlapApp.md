@@ -1,4 +1,3 @@
-#ctf #hook #frida 
 **Description**: A heard there is an easy way to make money. All you have to do, is slap `1.000.000.000` times.
 
 **Download**: https://lautarovculic.com/my_files/SlapApp-signed.apk

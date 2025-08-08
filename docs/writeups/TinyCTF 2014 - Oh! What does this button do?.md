@@ -1,4 +1,3 @@
-#ctf #smali #patching #strings 
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
 For example, an **ARM Translator**.
 https://github.com/m9rco/Genymotion_ARM_Translation

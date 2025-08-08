@@ -1,4 +1,3 @@
-#ctf #smali #patching 
 Download **APK**: https://lautarovculic.com/my_files/ilam_ctf_2018.zip
 
 ![[ilam_CTF1.png]]

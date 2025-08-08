@@ -1,4 +1,3 @@
-#ctf #dart #flutter #rev-libraries #blutter #crypto 
 **Description**: Introducing DroidPass - the "secure" password manager that promises military-grade encryption for all your sensitive credentials!
 
 **Link**: https://academy.8ksec.io/course/android-application-exploitation-challenges

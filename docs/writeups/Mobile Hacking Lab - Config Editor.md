@@ -1,4 +1,3 @@
-#ctf #deserialization #vuln #code-execution 
 **Description**: Welcome to the **Config Editor** Challenge! In this lab, you'll dive into a realistic situation involving vulnerabilities in a widely-used third-party library. Your objective is to exploit a library-induced vulnerability to achieve RCE on an Android application.
 
 **Download**: https://lautarovculic.com/my_files/configEditor.apk

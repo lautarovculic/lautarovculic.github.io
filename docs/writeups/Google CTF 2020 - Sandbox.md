@@ -1,4 +1,3 @@
-#ctf #dex2jar #jd-gui #python 
 **Download**: https://lautarovculic.com/my_files/google2020reverse.apk
 
 ![[googleCTF2020sandbox1.png]]

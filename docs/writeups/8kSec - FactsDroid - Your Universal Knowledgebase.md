@@ -1,4 +1,3 @@
-#ctf #flutter #blutter #network #iptables #burpsuite #mitm-proxy #bypass 
 **Description**: FactsDroid is the ultimate knowledge companion that delivers fascinating facts right to your fingertips!
 
 **Link**: https://academy.8ksec.io/course/android-application-exploitation-challenges

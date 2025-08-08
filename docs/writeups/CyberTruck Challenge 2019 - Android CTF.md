@@ -1,4 +1,3 @@
-#ctf #crypto #frida #hook #strings #rev-libraries 
 **Description**: A new mobile remote keyless system “**CyberTruck**” has been implemented by one of the most well-known car security companies “**NowSecure Mobile Vehicles**”. The car security company has ensured that the system is entirely **uncrackable** and therefore attackers will not be able to recover secrets within the mobile application.
 
 If you are an experienced Android reverser, then enable the `tamperproof` button to harden the application before unlocking your cars. Your goal will consist on **recovering up to 6 secrets in the application**.

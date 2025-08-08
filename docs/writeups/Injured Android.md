@@ -1,4 +1,3 @@
-#ctf #XSS #strings #SQLite #activity #broadcast #crypto #aws #firebase #intents #file-providers #deep-links #examples 
 This CTF Mobile has taken from here:
 https://github.com/B3nac/InjuredAndroid
 

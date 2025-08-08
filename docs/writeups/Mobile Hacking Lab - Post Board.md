@@ -1,4 +1,3 @@
-#ctf #webviews #XSS #code-execution #intents-extra #adb 
 **Description**: Welcome to the **Android Insecure WebView Challenge**! This challenge is designed to delve into the complexities of Android's WebView component, exploiting a Cross-Site Scripting (XSS) vulnerability to achieve Remote Code Execution (RCE). It's an immersive opportunity for participants to engage with Android application security, particularly focusing on WebView security issues.
 
 **Download**: https://lautarovculic.com/my_files/postBoard.apk

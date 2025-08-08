@@ -1,4 +1,3 @@
-#ctf #frida #hook 
 **Description**: Captain Hook has applied for a position in Squid Game 2022, but in order to take part into the game, he got asked to bypass the login screen of this app. Help him bypass it and he wont have the crocodile eat your hand.
 
 **Download**: https://lautarovculic.com/my_files/Captain_Hook.apk

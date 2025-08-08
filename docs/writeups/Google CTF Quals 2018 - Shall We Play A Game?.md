@@ -1,4 +1,3 @@
-#ctf #smali #patching 
 **Description**: Win the game 1,000,000 times to get the flag.
 
 Download **APK**: https://lautarovculic.com/my_files/shallweplayagame.apk

@@ -1,4 +1,3 @@
-#ctf #strings 
 **Description**: Autobots. ROLLL OUTT!!!!!!
 
 **Download**: https://lautarovculic.com/my_files/mobilize.apk

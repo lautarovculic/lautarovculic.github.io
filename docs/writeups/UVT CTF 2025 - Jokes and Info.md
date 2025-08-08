@@ -1,4 +1,3 @@
-#ctf #rev-libraries #strings 
 **Description**: We found an apk. It is useless, or isn't it?
 
 **Download**: https://lautarovculic.com/my_files/jokes_and_info.apk

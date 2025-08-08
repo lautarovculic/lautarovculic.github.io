@@ -1,4 +1,3 @@
-#ctf #strings 
 **Description**: Just an ez mobile chall for n00bies.
 **Download content**: https://lautarovculic.com/my_files/ezmobile.zip
 
