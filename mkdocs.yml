@@ -1,4 +1,4 @@
-site_name: Lautaro • Mobile Security Writeups
+site_name: Lautaro • Mobile Security
 site_url: https://lautarovculic.github.io
 site_description: Mobile Security Writeups - CTF
 theme: { name: material, palette: { scheme: slate } }
