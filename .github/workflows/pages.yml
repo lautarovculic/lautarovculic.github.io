@@ -22,7 +22,30 @@ jobs:
         with:
           python-version: '3.x'
       - run: pip install --upgrade pip
-      - run: pip install mkdocs mkdocs-material mkdocs-roamlinks-plugin mkdocs-glightbox mkdocs-minify-plugin mkdocs-simple-hooks
+      - run: pip install mkdocs mkdocs-material mkdocs-roamlinks-plugin mkdocs-glightbox mkdocs-minify-plugin
+      - name: Force H1 = filename (no plugins)
+        run: |
+          python - <<'PY'
+          import pathlib
+          root = pathlib.Path('docs')
+          for p in root.rglob('*.md'):
+              if '/assets/' in str(p): 
+                  continue
+              stem = p.stem
+              lines = p.read_text(encoding='utf-8').splitlines()
+              i = 0
+              if lines and lines[0].strip() == '---':
+                  i = 1
+                  while i < len(lines) and lines[i].strip() != '---': i += 1
+                  if i < len(lines): i += 1
+              for j in range(i, len(lines)):
+                  if lines[j].startswith('# '):
+                      lines[j] = '# ' + stem
+                      break
+              else:
+                  lines.insert(i, '# ' + stem)
+              p.write_text('\n'.join(lines), encoding='utf-8')
+          PY
       - run: mkdocs build --site-dir site
       - uses: actions/upload-pages-artifact@v3
         with:
