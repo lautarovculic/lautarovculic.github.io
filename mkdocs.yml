@@ -1,11 +1,22 @@
 site_name: Lautaro • Mobile Security
 site_url: https://lautarovculic.github.io
 site_description: Mobile Security Writeups - CTF
-theme: { name: material, palette: { scheme: slate } custom_dir: overrides }
+strict: false
+theme:
+  name: material
+  language: es
+  palette: { scheme: slate }
+  custom_dir: overrides
 plugins:
   - search
   - roamlinks
   - rss: { match_path: "writeups/.*" }
   - glightbox
   - minify: { minify_html: true }
+markdown_extensions:
+  - admonition
+  - footnotes
+  - tables
+  - attr_list
+  - pymdownx.superfences
 docs_dir: docs
