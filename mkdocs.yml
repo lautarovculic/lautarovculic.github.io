@@ -1,0 +1,17 @@
+site_name: Lautaro • Mobile Security
+site_url: https://lautarovculic.github.io
+theme:
+  name: material
+  palette: { scheme: slate }
+plugins:
+  - search
+  - roamlinks
+  - glightbox
+  - minify: { minify_html: true }
+markdown_extensions:
+  - admonition
+  - footnotes
+  - tables
+  - attr_list
+  - pymdownx.superfences
+docs_dir: docs
