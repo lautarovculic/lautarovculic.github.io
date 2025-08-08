@@ -4,6 +4,7 @@ site_description: Mobile Security Writeups - CTF
 site_author: Lautaro Daniel Villarreal Culic'
 copyright: Copyright &copy; 2024 Lautaro • Mobile Security Researcher
 
+
 repo_name: lautarovculic/lautarovculic.github.io
 repo_url: https://github.com/lautarovculic/lautarovculic.github.io
 edit_uri: ""
@@ -141,6 +142,8 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/lautarovculic
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/lautarovculic
     - icon: fontawesome/brands/linkedin
       link: https://linkedin.com/in/lautarovculic
   generator: false
