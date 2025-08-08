@@ -154,9 +154,25 @@ html, body, .md-content, .md-content__inner { background: var(--lauti-bg) !impor
   box-shadow: none !important;
 }
 
-/* por si algún build mete sombra en el título */
 .md-nav__title { background-color: transparent !important; }
 
-/* right ToC plano */
 .md-sidebar--secondary .md-nav__link,
 .md-sidebar--secondary .md-nav__title { background: transparent !important; }
+
+@media (max-width: 76.25em) {
+  .md-sidebar--primary {
+    width: 85vw;
+    max-width: 22rem;
+    border-right: 1px solid var(--lauti-border);
+  }
+  .md-sidebar--secondary { display: none !important; }
+  .md-sidebar,
+  .md-sidebar__scrollwrap,
+  .md-nav { background: #000 !important; }
+}
+
+#\__drawer:checked ~ .md-container .md-sidebar--primary {
+  transform: translateX(0) !important;
+}
+
+.md-overlay { background: rgba(0,0,0,.6); }

@@ -22,6 +22,7 @@ theme:
     accent: white
 
   features:
+    - toc.integrate
     - announce.dismiss
     - content.action.edit
     - content.action.view
