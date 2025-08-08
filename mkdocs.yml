@@ -85,9 +85,6 @@ plugins:
       minify_html: true
   - awesome-pages
   - social            
-  - sitemap:         
-      changefreq: weekly
-      priority: 0.8
   - git-revision-date-localized:           
       enable_creation_date: true
       fallback_to_build_date: true
