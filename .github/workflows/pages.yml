@@ -3,13 +3,16 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
 concurrency:
   group: "pages"
   cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,10 +21,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - run: pip install mkdocs mkdocs-material mkdocs-roamlinks-plugin mkdocs-glightbox mkdocs-minify-plugin
+      - run: pip install --upgrade pip
+      - run: pip install mkdocs mkdocs-material mkdocs-roamlinks-plugin mkdocs-glightbox mkdocs-minify-plugin mkdocs-simple-hooks
       - run: mkdocs build --site-dir site
       - uses: actions/upload-pages-artifact@v3
-        with: { path: site }
+        with:
+          path: site
+
   deploy:
     needs: build
     runs-on: ubuntu-latest

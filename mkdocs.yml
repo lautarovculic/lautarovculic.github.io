@@ -1,21 +1,26 @@
 site_name: Lautaro • Mobile Security
 site_url: https://lautarovculic.github.io
+strict: false
+
 theme:
   name: material
   palette: { scheme: slate }
+
 plugins:
   - search
   - roamlinks
   - glightbox
-  - minify: { minify_html: true }
+  - minify:
+      minify_html: true
   - simple-hooks:
-    hooks:
-      on_oage_markdown: "hooks:set_title_from_filename"
+      hooks:
+        on_page_markdown: "hooks:set_title_from_filename"
+
 markdown_extensions:
   - admonition
   - footnotes
   - tables
   - attr_list
   - pymdownx.superfences
+
 docs_dir: docs
-strict: false
