@@ -8,6 +8,9 @@ plugins:
   - roamlinks
   - glightbox
   - minify: { minify_html: true }
+  - simple-hooks:
+    hooks:
+      on_oage_markdown: "hooks:set_title_from_filename"
 markdown_extensions:
   - admonition
   - footnotes
