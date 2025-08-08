@@ -22,8 +22,7 @@ jobs:
         with:
           python-version: '3.x'
       - run: pip install --upgrade pip
-      - run: pip install mkdocs mkdocs-material mkdocs-roamlinks-plugin mkdocs-glightbox mkdocs-minify-plugin
-      - run: pip install mkdocs mkdocs-material mkdocs-roamlinks-plugin mkdocs-glightbox mkdocs-minify-plugin mkdocs-rss-plugin mkdocs-sitemap-plugin
+      - run: pip install mkdocs mkdocs-material mkdocs-roamlinks-plugin mkdocs-glightbox mkdocs-minify-plugin mkdocs-rss-plugin mkdocs-redirects
       - name: SEO normalize (front-matter + H1)
         run: |
           python - <<'PY'
