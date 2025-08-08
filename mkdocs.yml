@@ -92,7 +92,7 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
-      permalink_title: Enlace permanente
+      permalink_title: permalink
   - pymdownx.arithmatex:
       generic: true
   - pymdownx.betterem:

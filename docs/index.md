@@ -1,6 +1,6 @@
 ---
 title: "Lautaro — Mobile Security Writeups"
-description: "Android/iOS CTF & appsec writeups. No research posts here."
+description: "Mobile Security Writeups - CTF"
 ---
 
 # Mobile Security Writeups
