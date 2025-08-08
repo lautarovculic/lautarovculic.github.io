@@ -4,7 +4,6 @@ site_description: Mobile Security Writeups - CTF
 site_author: Lautaro
 copyright: Copyright &copy; 2025 Lautaro • Mobile Security Researcher
 
-# repo
 repo_name: lautarovculic/lautarovculic.github.io
 repo_url: https://github.com/lautarovculic/lautarovculic.github.io
 edit_uri: ""
@@ -16,22 +15,20 @@ theme:
   language: en
   custom_dir: overrides
   
-  # colors
   palette:
     - scheme: slate
       primary: black
-      accent: cyan
+      accent: white
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
     - scheme: default
-      primary: indigo
-      accent: cyan  
+      primary: black
+      accent: black  
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
 
-  # features
   features:
     - announce.dismiss
     - content.action.edit
@@ -60,7 +57,6 @@ theme:
     - toc.follow
     - toc.integrate
 
-  # icons
   icon:
     logo: material/security
     repo: fontawesome/brands/github
@@ -80,45 +76,19 @@ theme:
       example: octicons/beaker-16
       quote: octicons/quote-16
 
-  # fonts
   font:
     text: Inter
     code: JetBrains Mono
 
 plugins:
-  - search:
-      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - search
   - roamlinks
   - rss: 
       match_path: "writeups/.*"
-      date_from_meta:
-        as_creation: date
-      categories:
-        - tags
-        - categories
-  - glightbox:
-      touchNavigation: true
-      loop: false
-      effect: zoom
-      slide_effect: slide
-      width: 100%
-      height: auto
-      zoomable: true
-      draggable: true
-      auto_caption: false
-      caption_position: bottom
+  - glightbox
   - minify: 
       minify_html: true
-      minify_js: true
-      minify_css: true
-      htmlmin_opts:
-        remove_comments: true
-  - git-revision-date-localized:
-      enable_creation_date: true
-      type: timeago
-  - awesome-pages
 
-# extensions
 markdown_extensions:
   - abbr
   - admonition
@@ -172,7 +142,6 @@ markdown_extensions:
 
 docs_dir: docs
 
-# nav
 nav:
   - Home: index.md
   - Writeups:
@@ -180,7 +149,6 @@ nav:
   - Tools: tools.md
   - About: about.md
 
-# settings
 extra:
   analytics:
     provider: google
