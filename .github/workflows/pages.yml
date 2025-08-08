@@ -18,11 +18,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-      - run: pip install --upgrade pip
-      - run: pip install mkdocs mkdocs-material mkdocs-roamlinks-plugin mkdocs-glightbox mkdocs-minify-plugin mkdocs-rss-plugin mkdocs-redirects mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin
+      - run: python -m pip install --upgrade pip
+      - run: |
+          pip install mkdocs "mkdocs-material[imaging]" \
+            mkdocs-roamlinks-plugin mkdocs-glightbox mkdocs-minify-plugin \
+            mkdocs-rss-plugin mkdocs-redirects mkdocs-awesome-pages-plugin \
+            mkdocs-git-revision-date-localized-plugin mkdocs-sitemap-plugin
+      - name: Fix Obsidian image embeds -> Markdown
+        run: |
+            python - <<'PY'
+            import re
+            from pathlib import Path
+
+            docs = Path('docs')
+            imgs = {}
+            for p in docs.rglob('*'):
+                if p.is_file() and p.suffix.lower() in ('.png','.jpg','.jpeg','.gif','.webp','.svg'):
+                    imgs[p.name.lower()] = p.relative_to(docs).as_posix()
+
+            for md in docs.rglob('*.md'):
+                text = md.read_text(encoding='utf-8')
+                def repl(m):
+                    raw = m.group(1)
+                    fname = raw.split('|')[0].strip()
+                    path = imgs.get(fname.lower())
+                    if path:
+                        return f'![](/{path})'
+                    return f'![{fname}]({fname})'
+                new = re.sub(r'!\[\[([^\]]+?\.(?:png|jpe?g|gif|webp|svg)(?:\|[^\]]*)?)\]\]', repl, text, flags=re.I)
+                if new != text:
+                    md.write_text(new, encoding='utf-8')
+            PY
       - name: SEO + titles normalize (front-matter + H1)
         run: |
           python - <<'PY'
@@ -94,31 +125,6 @@ jobs:
               p.write_text('\n'.join(lines)+'\n',encoding='utf-8')
           PY
       - run: mkdocs build --site-dir site
-      - name: Fix Obsidian image embeds -> Markdown
-        run: |
-            python - <<'PY'
-            import re
-            from pathlib import Path
-
-            docs = Path('docs')
-            imgs = {}
-            for p in docs.rglob('*'):
-                if p.is_file() and p.suffix.lower() in ('.png','.jpg','.jpeg','.gif','.webp','.svg'):
-                    imgs[p.name.lower()] = p.relative_to(docs).as_posix()
-
-            for md in docs.rglob('*.md'):
-                text = md.read_text(encoding='utf-8')
-                def repl(m):
-                    raw = m.group(1)
-                    fname = raw.split('|')[0].strip()
-                    path = imgs.get(fname.lower())
-                    if path:
-                        return f'![](/{path})'
-                    return f'![{fname}]({fname})'
-                new = re.sub(r'!\[\[([^\]]+?\.(?:png|jpe?g|gif|webp|svg)(?:\|[^\]]*)?)\]\]', repl, text, flags=re.I)
-                if new != text:
-                    md.write_text(new, encoding='utf-8')
-            PY
       - name: Generate sitemap.xml
         run: |
           python - <<'PY'
