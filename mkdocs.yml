@@ -78,10 +78,19 @@ plugins:
   - roamlinks
   - rss: 
       match_path: "writeups/.*"
+      feed_title: "Lautaro • Mobile Security Researcher"
+      feed_description: "Mobile Security Writeups, Android/iOS Reversing."
   - glightbox
   - minify: 
       minify_html: true
   - awesome-pages
+  - social            
+  - sitemap:         
+      changefreq: weekly
+      priority: 0.8
+  - git-revision-date-localized:           
+      enable_creation_date: true
+      fallback_to_build_date: true
 
 markdown_extensions:
   - abbr
@@ -137,6 +146,8 @@ markdown_extensions:
 docs_dir: docs
 
 extra:
+  google_site_verification: 1oHG1nVTIVTV_kdxJRh9V--MFWBvw1QIztgVrPCzoss
+  social_image: https://lautarovculic.github.io/assets/
   analytics:
     provider: google
     property: !ENV GOOGLE_ANALYTICS_KEY
