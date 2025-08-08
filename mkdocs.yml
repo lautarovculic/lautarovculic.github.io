@@ -1,9 +1,10 @@
 site_name: Lautaro • Mobile Security
 site_url: https://lautarovculic.github.io
 site_description: Mobile Security Writeups - CTF
-site_author: Lautaro
-copyright: Copyright &copy; 2025 Lautaro • Mobile Security Researcher
+site_author: Lautaro Daniel Villarreal Culic'
+copyright: Copyright &copy; 2024 Lautaro • Mobile Security Researcher
 
+# Repository
 repo_name: lautarovculic/lautarovculic.github.io
 repo_url: https://github.com/lautarovculic/lautarovculic.github.io
 edit_uri: ""
@@ -16,18 +17,9 @@ theme:
   custom_dir: overrides
   
   palette:
-    - scheme: slate
-      primary: black
-      accent: white
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
-    - scheme: default
-      primary: black
-      accent: black  
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
+    scheme: slate
+    primary: black
+    accent: white
 
   features:
     - announce.dismiss
@@ -88,6 +80,7 @@ plugins:
   - glightbox
   - minify: 
       minify_html: true
+  - awesome-pages
 
 markdown_extensions:
   - abbr
@@ -144,11 +137,11 @@ docs_dir: docs
 
 nav:
   - Home: index.md
-  - Writeups:
-    - writeups/index.md
+  - Writeups: writeups/
   - Tools: tools.md
   - About: about.md
 
+# Configuraciones extra para un look más profesional
 extra:
   analytics:
     provider: google
