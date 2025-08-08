@@ -1,22 +1,203 @@
 site_name: Lautaro • Mobile Security
 site_url: https://lautarovculic.github.io
 site_description: Mobile Security Writeups - CTF
+site_author: Lautaro
+copyright: Copyright &copy; 2025 Lautaro • Mobile Security Researcher
+
+# repo
+repo_name: lautarovculic/lautarovculic.github.io
+repo_url: https://github.com/lautarovculic/lautarovculic.github.io
+edit_uri: ""
+
 strict: false
+
 theme:
   name: material
   language: en
-  palette: { scheme: slate }
   custom_dir: overrides
+  
+  # colors
+  palette:
+    - scheme: slate
+      primary: black
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: cyan  
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+  # features
+  features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.code.select
+    - content.tabs.link
+    - content.tooltips
+    - header.autohide
+    - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    - toc.integrate
+
+  # icons
+  icon:
+    logo: material/security
+    repo: fontawesome/brands/github
+    edit: material/pencil 
+    view: material/eye
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
+
+  # fonts
+  font:
+    text: Inter
+    code: JetBrains Mono
+
 plugins:
-  - search
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
   - roamlinks
-  - rss: { match_path: "writeups/.*" }
-  - glightbox
-  - minify: { minify_html: true }
+  - rss: 
+      match_path: "writeups/.*"
+      date_from_meta:
+        as_creation: date
+      categories:
+        - tags
+        - categories
+  - glightbox:
+      touchNavigation: true
+      loop: false
+      effect: zoom
+      slide_effect: slide
+      width: 100%
+      height: auto
+      zoomable: true
+      draggable: true
+      auto_caption: false
+      caption_position: bottom
+  - minify: 
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+        remove_comments: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: timeago
+  - awesome-pages
+
+# extensions
 markdown_extensions:
+  - abbr
   - admonition
-  - footnotes
-  - tables
   - attr_list
-  - pymdownx.superfences
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      permalink_title: Enlace permanente
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      normalize_issue_symbols: true
+      repo_url_shorthand: true
+      user: lautarovculic
+      repo: lautarovculic.github.io
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      auto_append:
+        - includes/mkdocs.md
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+      combine_header_slug: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
 docs_dir: docs
+
+# nav
+nav:
+  - Home: index.md
+  - Writeups:
+    - writeups/index.md
+  - Tools: tools.md
+  - About: about.md
+
+# settings
+extra:
+  analytics:
+    provider: google
+    property: !ENV GOOGLE_ANALYTICS_KEY
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/lautarovculic
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/lautarovculic
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/in/lautarovculic
+  generator: false
+  
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
