@@ -4,7 +4,6 @@ site_description: Mobile Security Writeups - CTF
 theme: { name: material, palette: { scheme: slate } }
 plugins:
   - search
-  - sitemap
   - rss: { match_path: "writeups/.*" }
   - glightbox
   - minify: { minify_html: true }

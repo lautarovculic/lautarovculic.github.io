@@ -28,107 +28,98 @@ jobs:
           python - <<'PY'
           import re
           from pathlib import Path
-
           def parse_fm(lines):
-              i = 0; fm_start = fm_end = -1
-              if i < len(lines) and lines[i].strip() == '---':
-                  fm_start = i; i += 1
-                  while i < len(lines) and lines[i].strip() != '---':
-                      i += 1
-                  if i < len(lines) and lines[i].strip() == '---':
-                      fm_end = i; i += 1
-              return fm_start, fm_end, i
-
-          def upsert_fm(lines, key, val, fm_start, fm_end, content_start):
-              line = f'{key}: {val}'
-              if fm_start != -1:
-                  tline = None
-                  for k in range(fm_start+1, fm_end):
-                      if re.match(rf'^\s*{key}\s*:', lines[k], flags=re.I):
-                          tline = k; break
-                  if tline is not None:
-                      lines[tline] = line
-                  else:
-                      lines.insert(fm_start+1, line)
-                      fm_end += 1
-                      content_start += 1
+              i=0; s=e=-1
+              if i<len(lines) and lines[i].strip()=='---':
+                  s=i; i+=1
+                  while i<len(lines) and lines[i].strip()!='---': i+=1
+                  if i<len(lines) and lines[i].strip()=='---':
+                      e=i; i+=1
+              return s,e,i
+          def upsert_fm(lines,key,val,s,e,c):
+              line=f'{key}: {val}'
+              if s!=-1:
+                  t=None
+                  for k in range(s+1,e):
+                      if re.match(rf'^\s*{key}\s*:', lines[k], flags=re.I): t=k; break
+                  if t is not None: lines[t]=line
+                  else: lines.insert(s+1,line); e+=1; c+=1
               else:
-                  lines = ['---', line, '---', ''] + lines
-                  fm_start, fm_end, content_start = 0, 2, 4
-              return lines, fm_start, fm_end, content_start
-
+                  lines=['---',line,'---','']+lines; s,e,c=0,2,4
+              return lines,s,e,c
           def strip_md(t):
-              t = re.sub(r'```.*?```', '', t, flags=re.S)
-              t = re.sub(r'`[^`]*`', '', t)
-              t = re.sub(r'!\[[^\]]*\]\([^)]+\)', '', t)
-              t = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', t)
-              t = re.sub(r'<[^>]+>', '', t)
-              t = re.sub(r'\s+', ' ', t).strip()
+              t=re.sub(r'```.*?```','',t,flags=re.S)
+              t=re.sub(r'`[^`]*`','',t)
+              t=re.sub(r'!\[[^\]]*\]\([^)]+\)','',t)
+              t=re.sub(r'\[([^\]]+)\]\([^)]+\)',r'\1',t)
+              t=re.sub(r'<[^>]+>','',t)
+              t=re.sub(r'\s+',' ',t).strip()
               return t
-
-          root = Path('docs')
+          root=Path('docs')
           for p in root.rglob('*.md'):
-              sp = str(p).replace('\\','/')
-              if '/assets/' in sp: 
-                  continue
-              stem = p.stem
-              txt = p.read_text(encoding='utf-8', errors='ignore')
-              lines = txt.splitlines()
-              if lines and lines[0].startswith('\ufeff'):
-                  lines[0] = lines[0].lstrip('\ufeff')
-
-              fm_start, fm_end, content_start = parse_fm(lines)
-
-              body = '\n'.join(lines[content_start:])
-              body_no_h1 = re.sub(r'^\s*#.*$', '', body, flags=re.M)
-              paras = [x.strip() for x in re.split(r'\n\s*\n', body_no_h1) if x.strip()]
-              desc = ''
+              sp=str(p).replace('\\','/')
+              if '/assets/' in sp: continue
+              stem=p.stem
+              lines=p.read_text(encoding='utf-8',errors='ignore').splitlines()
+              if lines and lines[0].startswith('\ufeff'): lines[0]=lines[0].lstrip('\ufeff')
+              s,e,c=parse_fm(lines)
+              body='\n'.join(lines[c:])
+              body_no_h1=re.sub(r'^\s*#.*$','',body,flags=re.M)
+              paras=[x.strip() for x in re.split(r'\n\s*\n',body_no_h1) if x.strip()]
+              desc=''
               for para in paras:
-                  if para.startswith('!'): 
-                      continue
-                  cand = strip_md(para)
-                  if len(cand) >= 40:
-                      desc = cand; break
-              if not desc and paras:
-                  desc = strip_md(paras[0])
-              if len(desc) > 160:
-                  cut = desc[:160]
-                  desc = cut[:cut.rfind(' ')] if ' ' in cut else cut
-
-              sample = '\n'.join(lines[content_start:content_start+6])
-              tags = list(dict.fromkeys(re.findall(r'(?<!\w)#([a-zA-Z0-9_\-]+)', sample)))
-
-              lines, fm_start, fm_end, content_start = upsert_fm(lines, 'title', f'"{stem}"', fm_start, fm_end, content_start)
-              if desc:
-                  lines, fm_start, fm_end, content_start = upsert_fm(lines, 'description', f'"{desc}"', fm_start, fm_end, content_start)
-              if tags:
-                  lines, fm_start, fm_end, content_start = upsert_fm(lines, 'tags', '[' + ', '.join(tags) + ']', fm_start, fm_end, content_start)
-
-              in_code = False
-              fence = re.compile(r'^\s*(`{3,}|~{3,})')
-              atx = re.compile(r'^\s{0,3}#{1,6}\s+.*$')
-              set1 = re.compile(r'^\s*={3,}\s*$')
-              set2 = re.compile(r'^\s*-{3,}\s*$')
-
-              j = content_start; done = False
-              while j < len(lines):
-                  if fence.match(lines[j]): 
-                      in_code = not in_code; j += 1; continue
+                  if para.startswith('!'): continue
+                  cand=strip_md(para)
+                  if len(cand)>=40: desc=cand; break
+              if not desc and paras: desc=strip_md(paras[0])
+              if len(desc)>160:
+                  cut=desc[:160]; desc=cut[:cut.rfind(' ')] if ' ' in cut else cut
+              sample='\n'.join(lines[c:c+6])
+              tags=list(dict.fromkeys(re.findall(r'(?<!\w)#([a-zA-Z0-9_\-]+)',sample)))
+              lines,s,e,c=upsert_fm(lines,'title',f'"{stem}"',s,e,c)
+              if desc: lines,s,e,c=upsert_fm(lines,'description',f'"{desc}"',s,e,c)
+              if tags: lines,s,e,c=upsert_fm(lines,'tags','['+', '.join(tags)+']',s,e,c)
+              in_code=False
+              fence=re.compile(r'^\s*(`{3,}|~{3,})'); atx=re.compile(r'^\s{0,3}#{1,6}\s+.*$')
+              set1=re.compile(r'^\s*={3,}\s*$'); set2=re.compile(r'^\s*-{3,}\s*$')
+              j=c; done=False
+              while j<len(lines):
+                  if fence.match(lines[j]): in_code=not in_code; j+=1; continue
                   if not in_code:
-                      if atx.match(lines[j]):
-                          lines[j] = '# ' + stem
-                          done = True; break
-                      if j+1 < len(lines) and (set1.match(lines[j+1]) or set2.match(lines[j+1])):
-                          lines[j] = '# ' + stem
-                          del lines[j+1]
-                          done = True; break
-                  j += 1
-              if not done:
-                  lines.insert(content_start, '# ' + stem)
-
-              p.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+                      if atx.match(lines[j]): lines[j]='# '+stem; done=True; break
+                      if j+1<len(lines) and (set1.match(lines[j+1]) or set2.match(lines[j+1])):
+                          lines[j]='# '+stem; del lines[j+1]; done=True; break
+                  j+=1
+              if not done: lines.insert(c,'# '+stem)
+              p.write_text('\n'.join(lines)+'\n',encoding='utf-8')
           PY
       - run: mkdocs build --site-dir site
+      - name: Generate sitemap.xml
+        run: |
+          python - <<'PY'
+          import os, time, xml.etree.ElementTree as ET
+          base = "https://lautarovculic.github.io"
+          urls=[]
+          for root,_,files in os.walk("site"):
+              for f in files:
+                  if not f.endswith(".html"): continue
+                  path=os.path.join(root,f)
+                  rel=path[len("site/"):]
+                  if rel in ("404.html",): continue
+                  if rel.startswith(("assets/","search/")): continue
+                  url=rel[:-10] if rel.endswith("index.html") else rel
+                  if not url.startswith("/"): url="/"+url
+                  if url.endswith(".html"): url=url
+                  loc=base+url
+                  mtime=time.strftime("%Y-%m-%d", time.gmtime(os.path.getmtime(path)))
+                  urls.append((loc,mtime))
+          urlset=ET.Element("urlset", xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
+          for loc,mtime in sorted(urls):
+              u=ET.SubElement(urlset,"url")
+              ET.SubElement(u,"loc").text=loc
+              ET.SubElement(u,"lastmod").text=mtime
+          ET.ElementTree(urlset).write("site/sitemap.xml", encoding="utf-8", xml_declaration=True)
+          PY
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
