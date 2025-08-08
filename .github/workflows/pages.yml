@@ -23,11 +23,39 @@ jobs:
           python-version: '3.x'
       - run: pip install --upgrade pip
       - run: pip install mkdocs mkdocs-material mkdocs-roamlinks-plugin mkdocs-glightbox mkdocs-minify-plugin mkdocs-rss-plugin mkdocs-redirects
-      - name: SEO normalize (front-matter + H1)
+      - name: SEO + titles normalize (front-matter + H1)
         run: |
           python - <<'PY'
-          import re, pathlib
+          import re
           from pathlib import Path
+
+          def parse_fm(lines):
+              i = 0; fm_start = fm_end = -1
+              if i < len(lines) and lines[i].strip() == '---':
+                  fm_start = i; i += 1
+                  while i < len(lines) and lines[i].strip() != '---':
+                      i += 1
+                  if i < len(lines) and lines[i].strip() == '---':
+                      fm_end = i; i += 1
+              return fm_start, fm_end, i
+
+          def upsert_fm(lines, key, val, fm_start, fm_end, content_start):
+              line = f'{key}: {val}'
+              if fm_start != -1:
+                  tline = None
+                  for k in range(fm_start+1, fm_end):
+                      if re.match(rf'^\s*{key}\s*:', lines[k], flags=re.I):
+                          tline = k; break
+                  if tline is not None:
+                      lines[tline] = line
+                  else:
+                      lines.insert(fm_start+1, line)
+                      fm_end += 1
+                      content_start += 1
+              else:
+                  lines = ['---', line, '---', ''] + lines
+                  fm_start, fm_end, content_start = 0, 2, 4
+              return lines, fm_start, fm_end, content_start
 
           def strip_md(t):
               t = re.sub(r'```.*?```', '', t, flags=re.S)
@@ -49,19 +77,15 @@ jobs:
               if lines and lines[0].startswith('\ufeff'):
                   lines[0] = lines[0].lstrip('\ufeff')
 
-              i=0; fm_start=fm_end=-1
-              if i < len(lines) and lines[i].strip()=='---':
-                  fm_start=i; i+=1
-                  while i < len(lines) and lines[i].strip()!='---': i+=1
-                  if i < len(lines): fm_end=i; i+=1
-              content_start=i
+              fm_start, fm_end, content_start = parse_fm(lines)
 
               body = '\n'.join(lines[content_start:])
               body_no_h1 = re.sub(r'^\s*#.*$', '', body, flags=re.M)
               paras = [x.strip() for x in re.split(r'\n\s*\n', body_no_h1) if x.strip()]
-              desc=''
+              desc = ''
               for para in paras:
-                  if para.startswith('!'): continue
+                  if para.startswith('!'): 
+                      continue
                   cand = strip_md(para)
                   if len(cand) >= 40:
                       desc = cand; break
@@ -74,100 +98,34 @@ jobs:
               sample = '\n'.join(lines[content_start:content_start+6])
               tags = list(dict.fromkeys(re.findall(r'(?<!\w)#([a-zA-Z0-9_\-]+)', sample)))
 
-              def upsert_frontmatter(lines, key, val):
-                  nonlocal fm_start, fm_end, content_start
-                  line = f'{key}: {val}'
-                  if fm_start != -1:
-                      for k in range(fm_start+1, fm_end):
-                          if re.match(rf'^\s*{key}\s*:', lines[k], flags=re.I):
-                              lines[k] = line; return lines
-                      lines.insert(fm_start+1, line); fm_end += 1; content_start += 1
-                      return lines
-                  else:
-                      lines = ['---', line, '---', ''] + lines
-                      fm_start = 0; fm_end = 2; content_start = 4
-                      return lines
-
-              lines = upsert_frontmatter(lines, 'title', f'"{stem}"')
+              lines, fm_start, fm_end, content_start = upsert_fm(lines, 'title', f'"{stem}"', fm_start, fm_end, content_start)
               if desc:
-                  lines = upsert_frontmatter(lines, 'description', f'"{desc}"')
+                  lines, fm_start, fm_end, content_start = upsert_fm(lines, 'description', f'"{desc}"', fm_start, fm_end, content_start)
               if tags:
-                  lines = upsert_frontmatter(lines, 'tags', '[' + ', '.join(tags) + ']')
+                  lines, fm_start, fm_end, content_start = upsert_fm(lines, 'tags', '[' + ', '.join(tags) + ']', fm_start, fm_end, content_start)
 
-              in_code=False
-              fence=re.compile(r'^\s*(`{3,}|~{3,})')
-              atx=re.compile(r'^\s{0,3}#{1,6}\s+.*$')
-              j=content_start; done=False
-              while j < len(lines):
-                  if fence.match(lines[j]): in_code = not in_code; j+=1; continue
-                  if not in_code and atx.match(lines[j]): lines[j] = '# ' + stem; done=True; break
-                  j+=1
-              if not done:
-                  lines.insert(content_start, '# ' + stem)
-
-              p.write_text('\n'.join(lines) + '\n', encoding='utf-8')
-          PY
-      - name: Normalize titles (filename -> H1 + front-matter)
-        run: |
-          python - <<'PY'
-          import re, pathlib
-          root = pathlib.Path('docs')
-          for p in root.rglob('*.md'):
-              sp = str(p).replace('\\','/')
-              if '/assets/' in sp:
-                  continue
-              stem = p.stem
-              txt = p.read_text(encoding='utf-8', errors='ignore')
-              lines = txt.splitlines()
-              if lines and lines[0].startswith('\ufeff'):
-                  lines[0] = lines[0].lstrip('\ufeff')
-              i = 0; fm_start = fm_end = -1
-              if i < len(lines) and lines[i].strip() == '---':
-                  fm_start = i; i += 1
-                  while i < len(lines) and lines[i].strip() != '---':
-                      i += 1
-                  if i < len(lines) and lines[i].strip() == '---':
-                      fm_end = i; i += 1
-              content_start = i
-              if fm_start != -1:
-                  tline = None
-                  for k in range(fm_start+1, fm_end):
-                      if re.match(r'^\s*title\s*:', lines[k], flags=re.I):
-                          tline = k; break
-                  title_val = f'title: "{stem}"'
-                  if tline is not None:
-                      lines[tline] = title_val
-                  else:
-                      lines.insert(fm_start+1, title_val)
-                      fm_end += 1
-                      content_start += 1
-              else:
-                  lines = ['---', f'title: "{stem}"', '---', ''] + lines
-                  content_start = 4
               in_code = False
               fence = re.compile(r'^\s*(`{3,}|~{3,})')
               atx = re.compile(r'^\s{0,3}#{1,6}\s+.*$')
               set1 = re.compile(r'^\s*={3,}\s*$')
               set2 = re.compile(r'^\s*-{3,}\s*$')
-              j = content_start
-              done = False
+
+              j = content_start; done = False
               while j < len(lines):
-                  if fence.match(lines[j]):
-                      in_code = not in_code
-                      j += 1; continue
+                  if fence.match(lines[j]): 
+                      in_code = not in_code; j += 1; continue
                   if not in_code:
                       if atx.match(lines[j]):
                           lines[j] = '# ' + stem
-                          done = True
-                          break
+                          done = True; break
                       if j+1 < len(lines) and (set1.match(lines[j+1]) or set2.match(lines[j+1])):
                           lines[j] = '# ' + stem
                           del lines[j+1]
-                          done = True
-                          break
+                          done = True; break
                   j += 1
               if not done:
                   lines.insert(content_start, '# ' + stem)
+
               p.write_text('\n'.join(lines) + '\n', encoding='utf-8')
           PY
       - run: mkdocs build --site-dir site
