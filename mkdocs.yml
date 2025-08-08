@@ -1,16 +1,11 @@
-site_name: Lautaro • Mobile Security
+site_name: Lautaro • Mobile Security Writeups
 site_url: https://lautarovculic.github.io
-strict: false
+site_description: Mobile Security Writeups - CTF
 theme: { name: material, palette: { scheme: slate } }
 plugins:
   - search
-  - roamlinks
+  - sitemap
+  - rss: { match_path: "writeups/.*" }
   - glightbox
   - minify: { minify_html: true }
-markdown_extensions:
-  - admonition
-  - footnotes
-  - tables
-  - attr_list
-  - pymdownx.superfences
 docs_dir: docs

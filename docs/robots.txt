@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://lautarovculic.github.io/sitemap.xml
