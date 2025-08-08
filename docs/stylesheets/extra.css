@@ -74,3 +74,89 @@ html, body, .md-content, .md-content__inner { background: var(--lauti-bg) !impor
 .md-typeset a.glightbox[style*="float"],
 .md-typeset img[style*="float"] { float: none !important; display: block !important; clear: both !important; margin: 1rem 0 !important; max-width: 100% !important; }
 .md-typeset img { background: #0a0a0a; border: 1px solid #151515; border-radius: 10px; }
+
+.md-nav__title,
+.md-nav__link,
+.md-nav__item {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+.md-nav__title::before,
+.md-nav__title::after,
+.md-nav__link::before,
+.md-nav__link::after {
+  content: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+.md-sidebar__scrollwrap,
+.md-nav,
+.md-nav__list {
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+  background-image: none !important;
+}
+
+[data-md-component="top"] a,
+.md-top,
+.md-top__button,
+.md-top__link {
+  background: #0a0a0a;
+  color: #fff !important;
+  border: 1px solid var(--lauti-border);
+}
+[data-md-component="top"] a:hover,
+.md-top:hover,
+.md-top__button:hover,
+.md-top__link:hover {
+  background: #fff !important;
+  color: #000 !important;
+  border-color: #fff !important;
+}
+[data-md-component="top"] a:hover svg,
+.md-top:hover svg,
+.md-top__button:hover svg,
+.md-top__link:hover svg {
+  color: #000 !important;
+  fill: currentColor !important;
+}
+
+/* sin gradientes ni fades en sidebars */
+.md-sidebar--primary .md-sidebar__scrollwrap,
+.md-sidebar--secondary .md-sidebar__scrollwrap,
+.md-nav--primary,
+.md-nav--secondary,
+.md-nav--primary .md-nav__list,
+.md-nav--secondary .md-nav__list,
+.md-nav__item,
+.md-nav__link,
+.md-nav__title {
+  background: transparent !important;
+  background-image: none !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+  box-shadow: none !important;
+}
+
+/* overlays/fades top/bottom */
+.md-sidebar--primary .md-sidebar__scrollwrap::before,
+.md-sidebar--primary .md-sidebar__scrollwrap::after,
+.md-sidebar--secondary .md-sidebar__scrollwrap::before,
+.md-sidebar--secondary .md-sidebar__scrollwrap::after,
+.md-nav--primary .md-nav__title::before,
+.md-nav--secondary .md-nav__title::before,
+.md-nav__list::before,
+.md-nav__list::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* por si algún build mete sombra en el título */
+.md-nav__title { background-color: transparent !important; }
+
+/* right ToC plano */
+.md-sidebar--secondary .md-nav__link,
+.md-sidebar--secondary .md-nav__title { background: transparent !important; }
