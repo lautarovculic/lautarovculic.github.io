@@ -142,8 +142,10 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/lautarovculic
-    - icon: fontawesome/brands/twitter
-      link: https://twitter.com/lautarovculic
+    - icon: fontawesome/brands/web
+      link: https://lautarovculic.com
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/@TheHackingHub
     - icon: fontawesome/brands/linkedin
       link: https://linkedin.com/in/lautarovculic
   generator: false
