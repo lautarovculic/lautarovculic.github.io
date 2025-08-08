@@ -4,7 +4,7 @@ site_description: Mobile Security Writeups - CTF
 strict: false
 theme:
   name: material
-  language: es
+  language: en
   palette: { scheme: slate }
   custom_dir: overrides
 plugins:
