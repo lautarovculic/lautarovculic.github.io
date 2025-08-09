@@ -1,8 +1,3 @@
----
-title: "Lautaro Villarreal Culic' — Mobile Security Researcher"
-description: "Mobile Security Writeups: Android/iOS Reversing, Frida/Objection, WebView/Intents/Providers abuse, Deep Links, IDORs, Smali, SSL pinning."
----
-
 ## What’s inside
 - **Android/iOS** reversing & exploitation (Smali/DEX, ARM64, ObjC/Swift).
 - **Frida / Objection**: hooks, automation, root/jailbreak/debugger & cert-pinning bypass.
