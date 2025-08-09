@@ -255,7 +255,7 @@ html, body, .md-content, .md-content__inner {
   box-shadow: none !important;
 }
 
-.md-nav__title { background-color: transparent !important; }
+.md-nav__title { background-color: black !important; }
 .md-sidebar--secondary .md-nav__link,
 .md-sidebar--secondary .md-nav__title { background: transparent !important; }
 
