@@ -145,6 +145,8 @@ docs_dir: docs
 extra:
   google_site_verification: 1oHG1nVTIVTV_kdxJRh9V--MFWBvw1QIztgVrPCzoss
   social_image: https://lautarovculic.github.io/assets/social-card.png
+  og_image_w: 1200
+  og_image_h: 630
   analytics:
     provider: google
     property: !ENV GOOGLE_ANALYTICS_KEY

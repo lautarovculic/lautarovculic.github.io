@@ -1,3 +1,12 @@
 {% if page.is_homepage and config.extra.google_site_verification %}
 <meta name="google-site-verification" content="{{ config.extra.google_site_verification }}">
 {% endif %}
+
+{% set img = page.meta.image or config.extra.social_image %}
+{% if img %}
+<meta property="og:image" content="{{ img }}">
+<meta property="og:image:secure_url" content="{{ img }}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="{{ config.extra.og_image_w | default(1200) }}">
+<meta property="og:image:height" content="{{ config.extra.og_image_h | default(630) }}">
+{% endif %}
