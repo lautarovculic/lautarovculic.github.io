@@ -59,72 +59,95 @@ jobs:
           python - <<'PY'
           import re
           from pathlib import Path
+
           def parse_fm(lines):
               i=0; s=e=-1
+              while i<len(lines) and not lines[i].strip(): i+=1
               if i<len(lines) and lines[i].strip()=='---':
                   s=i; i+=1
                   while i<len(lines) and lines[i].strip()!='---': i+=1
                   if i<len(lines) and lines[i].strip()=='---':
                       e=i; i+=1
               return s,e,i
-          def upsert_fm(lines,key,val,s,e,c):
+
+          def has_key(lines,s,e,key):
+              if s==-1: return False
+              for k in range(s+1,e):
+                  if re.match(rf'^\s*{key}\s*:', lines[k], flags=re.I): return True
+              return False
+
+          def upsert(lines,s,e,c,key,val):
               line=f'{key}: {val}'
               if s!=-1:
-                  t=None
-                  for k in range(s+1,e):
-                      if re.match(rf'^\s*{key}\s*:', lines[k], flags=re.I): t=k; break
-                  if t is not None: lines[t]=line
-                  else: lines.insert(s+1,line); e+=1; c+=1
+                  lines.insert(s+1,line); e+=1; c+=1
               else:
                   lines=['---',line,'---','']+lines; s,e,c=0,2,4
               return lines,s,e,c
+
           def strip_md(t):
               t=re.sub(r'```.*?```','',t,flags=re.S)
               t=re.sub(r'`[^`]*`','',t)
               t=re.sub(r'!\[[^\]]*\]\([^)]+\)','',t)
               t=re.sub(r'\[([^\]]+)\]\([^)]+\)',r'\1',t)
+              t=re.sub(r'<[^>]+>.*?</[^>]+>','',t,flags=re.S)  
               t=re.sub(r'<[^>]+>','',t)
               t=re.sub(r'\s+',' ',t).strip()
               return t
+
           root=Path('docs')
           for p in root.rglob('*.md'):
               sp=str(p).replace('\\','/')
               if '/assets/' in sp: continue
-              stem=p.stem
+              stem=p.stem.replace('-', ' ').strip()
+
               lines=p.read_text(encoding='utf-8',errors='ignore').splitlines()
               if lines and lines[0].startswith('\ufeff'): lines[0]=lines[0].lstrip('\ufeff')
+
               s,e,c=parse_fm(lines)
-              body='\n'.join(lines[c:])
-              body_no_h1=re.sub(r'^\s*#.*$','',body,flags=re.M)
-              paras=[x.strip() for x in re.split(r'\n\s*\n',body_no_h1) if x.strip()]
-              desc=''
-              for para in paras:
-                  if para.startswith('!'): continue
-                  cand=strip_md(para)
-                  if len(cand)>=40: desc=cand; break
-              if not desc and paras: desc=strip_md(paras[0])
-              if len(desc)>160:
-                  cut=desc[:160]; desc=cut[:cut.rfind(' ')] if ' ' in cut else cut
-              sample='\n'.join(lines[c:c+6])
-              tags=list(dict.fromkeys(re.findall(r'(?<!\w)#([a-zA-Z0-9_\-]+)',sample)))
-              lines,s,e,c=upsert_fm(lines,'title',f'"{stem}"',s,e,c)
-              if desc: lines,s,e,c=upsert_fm(lines,'description',f'"{desc}"',s,e,c)
-              if tags: lines,s,e,c=upsert_fm(lines,'tags','['+', '.join(tags)+']',s,e,c)
-              in_code=False
-              fence=re.compile(r'^\s*(`{3,}|~{3,})'); atx=re.compile(r'^\s{0,3}#{1,6}\s+.*$')
-              set1=re.compile(r'^\s*={3,}\s*$'); set2=re.compile(r'^\s*-{3,}\s*$')
-              j=c; done=False
-              while j<len(lines):
-                  if fence.match(lines[j]): in_code=not in_code; j+=1; continue
-                  if not in_code:
-                      if atx.match(lines[j]): lines[j]='# '+stem; done=True; break
-                      if j+1<len(lines) and (set1.match(lines[j+1]) or set2.match(lines[j+1])):
-                          lines[j]='# '+stem; del lines[j+1]; done=True; break
-                  j+=1
-              if not done: lines.insert(c,'# '+stem)
+
+              if not has_key(lines,s,e,'title'):
+                  lines,s,e,c=upsert(lines,s,e,c,'title',f'"{stem}"')
+
+              if not has_key(lines,s,e,'description'):
+                  body='\n'.join(lines[c:])
+                  # quitar H1 visible del body
+                  body=re.sub(r'^\s*# .*$', '', body, flags=re.M)
+                  # elegir primer párrafo útil que no sea JSON/HTML
+                  paras=[x.strip() for x in re.split(r'\n\s*\n',body) if x.strip()]
+                  desc=''
+                  for para in paras:
+                      if para.lstrip().startswith(('{','<')):  # evita JSON-LD/HTML
+                          continue
+                      cand=strip_md(para)
+                      if len(cand)>=40:
+                          desc=cand; break
+                  if not desc and paras:
+                      desc=strip_md(paras[0])
+                  if desc:
+                      if len(desc)>160:
+                          cut=desc[:160]; desc=cut[:cut.rfind(' ')] if ' ' in cut else cut
+                      lines,s,e,c=upsert(lines,s,e,c,'description',f'"{desc}"')
+
+              fence=re.compile(r'^\s*(`{3,}|~{3,})'); in_code=False
+              has_h1=False
+              for j in range(c,len(lines)):
+                  if fence.match(lines[j]): in_code=not in_code; continue
+                  if not in_code and re.match(r'^\s*#\s+.+$', lines[j]):
+                      has_h1=True; break
+              if not has_h1:
+                  # usar el title del FM si lo hay
+                  title_line=None
+                  if s!=-1:
+                      for k in range(s+1,e):
+                          m=re.match(r'^\s*title\s*:\s*(.+)$', lines[k], flags=re.I)
+                          if m: 
+                              title_line=m.group(1).strip().strip('"')
+                              break
+                  lines.insert(c, f'# {title_line or stem}')
+
               p.write_text('\n'.join(lines)+'\n',encoding='utf-8')
           PY
-      - run: mkdocs build --site-dir site
+      - run: mkdocs build --clean --site-dir site
       - name: Generate sitemap.xml
         run: |
           python - <<'PY'
