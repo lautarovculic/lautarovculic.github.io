@@ -72,10 +72,10 @@ html, body, .md-content, .md-content__inner {
 .md-nav__title { 
   color: var(--lauti-fg) !important; 
   font-weight: 700; 
-  background: black !important; 
+  background: transparent !important; 
 }
 
-.md-nav__link { color: var(--lauti-fg-muted) !important; }
+.md-nav__link { color: black !important; }
 
 .md-nav__link:hover { 
   color: var(--lauti-fg) !important; 
