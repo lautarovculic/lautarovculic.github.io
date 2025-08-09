@@ -271,32 +271,20 @@ html, body, .md-content, .md-content__inner {
 .md-sidebar--secondary .md-nav__link,
 .md-sidebar--secondary .md-nav__title { background: transparent !important; }
 
-/* FIX PARA EL SCROLL - AQUÍ ESTÁN LOS CAMBIOS PRINCIPALES */
 .md-nav__item--section > .md-nav__container > a.md-nav__link {
-  position: relative !important; /* Cambio de static a relative */
+  position: relative !important; 
   inset: auto !important;
-  z-index: auto !important; /* Cambio de z-index fijo a auto */
+  z-index: 1 !important; 
 }
 
 .md-nav__item--section > nav.md-nav {
   position: relative;
-  z-index: auto; /* Cambio de z-index fijo a auto */
+  z-index: 2; 
 }
 
-/* Asegurar que el scrollwrap funcione correctamente */
 .md-sidebar__scrollwrap {
-  position: relative !important;
-  overflow-y: auto !important;
-  height: 100% !important;
   scroll-behavior: smooth !important;
-}
-
-/* Evitar conflictos de posicionamiento en navegación */
-.md-nav,
-.md-nav__list,
-.md-nav__item {
-  position: relative !important;
-  z-index: auto !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 
 /* MOBILE FIXES */
@@ -331,13 +319,11 @@ html, body, .md-content, .md-content__inner {
     height: 100% !important;
     background: var(--lauti-bg) !important;
     overflow-y: auto !important;
-    position: relative !important;
   }
   
   .md-nav,
   .md-nav__list {
     background: var(--lauti-bg) !important;
-    position: relative !important;
   }
   
   .md-overlay {
