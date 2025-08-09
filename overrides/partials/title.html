@@ -1,0 +1,9 @@
+{% if page and page.is_homepage %}
+  {{ config.site_name }}
+{% elif page and page.meta and page.meta.seo_title %}
+  {{ page.meta.seo_title }} - {{ config.site_name }}
+{% elif page and page.title %}
+  {{ page.title }} - {{ config.site_name }}
+{% else %}
+  {{ config.site_name }}
+{% endif %}
