@@ -30,12 +30,6 @@ html, body, .md-content, .md-content__inner {
   box-shadow: none !important; 
 }
 
-.md-header {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
 .md-main { scroll-margin-top: 3.2rem; }
 
 .md-header__inner::after, .md-tabs__inner::after { content: none !important; }
