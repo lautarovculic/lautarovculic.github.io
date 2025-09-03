@@ -1074,11 +1074,18 @@ Java.perform(() => {
 
 In short:
 - **`RootDetector.*`** → `return false`.
+
 - **`NativeRootChecker.checkSuExists / checkProcMaps`** → `return false`.
+
 - **`LocationUtils.isWithinCollectionRadius`** → `return true`.
+
 - **`LocationUtils.calculateDistance`** → `return 0.0`.
+
 - **`android.location.Location.distanceBetween(double,double,double,double,float[])`** → write `results[0]=1.0`.
+
 - **Capture `Function2` in `LocationService.startLocationUpdates(cb)`** → save `cb`.
+
 - **Intercept `AndroidClipboardManager.setText(AnnotatedString)`** → parse `"lat, lon"` and do `cb.invoke(new GeoPoint(lat,lon), false)`.
+
 
 I hope you found it useful (:
