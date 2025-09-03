@@ -40,7 +40,7 @@ theme:
     - navigation.instant.progress
     - navigation.prune
     - navigation.sections
-    - navigation.tabs
+#    - navigation.tabs
 #    - navigation.tabs.sticky
     - navigation.top
     - navigation.tracking
