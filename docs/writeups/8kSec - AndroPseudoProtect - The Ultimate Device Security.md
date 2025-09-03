@@ -46,12 +46,16 @@ Looking in the `AndroidManifest.xml` file, we can see the following XML content:
 
 We can see the *Activity*:
 - `com.eightksec.andropseudoprotect.MainActivity`
+
 The *service*:
 - `com.eightksec.andropseudoprotect.SecurityService`
+
 The *receiver*:
 - `com.eightksec.andropseudoprotect.SecurityReceiver`
+
 The *receiver listen* for:
 - `com.eightksec.andropseudoprotect.START_SECURITY`
+
 - `com.eightksec.andropseudoprotect.STOP_SECURITY`
 
 As **exported** and **without protections permissions**.
