@@ -12,20 +12,35 @@ adb install -r GeofenceGamble.apk
 In my case, I use a physical device for this challenge. *Once the app is launched and permissions are granted*, multiple **root detection checks are triggered**.
 In fact, these mechanism are:
 - `checkSuPaths`
+
 - `checkForMagisk`
+
 - `checkForBusyBox` <- *Detected on my device*
+
 - `checkBuildTags`
+
 - `checkDangerousProps`
+
 - `checkSELinuxPermissive`
+
 - `checkForHooks`
+
 - `checkForRootManagementApps`
+
 - `checkForDangerousApps`
+
 - `checkForEmulatorFiles`
+
 - `checkEmulatorProps`
+
 - `checkEmulatorHardwareName`
+
 - `checkQemuProps` <- *Detected on my device*
+
 - `canWriteToSystemFolder`
+
 - `checkNativeRootIndicators`
+
 
 Since *BusyBox is embedded in my device’s system partition and cannot be easily removed*, I decided to **bypass all the checks dynamically with Frida**.
 But, first let's search the code where these mechanism was implemented!
