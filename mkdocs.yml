@@ -4,7 +4,6 @@ site_description: Mobile Security Writeups - CTF by Lautaro Villarreal Culic'
 site_author: Lautaro Daniel Villarreal Culic'
 copyright: Copyright &copy; 2025 - Lautaro D. Villarreal Culic'
 
-
 repo_name: lautarovculic/lautarovculic.github.io
 repo_url: https://github.com/lautarovculic/lautarovculic.github.io
 edit_uri: ""
@@ -56,6 +55,7 @@ theme:
     repo: fontawesome/brands/github
     edit: material/pencil 
     view: material/eye
+    # add icons for search
     admonition:
       note: octicons/tag-16
       abstract: octicons/checklist-16
@@ -75,7 +75,8 @@ theme:
     code: JetBrains Mono
 
 plugins:
-  - search
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
   - roamlinks
   - rss: 
       match_path: "writeups/.*"

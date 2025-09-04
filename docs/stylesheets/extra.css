@@ -140,6 +140,68 @@ html, body, .md-content, .md-content__inner {
   border-radius: 22px; 
 }
 
+/* search bar container */
+.md-search__form{ 
+  position:relative; 
+  height:2.75rem;
+}
+
+/* padding for right-icons (X + Share) */
+.md-search__input{
+  padding-right: 5rem;          /* space for search icons */
+  height:100%;
+  line-height:2.75rem;
+}
+
+/* center X / share */
+.md-search__options{
+  position:absolute;
+  top:0; right:0;
+  height:100%;
+  display:flex;
+  align-items:center;
+  gap:.35rem;
+  padding-right:.6rem;
+}
+
+/* visibility and don't break icons */
+.md-search__options .md-search__icon{
+  position:static;
+  margin:0;
+  color:var(--lauti-fg-muted);
+}
+.md-search__options .md-search__icon:hover{ color:#fff; }
+
+/* show X just when there are text */
+.md-search__options [data-md-component="search-reset"],
+.md-search__options button[type="reset"]{ display:none; }
+.md-search__input:not(:placeholder-shown) ~ .md-search__options [data-md-component="search-reset"],
+.md-search__input:not(:placeholder-shown) ~ .md-search__options button[type="reset"]{ display:inline-flex; }
+
+/* arrow  “back” just in overlay */
+.md-search__form > .md-search__icon[for="__search"]{ display:none; }
+#__search:checked ~ .md-header .md-search__form > .md-search__icon[for="__search"]{
+  display:block;
+  position:absolute;
+  left:.6rem; top:50%;
+  transform:translateY(-50%);
+  color:var(--lauti-fg-muted);
+}
+
+/* give space if arrow is present */
+#__search:checked ~ .md-header .md-search__form .md-search__input{
+  padding-left:2.25rem;
+}
+
+/* avoid burger in mobile when overlay is active */
+@media screen and (max-width: 76.1875em){
+  #__search:checked ~ .md-header label.md-header__button[for="__drawer"]{
+    opacity:0; pointer-events:none;
+  }
+}
+
+/* =========================== */
+
 .md-footer, .md-footer-meta { 
   background: var(--lauti-bg) !important; 
   border-top: 1px solid var(--lauti-border); 
@@ -278,7 +340,7 @@ html, body, .md-content, .md-content__inner {
   -webkit-overflow-scrolling: touch !important;
 }
 
-/* MOBILE FIXES */
+/* MOBILE FIXES (drawer) */
 @media screen and (max-width: 76.1875em) {
   .md-sidebar--secondary { 
     display: none !important; 
@@ -348,5 +410,48 @@ html, body, .md-content, .md-content__inner {
   .md-header__button.md-icon {
     position: relative !important;
     z-index: 201 !important;
+  }
+}
+
+:root{ --search-h:2.00rem; --search-pad-y:.25rem; --search-leftpad:2.25rem; }
+
+.md-search__form{ height:var(--search-h) !important; }
+
+.md-search__input{
+  height:var(--search-h) !important;
+  line-height:calc(var(--search-h) - 2px) !important;
+  padding-top:var(--search-pad-y) !important;
+  padding-bottom:var(--search-pad-y) !important;
+  padding-right:5rem !important;
+}
+
+#__search:checked ~ .md-header .md-search__form .md-search__input{
+  padding-left:var(--search-leftpad) !important;
+}
+
+/* hide if search is active */
+#__search:checked ~ .md-header label.md-header__button[for="__search"],
+#__search:checked ~ .md-header .md-header__button.md-icon[for="__search"]{
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+#__search:checked ~ .md-header .md-search__form{
+  z-index:202 !important;
+}
+
+/* desktop searchbar */
+@media screen and (min-width: 76.1875em){
+  :root{
+    --search-h: 2.00rem;
+    --search-pad-y: .20rem;
+  }
+  .md-search__form{ height: var(--search-h) !important; }
+  .md-search__input{
+    height: var(--search-h) !important;
+    line-height: calc(var(--search-h) - 2px) !important;
+    padding-top: var(--search-pad-y) !important;
+    padding-bottom: var(--search-pad-y) !important;
   }
 }
