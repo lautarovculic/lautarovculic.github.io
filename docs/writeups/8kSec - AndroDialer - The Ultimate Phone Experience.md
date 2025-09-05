@@ -46,9 +46,13 @@ There are a *couple of components*, but we just will focus on this:
 ```
 
 We have serious problems here, for example:
+
 - **Exported and accessible** from external apps.
+
 - Processes `Intent.ACTION_VIEW` with `scheme=tel:`.
+
 - `@android:style/Theme.NoDisplay` -> Invisible activity.
+
 - This is the **main vulnerable component** (*Confused Deputy / Privilege Re-delegation*).
 
 We can see the
@@ -81,6 +85,7 @@ if (str7.equals("8kd1aL3R_s3Cur3_k3Y_2023") ||
 ```
 
 Token: **`8kd1aL3R_s3Cur3_k3Y_2023`**
+
 Also notice the name of *variable*: **`enterprise_auth_token`**, this sound important.
 And here we can see how *scheme works*
 ```java
@@ -115,7 +120,9 @@ if (AbstractC2986h.m5786a(data2 != null ? data2.getScheme() : null, "tel")) {
 ```
 
 We have *two extras*:
+
 - `arrayList.add(getIntent().getStringExtra("enterprise_auth_token"));`
+
 - `str3 = getIntent().getStringExtra("phoneNumber");`
 
 So, this seems simple, we just can test it using **ADB** and then, send the intent:
