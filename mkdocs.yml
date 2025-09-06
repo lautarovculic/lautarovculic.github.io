@@ -155,15 +155,15 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/lautarovculic
-    - icon: fontawesome/brands/x-twitter
+    - icon: simple/x
       link: https://x.com/lautarovculic
     - icon: fontawesome/brands/youtube
       link: https://www.youtube.com/@TheHackingHub
     - icon: fontawesome/brands/linkedin
       link: https://linkedin.com/in/lautarovculic
-    - icon: fontawesome/brands/hackerone
+    - icon: simple/hackerone
       link: https://hackerone.com/lautaro
-    - icon: fontawesome/solid/bug
+    - icon: simple/bugcrowd
       link: https://bugcrowd.com/lautarovculic
     - icon: fontawesome/solid/link
       link: https://lautarovculic.com
