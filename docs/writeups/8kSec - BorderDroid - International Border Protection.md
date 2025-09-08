@@ -10,18 +10,26 @@ adb install -r BorderDroid.apk
 ```
 
 Then, give **all the needed permissions** to the applications. *An input text for 6 digits must be appear*.
+
 I set a *6 digits* as `111111`. Then, a *new activity* will be launched with *three buttons*.
+
 - Start Security
+
 - Stop Security
+
 - Change PIN
 
 After set the PIN, and press *start security* button, we can see a **countdown**. And then, *kiosk mode is activated*.
+
 ![[8ksec-BorderDroid_2.png]]
+
 I'm trying to put *my code*, **but isn't work**.
+
 The kiosk mode, *is working*.
 
 Let's analyze the **source code** using **JADX**.
 The *package name* is `com.eightksec.borderdroid`.
+
 And in the `AndroidManifest.xml` file we can see this **receiver** exported as `true`.
 ```XML
 <receiver
@@ -35,6 +43,7 @@ And in the `AndroidManifest.xml` file we can see this **receiver** exported as `
 ```
 
 And, we can see a *lot of classes* in the *java code*.
+
 I'll show some interesting functions.
 ### Using Volume Buttons
 Starting in **`YouAreSecureActivity`** class, I found that **never will work** if we insert the *correct* pin, because **always will call to** `showWrongPinError()` function:
