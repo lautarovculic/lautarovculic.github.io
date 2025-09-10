@@ -10,7 +10,9 @@ Unzip the `.zip` file downloaded from course and let's take a tour into director
 We were given a partial dump of a *Samsung device* with multiple artifacts (`databases`, `notes`, `images`, `audio`, `SMemo`, etc.). The mission was to **decrypt the `flag_mhc.enc` file** located in the **`SecureFolder`** directory.
 
 Let's start analyzing the *databases*.
+
 The first database is **`BrowserHistory.db`** located at:
+
 - `Browser/data/com.sec.android.app.sbrowser/databases`
 
 ```bash
@@ -37,6 +39,7 @@ sqlite>
 ```
 
 We can see a *lot of search* about **AES encryption** and storing *sensitive data*.
+
 *Nothing useful here*. So, let's see the next database file, which is **`samsung_notes.db`** located at `db` directory.
 ```bash
 SQLite version 3.44.4 2025-02-19 00:18:53
