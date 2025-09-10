@@ -59,22 +59,31 @@ sqlite>
 ```
 
 Here we can found *a lot of useful information*:
+
 - **Key Derivation** -> 10000 Iterations -> This may indicate the use of `PBKDF2`.
+
 - **Reminder** -> key 32 bit.
+
 The rest of the information can be misleading and distract us from the challenge.
 
 I saw a `.wav` file in `Audio` directory, with the name `awful noise.wav`.
+
 After play this audio, Immediately notice that is **Morse code**.
+
 We can *decode this code* in:
+
 - https://morsecode.world/international/decoder/audio-decoder-adaptive.html
+
 The content that have is: **`PBKDF2 WITH SHA256`**
 
 This confirms the **KDF algorithm**.
+
 **Definition**:
 *A Key Derivation Function (KDF) is a cryptographic algorithm that transforms a primary secret, like a password or master key, into one or more secure cryptographic keys.
 KDFs strengthen weak inputs (such as passwords) and extract, expand, and format them into keys of the correct length and format, often using techniques like salting, hashing, and iterations to increase computational cost and resist brute force attacks.*
 
 Let's now take a look at the **images** in `Images` directory:
+
 Quickly, I noticed that there is an image named `passphr1.png` and also `2.png`, `3.png`, `4.png` and `5.png` which **are QR codes that can be scanned**.
 
 You can use your *mobile phone*, but I prefer using **`zbar`** tool suite.
@@ -82,12 +91,15 @@ You can use your *mobile phone*, but I prefer using **`zbar`** tool suite.
 zbarimg passphr1.png
 ```
 Output: **`red`**
+
 If we use the same command for `2`, `3`, `4`, `5` `.png` files, we can put together the **passphrase**.
 
 **KEY**: **`red34DuckMango!#2022++`**
 
 But we have more images in the directory that we must analyze.
+
 I use https://georgeom.net/StegOnline tool for image inspection, and I noticed that the **`School.png`** image contains something in the bit planes.
+
 This can been seen clearly in the *Red 0*:
 ![[mhl-shaken2.png]]
 
@@ -120,6 +132,7 @@ WIFI:T:WPA;S:TP-Link_CTF_NET;P:ctfStrongPass2025;;
 Password: **`ctfStrongPass2025;;`** (not useful for the challenge).
 
 But, an useful image for inspect, is `beautiful_thing.png`, that contains a **user comment**.
+
 Using the famous **exiftool** we can got the information:
 ```bash
 exiftool beautiful_thing.png
@@ -138,31 +151,44 @@ Orientation                     : Horizontal (normal)
 ```
 
 We got the **`For3ns1cQ`** word!
+
 *We already have enough information anyway, so given the time I've "wasted" investigating the rest of the information and clues the challenge gave, I'll decide to document the use of the outguess tool.*
 
 Let's look at the contents of the **`SMemo`** directory.
+
 We see that there are two `.snb` files inside.
+
 **SNB files are primarily associated with Samsung's outdated S Note application**, serving as archives for notes containing text, images, audio, and video.
+
 This are like `.zip` files, so, you can *unzip* the content and take a look.
+
 Inside, we have *To do sunday* and *Gmail* directory.
 
 In both, we have an `snb_thumbnailimage_001.jpg` file.
+
 The content of the images are:
+
 - **`Gmail`** -> Gmail Elos ivani
+
 - **`To do sunday`** -> A list in To-Do format.
 	- Installing anti forensic
 	- Picture hiding
 	- Gonna ask Jonathan
 
 *I fell into this rabbit hole*, and after extensive analysis with steganography tools, I discovered the **outguess** tool.
+
 - https://github.com/resurrecting-open-source-projects/outguess
 
 I knew that for this I would have to **find a password** and thus extract information that would not be useful to solve the challenge.
+
 After trying *many of the combinations and variations of the information above*, I realized that perhaps the words listed above might be helpful.
+
 Since the contents of the "*Gmail*" directory contained **ivani**, that's the only reason I laughed that the *IV would be inside the binary*.
 
 The password for:
+
 - `SMemo/Gmail/snote/media/snb_thumbnailimage_001.jpg` -> password: **`ivani`**
+
 - `SMemo/To do sunday/snote/media/snb_thumbnailimage_001.jpg` -> password: **`anti`**.
 
 We can use *outguess* for extract the binary inside:
@@ -174,6 +200,7 @@ And
 outguess -k 'anti' -r snb_thumbnailimage_001.jpg sunday.bin || true
 ```
 I even tried **nybbles swapping** ([REF](https://www.geeksforgeeks.org/dsa/swap-two-nibbles-byte/)) with all the results we've had.
+
 But none of that worked.
 ### Solution
 I already had everything I needed to **decrypt the flag with a script**.
