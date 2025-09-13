@@ -1,6 +1,8 @@
 ![[htb-flappyFlopper1.png]]
 **Difficult:** Medium
+
 **Category**: GamePwn
+
 **OS**: Android
 
 **Description**: No one has got 10000 score yet! Are you able to do so?
@@ -8,6 +10,7 @@
 ----
 
 Download and **extract** the **.zip** file with **hackthebox** as password.
+
 Install the `.apk` file using **ADB**
 ```bash
 adb install -r Flappyflopper.arm64-v8a.apk
@@ -16,6 +19,7 @@ adb install -r Flappyflopper.arm64-v8a.apk
 We can see that this is the kind of famous **Flappy Bird game**. Our goal is get **10000 points**!
 ### Recon
 Let's *analyze the source code*. For that, we'll use **JADX**!
+
 Looking in the `AndroidManifest.xml` file we can see the **package name**, which is `com.apuf.flapyfloper`.
 
 Quickly, we can see the **`MainActivity`** in the `.xml` file:
@@ -45,6 +49,7 @@ Quickly, we can see the **`MainActivity`** in the `.xml` file:
 ```
 
 Notice that the class name is `UnityPlayerActivity`. So, we are reversing an **Unity** game!
+
 Let's *decompile* the application using **apktool**:
 ```bash
 apktool d Flappyflopper.arm64-v8a.apk
@@ -87,16 +92,23 @@ lib
 ```
 
 Looks like we'll have to **work with IL2CPP**!
+
 But, **what's IL2CPP**?
+
 **Definition**:
+
 *IL2CPP (Intermediate Language To C++) is a scripting backend developed by Unity, serving as an alternative to the Mono backend. Its primary function is to enhance the performance, security, and platform compatibility of Unity projects, particularly when deploying to a wide range of platforms.*
 
 So, where the information of our interest is located?
+
 In the `assets/bin/Data/Managed/Metadata` directory, we can see the `global-metadata.dat` file **contains the class, methods and fields**.
+
 
 Also `ScriptingAssemblies.json` confirms **`Assembly-CSharp`** as the *game container*.
 
+
 By the way, we can **enumerate** which *custom* class are using in the app using **Frida**!
+
 We *can hook at a high level with the bridge* (methods/fields) or **go all out using the native method's VA**. I chose the latter for maximum robustness.
 
 Fortunately, there are geniuses who have already made our job easier, we can find it in this repository:
@@ -208,7 +220,9 @@ Output:
 ```
 
 This is really interesting!
+
 We can see the *functions and classes that interest us most*.
+
 We will *focus* in:
 ```bash
 [CLASS] Score
@@ -219,17 +233,26 @@ We will *focus* in:
    - System.Void Score::UpdateScoreText()
 ```
 Why? **Runs every time the HUD updates** → perfect *synchronization point*. On `ARM64`, `x0` is `this` → writing `this + offset(score)` before the body *ensures that the game code itself renders the forced value*.
+
 Avoid *dealing with UI overloads* (`Text/TMP_Text`) and *trigger timing*.
 
+
 But before, what is **VA**? 
+
 **VA = Virtual Address**: The absolute virtual address (*post-ASLR*) of the *method's native entry point within the process*. In Unity IL2CPP, *every C# method ends as a native function*.
+
 The bridge (`frida-il2cpp-bridge`) **gives you that VA with `method.virtualAddress`** so you can `Interceptor.attach(va, ...)` to it.
+
 
 **RVA is the offset relative to the base of `libil2cpp.so`**. The *bridge resolves both* from `MethodInfo/FieldInfo` using `global-metadata.dat`.
 
+
 How does bridge “resolve” it?
+
 It uses *il2cpp's APIs/structures and metadata* (`global-metadata.dat`) to map: *domain* → *assemblies* → *images* → *classes* → *methods/fields*.
+
 From each `MethodInfo`, it *obtains the code pointer* (VA) and from each `FieldInfo`, the *offset within the object*.
+
 This is why we were able to: **read `fScore.offset`, and hook `mUpd.virtualAddress`**.
 ### Solution
 So *I hooked the VA* and, on `ARM64` where `x0` is `this`, I wrote `this+offset = 10000`. When the *method was executed*, the **UI itself took the already patched value** and **displayed the manipulated score**.
