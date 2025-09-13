@@ -10,19 +10,28 @@ adb install -r DroidWars.apk
 ```
 
 Give the *storage permissions* to the app.
+
+
 We can see the screen with *Pikachu*, and also, the *settings button*.
+
 And finally, 4 buttons with some functions.
 
 Let's focus on the **source code** using **JADX**.
+
 In `AndroidManifest.xml` file, we can't see something useful. Just the *package name* `com.eightksec.droidwars` and the *Main Activity* class.
 
 But, it's important that in the manifest we can check for permissions:
+
 - `READ_EXTERNAL_STORAGE`
+
 - `WRITE_EXTERNAL_STORAGE` (up to SDK 29)
+
 - `MANAGE_EXTERNAL_STORAGE` (Android ≥ 11)
+
 This **grants full access to `/sdcard`**.
 
 So, now it's time of *java code*.
+
 First, let's see the **`MainActivity`** class.
 
 I'll use the `checkForExploitEvidence()` for see **if the exploit** was *worked*.
@@ -55,6 +64,7 @@ public final void checkForExploitEvidence() {
 ```
 
 So, *as goal*, we can try create the *`stole_data.txt`* file **using the malicious plugin**.
+
 I think that is *intentional* due that in our plugin we can set any name, except `stole_data` as name.
 
 Also, *the function* `loadExternalPlugins()` will **add the plugin**:
@@ -110,7 +120,9 @@ private final void loadExternalPlugins() {
 ```
 
 We mus put the `.dex` file into `/sdcard/PokeDex/plugins/` directory.
+
 We can see *multiple calls* to **`PluginLoader`** class.
+
 Finally we can see the `clearPluginCache()` function, **which will remove** all `.dex` files in the storage.
 
 So, it's **`PluginLoader`** class time.
@@ -200,8 +212,11 @@ for (String str3 : CollectionsKt.listOf((Object[]) new String[]{
 ```
 
 Which is:
+
 - `<pluginName>Plugin`
+
 - `MaliciousPlugin` (will trigger the suspicious code)
+
 - `com.eightksec.droidwars.plugin.<pluginName>Plugin`
 
 Also support **`SimplePlugin`**. Which use a **`Interface`**.
