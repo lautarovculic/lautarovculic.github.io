@@ -26,7 +26,7 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: |
           pip install mkdocs "mkdocs-material[imaging]" \
-          mkdocs-roamlinks-plugin mkdocs-glightbox mkdocs-minify-plugin \
+          mkdocs-roamlinks-plugin mkdocs-meta-descriptions-plugin mkdocs-glightbox mkdocs-minify-plugin \
           mkdocs-rss-plugin mkdocs-redirects mkdocs-awesome-pages-plugin \
           mkdocs-git-revision-date-localized-plugin
       - name: Fix Obsidian image embeds -> Markdown
