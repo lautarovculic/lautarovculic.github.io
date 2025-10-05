@@ -77,10 +77,6 @@ theme:
 plugins:
   - search:
       separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
-  - sitemap:
-      changefreq: weekly
-      priority: 0.5
-      sitemap_url: https://lautarovculic.github.io/sitemap.xml
   - roamlinks
   - rss: 
       match_path: "writeups/.*"
