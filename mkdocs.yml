@@ -86,7 +86,6 @@ plugins:
   - minify: 
       minify_html: true
   - awesome-pages
-  - mkdocs-meta-descriptions-plugin
   - social            
   - git-revision-date-localized:           
       enable_creation_date: true
