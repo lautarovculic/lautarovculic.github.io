@@ -741,7 +741,7 @@ The name of the closure, is "synthetic" (*invented by Ghidra when reconstructing
 
 Even *if they're not exported*, Ghidra **lists them as internal functions** (local symbols). That's why *you won't see them in Exports, but you will see them in Functions*.
 
-It's **code that you pass to an AP**I (e.g., `URLSession`) to **be executed when a result is received (`data/response/error`)**. It captures **environment variables** (e.g., the *destination URL*) and *decides what to do with the content*.
+It's **code that you pass to an API** (e.g., `URLSession`) to **be executed when a result is received (`data/response/error`)**. It captures **environment variables** (e.g., the *destination URL*) and *decides what to do with the content*.
 
 So, let's *understand THIS closure*:
 
