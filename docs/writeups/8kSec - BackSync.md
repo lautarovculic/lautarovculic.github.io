@@ -7,18 +7,27 @@
 Install an **IPA** file can be difficult. So, for make it more easy, I made a YouTube video with the process using **Sideloadly**. **LINK**: [https://www.youtube.com/watch?v=YPpo9owRKGE](https://www.youtube.com/watch?v=YPpo9owRKGE)
 
 Once you have the app installed, let's proceed with the challenge. **unzip** the **`.ipa`** file.
+
 ### Recon
 Inside of `Payload/BackSync.app` we can see the `BackSync.debug.dylib` file library.
+
 This is suspicious so, we can **import into Ghidra tool for code analysis**.
 
 Check the **Exports** container in `Symbol Tree`, we can see some functions:
+
 - `checkLocalConfigForVersion`
+
 - `fetchRemoteConfig`
+
 - `fetchRemoteConfigPeriodically`
+
 - `sendFlag`
+
 - `writeFlagToSandbox`
 
+
 We can notice that the app **make a call** to `http://deletedoldstagingsite.com/remoteConfig`
+
 Check that using this *recon frida script*:
 ```javascript
 if (!ObjC.available) throw new Error("ObjC not available");
@@ -235,6 +244,7 @@ void BackSync::fetchRemoteConfig(void)
 ```
 
 Notice that `http://deletedoldstagingsite.com` doesn't response. So, let's **intercept** this call using **MITMProxy**.
+
 I will skip the setup of proxy, you must know how to set up a lab in iOS and macOS. And there are a lot of content in internet.
 
 Let's start the *mitmproxy*
@@ -245,7 +255,9 @@ mitmproxy --listen-host 0.0.0.0 --listen-port 8080
 ![[8ksec-backSync2.png]]
 
 We can confirm that no information is transmitted in these request.
+
 And we don't need **interact with the app**, in fact, probably the buttons doesn't nothing.
+
 If we pay attention, in **`fetchRemoteConfigPeriodically`**, the **request is sent every 10 seconds**:
 ```C
   else {
@@ -268,14 +280,21 @@ If we pay attention, in **`fetchRemoteConfigPeriodically`**, the **request is se
 Specific -> `(local_168,10.0,(DispatchTimeInterval)(__int8)local_188);`
 
 What is `dataTaskWithURL:completionHandler:`?
+
 - https://developer.apple.com/documentation/foundation/urlsession/datatask(with:completionhandler:)-52wk8
+
 The method `dataTaskWithURL:completionHandler:` is a fundamental part of `NSURLSession` in
+
 Apple's Foundation framework, **used for making network requests and handling the response**.
 
 But, let's see the order that the app execute. First, we have also `init` functions.
+
 So, `init` function is important because execute another functions:
+
 - `writeFlagToSandbox()` → guarantees `flag.txt`
+
 - `fetchRemoteConfigPeriodically()` → schedules the **fetch loop every ~10 s**.
+
 **Implication**: The flag is *always set before the first GET to `remoteConfig`*
 
 The **`writeFlagToSandbox()`** function:
@@ -336,6 +355,7 @@ The **`writeFlagToSandbox()`** function:
   return;
 ```
 Will create the `flag.txt` file into `Documents` **sandbox directory**.
+
 ### The sendFlag function
 And the **most important function**: **`BackSync.sendFlag(to: String)`**
 ```C
@@ -547,15 +567,24 @@ LAB_0000bbcc:
 ```
 
 This is the **vulnerable function**
+
 1. Gets **Documents** and builds `.../Documents/flag.txt`.
+
 2. **Reads the contents** of `flag.txt` into a String (UTF-8).
+
 3. Constructs a `URLRequest` to (...).
+
 4. **POST** with `Content-Type: application/json` and body `{"flag": "<content>"}` via `NSJSONSerialization`.
+
 5. Creates `dataTaskWithRequest` and r`esume()` → **exfiltrates the flag**.
+
 ### Closure
 So, **how trigger this function**?
+
 Let's search in the program for the text **`NSJSONSerialization`**!
+
 We can found this **closure**:
+
 - `$$closure_#1_@Sendable_(Foundation.Data?,__C.NSURLResponse?,Swift.Error?)_->_()_in_BackSync.fet chRemoteConfig()_->_()`
 ```C
   local_38 = *(int *)PTR____stack_chk_guard_00014108;
@@ -699,22 +728,33 @@ LAB_00005898:
 ```
 
 But **what is a closure**?
+
 A closure in **Swift** is an **anonymous function created in place** (e.g., the `URLSession` completion handler).
+
 At the *binary level* (Mach-O), this closure *is not a public exported function like those in an API*; it is a block (Objective-C block) with:
+
 - A *stack/heap structure* (containing a pointer to the "*invoke*" function, descriptor, captures, etc.).
+
 - A pointer to the **routine that executes the closure body**.
 
 The name of the closure, is "synthetic" (*invented by Ghidra when reconstructing the stream*); it *does not appear in the binary's export table*.
+
 Even *if they're not exported*, Ghidra **lists them as internal functions** (local symbols). That's why *you won't see them in Exports, but you will see them in Functions*.
 
 It's **code that you pass to an AP**I (e.g., `URLSession`) to **be executed when a result is received (`data/response/error`)**. It captures **environment variables** (e.g., the *destination URL*) and *decides what to do with the content*.
 
 So, let's *understand THIS closure*:
+
 1. **Decode JSON** with `NSJSONSerialization.JSONObjectWithData(...)`.
+
 2. **Bridge** → **Any** → `[String:String] (_swift_dynamicCast` to `String:String`).
+
 3. Read **mode** and **compare** with "`collect_logs`".
+
 4. If **it's not `collect_logs`** → exit.
+
 5. If **it's `collect_logs`**, **take `target_url` and call `BackSync::sendFlag(target_url)`**.
+
 ### Solution
 Let's create a **mitimproxy** script that will trigger the `sendFlag()` function!
 ```python
