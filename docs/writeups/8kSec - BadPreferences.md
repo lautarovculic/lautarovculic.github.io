@@ -218,7 +218,9 @@ void BadPreference::ContentView::checkForDebugMode(ContentView param_1)
 ```
 
 We can easily read the flag, **but it is not allowed as a solution for the challenge**.
+
 So, let's explain this code.
+
 As you can read easily the flag, you can notice another **array**:
 ```C
   tVar10 = Swift::$_allocateUninitializedArray(0x11);
@@ -261,6 +263,7 @@ As you can read easily the flag, you can notice another **array**:
 ```
 
 Which is **`com.app.debugMode`**.
+
 **Some lines below**:
 ```C
   tVar10 = Swift::$_allocateUninitializedArray(4);
@@ -277,6 +280,7 @@ Which is **`com.app.debugMode`**.
 ```
 
 We can see **`true`**. So, basically, we need set `com.app.debugMode` to `true`.
+
 These values are chars, but, *below of each array*, will be **concatenated**.
 ```C
   AVar2 = Swift::$_finalizeUninitializedArray(tVar10.0);
@@ -284,9 +288,11 @@ These values are chars, but, *below of each array*, will be **concatenated**.
 ```
 
 So, how we can set to `true`?
+
 We can see that the app uses the `NSUserDefaults.standardUserDefaults();`
 
 What is **`NSUserDefaults`**?
+
 `NSUserDefaults` (now **`UserDefaults`** in **Swift**) is the **native iOS KV (Key Value) store for small, per-app preferences** (`key→value`). Lightweight **persistence**, fast access, and *no encryption*.
 
 Where we can found them?
@@ -295,10 +301,13 @@ Where we can found them?
 ```
 
 **Automatic synchronization:**
+
 The system *automatically synchronizes the in-memory cache with the user's defaults database at periodic intervals*, ensuring changes are saved. **While manual** `synchronize()` calls were *sometimes used in older versions or specific scenarios*, they are generally not recommended or necessary in modern iOS development.
+
 We can use `syncronyze()` for the challenge so, we can apply quickly the changes.
 
 **Accessing Values**
+
 You can **set and retrieve values** using methods like `setObject:forKey:`, `stringForKey:`, `integerForKey:`, `boolForKey:`, etc.
 ### Solution
 We only need to change a *preference*: set the **string value** `"true"` for the key `com.app.debugMode` in the app’s standard `UserDefaults` domain to *unlock the debug mode and reveal the flag*.
@@ -337,6 +346,7 @@ Output:
 ```
 
 For **revert the changes, you just need modify the frida script**, putting `false`.
+
 **Flag**: **`CTF{the_prefs_are_bad}`**
 
 I hope you found it useful (:
