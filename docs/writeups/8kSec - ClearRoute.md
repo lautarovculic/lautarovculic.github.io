@@ -9,13 +9,17 @@ Install an **IPA** file can be difficult. So, for make it more easy, I made a 
 Once you have the app installed, let's proceed with the challenge. **unzip** the **`.ipa`** file.
 ### Recon
 We can see that we have a *button* that **Send Secure Data** and, in green, the **status text**.
+
 And the challenge is clear with the objective, we need **intercept the information that is transmitted**.
 
 Inside of `Payload/ClearRoute.app` we have the **`ClearRoute.debug.dylib`** file library.
+
 Also, the binary **`ClearRoute`**. But first, let's check the *debug library*.
 
 Let's *import* into **Ghidra** and start **analyze the source code** looking for *interesting functions*.
+
 The first that we need to check is **`isProxyEnabled()`**.
+
 This Swift function returns a **boolean value**:
 ```C
   local_30 = (undefined *)0x0;
@@ -91,9 +95,11 @@ This Swift function returns a **boolean value**:
 ```
 
 We will not work with proxies like burpsuite or mitmproxy. So, *we never will set up a manual proxy in the Wi-Fi settings*. A great bypass sometimes is just go with the wind.
+
 In Swift, it **bridge `CFNetworkCopySystemProxySettings()`** then looks up the key "*HTTPProxy*" in the dictionary and returns `true` if it is not empty (`Sdtring::get_isEmpty`).
 
 Another *important function* is **`checkForProxyAndSend()`**.
+
 This function If `isProxyEnabled()==true`, set the *status/UI* to “Some Error Occurred, Please Try again” and **don’t send**. If `false`, set “Request Successful.” and call **`sendSensitiveRequest()`**.
 
 But the **most important is `sendSensitiveRequest()`**:
@@ -329,21 +335,29 @@ But the **most important is `sendSensitiveRequest()`**:
 ```
 
 Here's the request *is crafted*:
+
 - URL: https://8ksec.io/blog
+
 - Method: **POST**, header *`Content-Type: application/json`*
+
 - Key: *concatenate* "**`8k`**"+"**`sec`**"+" **`_int`**"+"**`er`**"+"**`cepted`**" → "`8ksec_intercepted`"
+
 - JSON: `{ "user": "john_doe", "8ksec_intercepted": "CTF{no_proxies_allowed}" }`
+
 - **Serializes** with `+[NSJSONSerialization dataWithJSONObject:options:error:]`, does **`setHTTPBody`**, creates `-[NSURLSession dataTaskWithRequest:completionHandler:]` and *resume*.
 
 And there are a **closure**:
+
 - `void $$closure_#1_@Sendable_(Foundation.Data?,__C.NSURLResponse?,Swift.Error?)_->_()_in_ClearRoute.C ontentView.sendSensitiveRequest()_->_()`
 
 This It's the **handler for `dataTaskWithRequest`**. It *dispatches to the main queue* using `DispatchQueue.main.async` to *update state/UI*.
 
 Basically, the *chain we can reconstruct is the following*:
+
 `isProxyEnabled()` (Swift) → if *no proxy*, call `sendSensitiveRequest()` → assemble *JSON* with `NSJSONSerialization` → `setHTTPBody` → `NSURLSession dataTask... resume`.
 ### Solution
 So, we can **hook** this function:
+
 `+[NSJSONSerialization dataWithJSONObject:options:error:]` → See the *dictionary before serializing*.
 
 We can use this **Frida script**:
@@ -489,7 +503,9 @@ setHTTPBody captured:
 ```
 
 - `+[NSJSONSerialization dataWithJSONObject:options:error:]` -> (JSON assembly)
+
 - `-[NSMutableURLRequest setHTTPBody:]` -> (injection of the body to the request)
+
 - `-[NSURLSession dataTaskWithRequest:completionHandler:]` -> (creation of the task with the final request).
 
 **Flag**: **`CTF{no_proxies_allowed}`**
