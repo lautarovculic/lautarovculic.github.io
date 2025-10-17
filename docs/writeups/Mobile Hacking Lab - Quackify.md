@@ -141,11 +141,17 @@ Output:
 ```
 
 Based in the output, I notice this valuable strings:
+
 - `quackify.License`
+
 - `LicenseGenerator`
+
 - `LicenseFile`
+
 - `_isPremium`
+
 - `isValid`
+
 - `presentUpgrade`
 
 After search for this strings in **Ghidra**, I did't find nothing useful.
