@@ -11,12 +11,17 @@ Once you have the app installed, let's proceed with the challenge. **unzip** t
 Since I don't have access to the challenge device, **the final flag will be created in the last step of the writeup** as a practical example.
 ### Recon
 This application is a radio app, and by default, **we have the free license**. This *allows us to listen to the radio station for 10 seconds*.
+
 After those 10 seconds, a pop-up will appear to **Upgrade to Premium**.
+
 There are two options:
+
 - License URL: We can serve a **local server** with the **`license.lic`** file. Then, downloading that the app will process the license file. 
+
 - License Key: We can activate the Premium account entering the license key.
 
 We will use the path of **License URL**.
+
 For that, I'll search for **strings** in the **binary file** `quackify`.
 ```bash
 ( strings -a -n 4 -t x quackify; strings -a -e l -n 4 -t x quackify ) \
@@ -144,7 +149,9 @@ Based in the output, I notice this valuable strings:
 - `presentUpgrade`
 
 After search for this strings in **Ghidra**, I did't find nothing useful.
+
 So we'll use the *best tool out there for performing static analysis on iOS*, which is **`ipsw`**.
+
 Let's extract all Swift **metadata contained in the Mach-O binary** (`quackify` in this case).
 ```bash
 ipsw swift-dump Payload/quackify.app/quackify --demangle
@@ -179,6 +186,7 @@ class quackify.License: NSObject {
 ```
 
 But `quackify.License` what is?
+
 It's a **Class**!
 ```swift
 class quackify.License: NSObject {
@@ -189,6 +197,7 @@ class quackify.License: NSObject {
 }
 ```
 It confirms this because it inherits from **`NSObject`** which *only classes can do this*.
+
 And these variables are the most important for **craft our license**.
 ### Crafting the License
 We need use **Swift** for compile the license, and then, generate that.
@@ -254,7 +263,9 @@ And then just download the license!
 ![[mhl-quackify2.png]]
 
 But **where's the flag**?
+
 - In the **original lab**, the *app activates premium and sets the flag UI in the same flow* (remote download → parse → `extractedFlag` → `_flagContent/_showCopyButton`).
+
 - On **your physical device**, you're **activating premium with a `.lic` file of the `quackify.License` class (correct)**, but that path doesn't populate `_flagContent` or touch the "*Copy button*" If you instead load a `.lic` file of `solution.License` or a `premium-license.txt` file, it does set the flag... but that flow doesn't show premium. They're two separate paths (intentional).
 
 We just need **create the `premium-license.txt`** file and put into the **Sandbox application**. In the **`Document`** directory.
