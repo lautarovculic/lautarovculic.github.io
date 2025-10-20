@@ -9,15 +9,19 @@ Install an **IPA** file can be difficult. So, for make it more easy, I made a 
 Once you have the app installed, let's proceed with the challenge. **unzip** the **`.ipa`** file.
 ### Recon
 If we *launch the app*, this will be closed.
+
 This means the **app detects if we run Frida even without spawning it or anything**. Something we can use to our advantage.
 
 In fact, **the error message shows that it is detected due to the socket port or a `dylib`**.
+
 So, may be we need *rename* the **`FridaGadget.dylib`**?
+
 Or just *rename* the **`frida-server`** binary, and then, **launch it with another port**?
 
 Let's try it!
 ### Bypass
 Login via *SSH* to your iPhone with jailbreak.
+
 First, *kill the `frida-server`*:
 ```bash
 killall frida-server
@@ -41,7 +45,9 @@ frida -H 192.168.0.248:1337 -f com.8ksec.FridaInTheMiddle
 Notice that the *Intercept First Argument Using Frida* text is a **button**!
 ### Getting the Flag
 Finally, we have the **hint** that the *flag function* is called `dummyFunction`.
+
 So, we can **enumerate** the loaded *modules* and *functions*.
+
 Also, **try to hook them**!
 
 But first, let's make a search:
@@ -68,6 +74,7 @@ module: FridaInTheMiddle.debug.dylib
 And there is!
 
 Now, let's **try call the function**!
+
 For that, I made this script
 ```javascript
 // search symbol
@@ -106,6 +113,7 @@ function tryHook() {
 tryHook();
 ```
 Putting in a way to say the first script also here. So, you just need use this script.
+
 **Dynamically locates the `dummyFunction` symbol inside the target module** and *hooks it*. When the *function is triggered, it logs the arguments and dumps memory* from the second argument, which **contains the flag**.
 
 Finally, run the Frida command:
@@ -134,6 +142,7 @@ Spawned `com.8ksec.FridaInTheMiddle`. Resuming main thread!
 ```
 
 Just press the text mentioned previously (launch the `dummyFunction`) and *you will see the flag*!
+
 Output:
 ![[8ksec-fridaInTheMiddle3.png]]
 
