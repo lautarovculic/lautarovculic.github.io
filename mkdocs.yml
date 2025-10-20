@@ -164,7 +164,7 @@ extra:
     - icon: simple/hackerone
       link: https://hackerone.com/lautaro
     - icon: simple/bugcrowd
-      link: hhttps://bugcrowd.com/h/lautarovculic
+      link: https://bugcrowd.com/h/lautarovculic
     - icon: fontawesome/solid/link
       link: https://lautarovculic.com
   generator: false
