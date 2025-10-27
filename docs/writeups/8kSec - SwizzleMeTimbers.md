@@ -161,7 +161,7 @@ Press the **Unlock Treasure** button and now you will get the flag!!
 
 **Some considerations**
 
-- The `_9zB()` method **wasn't visible in the U**I, but it was **swizzleable because it was generated as an ObjC selector**.
+- The `_9zB()` method **wasn't visible in the UI**, but it was **swizzleable because it was generated as an ObjC selector**.
 
 - The `g0()` method **that returns the flag didn't need to be hooked**, as the *UIAlert exposed it directly*.
 
