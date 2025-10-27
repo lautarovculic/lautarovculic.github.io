@@ -9,12 +9,15 @@ Install an **IPA** file can be difficult. So, for make it more easy, I made a 
 Once you have the app installed, let's proceed with the challenge. **unzip** the **`.ipa`** file.
 ### Recon
 In this application, we can see a simple button that says "**Unlock Treasure**"
+
 If we click it, we see a message that says "**That ain't the pirate's path**"
 
 Inside of `Payload/SwizzleMeTimbers.app/` we can see the **`SwizzleMeTimbers.debug.dylib`**.
+
 Let's **import this file into Ghidra** for examine some code.
 
 But before, let's explore some **classes** with **Frida**!
+
 Here's the code:
 ```javascript
 // list classes and methods
@@ -41,15 +44,19 @@ frida -U -f com.8ksec.SwizzleMeTimbers.YX4C7J2RLK -l recon.js
 In the output we found a **Interesting class** named **`SwizzleMeTimbers.Q9V0`**
 
 Let's add in the `const CANDIDATE` in the script (replace `NOT YET`). And run again the script.
+
 We can see now in the output a huge list of **methods**:
 ```bash
 [Methods of] SwizzleMeTimbers.Q9V0 +
 ```
 After a huge look, I found **two methods**:
+
 - `_9zB`
+
 - `t4G0`
 
 So, let's go now to **Ghidra** and we will look for this suspicious classes and methods.
+
 First, the **`_9zB`** method **always will return `false`**:
 ```C
 /* SwizzleMeTimbers.Q9V0._9zB() -> Swift.Bool */
@@ -95,7 +102,9 @@ void $$SwizzleMeTimbers.Q9V0.(t4G0_in__8DFD43FAB028256CB03EE728FE8EB512)()_->_()
 ```
 
 - When you press **Unlock Treasure**, `t4G0` is called.
+
 - This method executes `_9zB()` as **validation**.
+
 - If **`true`**, the flag is obtained via `g0()` and displayed in a **`UIAlertController`**.
 ### Unlocking the Treasure
 Since `_9zB()` was **exposed as an ObjC method**, we **dynamically overrode it with Frida**:
@@ -149,9 +158,13 @@ Press the **Unlock Treasure** button and now you will get the flag!!
 | `- _9zB`                            | Swift method that acts as a guard                |
 | `ObjC.choose()`                     | Finds live instances of a class in memory        |
 | `ObjC.schedule(ObjC.mainQueue, fn)` | Executes code on the main thread (needed for UI) |
+
 **Some considerations**
+
 - The `_9zB()` method **wasn't visible in the U**I, but it was **swizzleable because it was generated as an ObjC selector**.
+
 - The `g0()` method **that returns the flag didn't need to be hooked**, as the *UIAlert exposed it directly*.
+
 - Using *UIAlertController allowed the flag to be sniffed* without the need for further reversing.
 
 **Flag**: **`CTF{{Swizzle_mbers}}`**
