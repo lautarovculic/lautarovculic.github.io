@@ -9,9 +9,11 @@ Install an **IPA** file can be difficult. So, for make it more easy, I made a 
 Once you have the app installed, let's proceed with the challenge. **unzip** the **`.ipa`** file.
 ### Recon
 For this challenge I decided to do it 100% with Frida and not decompile the app.
+
 For this, **the best tool for dynamically recognizing the application's behavior is `frida-trace`**.
 
 We can guess that the module is **`TraceTheChat`**.
+
 You can get the *identifier* with this Frida command:
 ```bash
 frida-ps -Uai | grep TraceTheChat
@@ -50,27 +52,45 @@ Output:
 ```
 
 From here we can get interesting functions:
+
 - **`$s12TraceTheChat13MessageRouterC8dispatch_2toySS_SStF()`**
+
 - **`$s12TraceTheChat10ObfMessageCMa()`**
+
 - **`$s12TraceTheChat10ObfMessageC3msg7contactACSS_SStcfC()`**
+
 - **`$s12TraceTheChat18InternalMsgHandlerC5route3msgyAA10ObfMessageC_tF()`**
+
 - ...
 
 We will focus on **`$s12TraceTheChat13MessageRouterC8dispatch_2toySS_SStF()`**.
+
 Let me break this function down:
+
 `$s`: *Swift* prefix.
+
 `12TraceTheChat`: length 12 + *TraceTheChat* **module**.
+
 `13MessageRouter`: length 13 + *MessageRouter* **type**.
+
 `C`: is a **class**.
+
 `8dispatch`: length 8 + **dispatch method name**.
+
 `_2to`: Parameter labels. First parameter unlabeled (`_`), second labeled `to`(length 2).
+
 `SS_SS`: Parameter **types**: **`Swift.String`**, **`Swift.String`**.
+
 `t`: End of parameter tuple.
+
 `y`: return `()` (**Void**).
+
 `F`: End of function signature.
 
 So, we can translate into:
+
 - **`TraceTheChat.MessageRouter.dispatch(_:to:) -> Void`**
+
 That is perfect for our hook!
 
 Also, we can *enumerate this* using the following JavaScript code:
@@ -93,6 +113,7 @@ frida -U -f com.8ksec.TraceTheChat.YX4C7J2RLK -l searchFunction.js
 ```
 ### Trying to get the messages
 A moment ago we identified the function that interests us with `frida-trace`.
+
 `frida-trace` generates **hook files for each of the functions it inspects**. We can view them before it begins tracing the functions.
 
 To further *filter the function*, we can use the following command:
@@ -169,14 +190,18 @@ And here is:
 4000 ms  arg[3] = 0xe800000000000000
 ```
 I sent the message with `a` as body. In hex, `a` is `0x61`!
+
 And `0x313030395f746f42` is **`Bot_9001`**!
+
 But, there's a problem, because we can see that if we use hexdump, the *output* is `1009_toB`!
+
 It’s because of little-endian… and **because of Swift Small String Optimization (SSO)**.
 
 ![[8ksec-traceTheChat2.png]]
 In memory (little-endian) you read it as `1 0 0 9 _ t o B`, but the logical text is `B o t _ 9 0 0 1` → `Bot_9001`. When you *capture the word from the registry and treat it as a number/hex, you are seeing it “right side up” numerically*, which is the **reverse of the string printing order**. That is **why when you dump directly you get `1009_toB`**.
 ### Understanding Swift SSO
 This is an excellent challenge to learn about Swift SSO (**Small String Optimization**).
+
 *You may not have noticed that if you send a message `>12 characters long`, our hook may not be able to catch it, right?*
 
 Let's try:
@@ -198,28 +223,43 @@ Let's try:
 ```
 
 I sent 15 `a`'s. And the `arg` is `0xf`. What a problem, huh?
-In Swift 5+, **Strings are native UTF-8 and occupy 16 bytes of payload for the value**. If the content *fits within those 16 bytes (actually up to 15 usable bytes because 1 byte stores flags/length)*, the string i**s saved inline without heap or pointers**. That's SSO.
+
+In Swift 5+, **Strings are native UTF-8 and occupy 16 bytes of payload for the value**. If the content *fits within those 16 bytes (actually up to 15 usable bytes because 1 byte stores flags/length)*, the string **is saved inline without heap or pointers**. That's SSO.
 
 **Layout (64-bit, little-endian)**:
+
 - 16 total bytes.
+
 - 15 data bytes + 1 byte with a length of "*small*".
 
 - In little-endian, when you *look at the first u64 as a number/hex*, it appears the opposite of how you would read it as text.
+
 	- *Example*: `0x313030395f746f42` in memory represents the bytes `31 30 30 39 5f 74 6f 42` then "`1 0 0 9 _ t o B`", which is logically "**`Bot_9001`**".
 
 **When SSO is NOT available**: If the **string exceeds 15 bytes, Swift uses heap/native storage or Cocoa storage**. In this case, the String **contains a pointer to the bytes**, and there's no need to invert anything; it's read with **`Memory.readUtf8String(ptr)`** or **bridged to `NSString`**.
 ### Foundation and the String ↔ NSString bridge
 **NSString (Foundation/ObjC)**
+
 - Immutable semantics, logical *UTF-16 encoding* (`CFString` can optimize internally), old but stable API.
+
 - **When you request** `-UTF8String`, CF creates/looks for a *contiguous UTF-8 view*; if it doesn't exist, *it copies and returns a temporary buffer*.
+
 **Bridging runtime**
+
 - Swift *String* is `ObjectiveCBridgeable`.
+
 - If an **ObjC method expects `NSString*`**, the runtime:
+
 	- If the *String already has Cocoa storage* (e.g., it was **born from an `NSString`**), share it *without copying*.
+
 	- If **it's native/SSO,** *create an `NSString` from the UTF-8*.
+
 - On the way back: *`NSStrings` entering Swift can remain as Cocoa-backed Strings without copying*.
+
 **Why we can use this logic**
+
 **For bytes ≤ 15**: you avoided reading the inline SSO.
+
 **For > 15 bytes or Unicode**: you've avoided dealing with pointers and lengths; *`NSString` already gives you the content ready*.
 ### Intercepting Messages
 So, here's the Frida script that we can use for *intercept* the message:
