@@ -9,9 +9,11 @@ Install an **IPA** file can be difficult. So, for make it more easy, I made a 
 Once you have the app installed, let's proceed with the challenge. **unzip** the **`.ipa`** file.
 ### Recon
 Inside the directory `Payload/TraceTheMap.app/` we have the `TraceTheMap.debug.dylib` file.
+
 Let's import into **Ghidra** for know how the app work.
 
 Inside, we can see some functions. First, the function:
+
 - **`Array<Collectible> TraceTheMap::generateCollectibles(CLLocation *around,int count,double radius)`**
 
 ```C
@@ -199,16 +201,23 @@ Inside, we can see some functions. First, the function:
 ```
 
 The most important thing of this functions is:
+
 - Use **`BinaryFloatingPoint.random(in:)`** twice:
+
 - Angle in `[0, 360]`.
+
 - Distance in `[100, radius]` (if **radius < 100**, `assert → crash`).
+
 - Apply `trig(cos, sin)` and the approximation `111,000 m/degree` for **latitude**; adjust **longitude** by `cos(lat)` (factor with `π`, visible calls to `_sin/_cos` and the `deg↔rad` conversion).
+
 - **Calculate coordinates from `around.coordinate`** and add annotations (via **`MKMapView.addAnnotation/setCoordinate:`**).
 
 Conclusion: It is not feasible to "**lower**" the distance to 0 by editing the range without touching invariants; the range `[100, R]` is protected by a valid **`ClosedRange`**.
 
 Anyway, this function doesn't important for complete the challenge, but is good to know.
+
 One of the most **important** function is:
+
 - **`void TraceTheMap::ContentView::checkProximity(CLLocation *to,ContentView param_2)`**
 
 ```C
@@ -382,19 +391,29 @@ One of the most **important** function is:
 ```
 
 This function:
+
 - Retrieves the `State<[Collectible]>` array.
+
 - Iterates over indices (`Range<Int>`, `IndexingIterator`).
+
 - For each uncollected Collectible:
+
 	- **Constructs** **`CLLocation`** with the `lat/lon` of the collectible.
+
 	- **Calculates** `to.distanceFromLocation(collectibleLoc)`.
+
 	- If < 50.0:
+
 		- `set_collected(true)` (setter of `Collectible.collected`).
+
 		- Increment state score by +100 (`SwiftUI State<Int>`).
+
 - When `score == 500` then show the Win UI.
 
 Conclusion: The **`decision depends 100% on distanceFromLocation:`**. It's the perfect hook point.
 
 So, let's explore the `locationManager` that `didUpdateLocations`:
+
 - `void __thiscall TraceTheMap::LocationManager::locationManager(LocationManager *this,CLLocationManager *param_1,Array<CLLocation> didUpdateLocations)`
 
 ```C
@@ -472,12 +491,15 @@ So, let's explore the `locationManager` that `didUpdateLocations`:
 ```
 
 It takes the last **`CLLocation`** from the array (`BidirectionalCollection.get_last()`) and then It `'requeues'` it in main with `dispatch_async`.
+
 From there, it updates the `Published<CLLocation?>` (`$userLocation.setter`), which triggers the **`checkProximity(to:)`** in the UI.
 ### Getting the Flags
 So, let's hook **`-[CLLocation distanceFromLocation:]`**!!
+
 I decide hook more "normal", because it's possible get all collectibles in one second.
 
 So we limit the "**cheat**" to one **measurement per time window** and the **rest use the actual distance**.
+
 Thus, a collectible falls for ~1.2s (or not, just **wait until got all the collectibles**):
 ```javascript
 'use strict';
