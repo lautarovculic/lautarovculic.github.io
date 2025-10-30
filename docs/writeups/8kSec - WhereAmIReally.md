@@ -1,4 +1,6 @@
+**Description**: WhereAmIReally is an iOS app that only reveals the flag if you’re in the right place "physically". It checks your GPS coordinates against a geofenced area and validates the authenticity of your location before granting access.
 
+**Link**: https://academy.8ksec.io/course/ios-application-exploitation-challenges
 
 ![[8ksec-whereAmIReally1.png]]
 
