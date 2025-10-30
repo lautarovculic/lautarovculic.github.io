@@ -13,7 +13,9 @@ In first place, when we *launch the application*, we can see an message in the s
 ![[8ksec-whereAmIReally2.png]]
 
 So, we need bypass that. But, for that, we can spend less time if we **reverse the application**.
+
 Inside of `Payload/WhereAmIReally.app` directory, we can see the *debug* dylib file **`WhereAmIReally.debug.dylib`**.
+
 Create a new **Ghidra** project and then, import that file.
 
 In the **Exports** we can see the function **`isJailbroken()`**:
@@ -116,16 +118,27 @@ bool __thiscall WhereAmIReally::JailbreakChecker::isJailbroken(JailbreakChecker 
 ```
 
 This `isJailbroken()` method implements a *classic jailbreak detection technique* based on **checking suspicious files and directories**.
+
 *Creates an array with 24 paths (`0x18` in hex)* of files and directories **typical** of jailbroken devices.
+
 List of paths it searches for:
+
 - **Jailbreak apps**: `/Applications/Cydia.app`, `/Applications/Sileo.app`
+
 - **Tools**: `/var/jb/usr/bin/bash`, `/var/jb/usr/bin/sshd`
+
 - **MobileSubstrate**: `/Library/MobileSubstrate/MobileSubstrate.dylib`
+
 - **Tweaking apps**: `RockApp`, `Icy`, `WinterBoard`, `SBSettings`, etc.
+
 - **Modified system directories**: `/private/var/stash`, `/private/var/lib/cydia`
+
 - **Cydia configuration files**.
+
 For each path:
+
 - Use **`NSFileManager`** to check if it exists (`fileExistsAtPath:`).
+
 - If *any file/directory is found* then return **`true`** (jailbroken).
 
 We need get the *Identifier* for the app, for that:
@@ -135,6 +148,7 @@ frida-ps -Uai | grep WhereAmIReally
 In my case is `com.8ksec.WhereAmIReally.YX4C7J2RLK`
 
 *If we know what the app is checking for,* we can **directly hook and return `false` to any jailbreak file check**.
+
 So, we can simply do this Frida script:
 ```javascript
 (function(){
@@ -164,6 +178,7 @@ frida -U -f com.8ksec.WhereAmIReally.YX4C7J2RLK -l jailBypass.js
 And we can see that the *jailbreak detection was bypassed*!
 
 **NOTE**
+
 *Your device may need to perform additional validations to bypass the jailbreak. The Ghidra feature provides the complete list. Please review the tweaks, tools, and libraries you have on your device and add them to the script.*
 ### Recon Location
 Here we have a lot of functions we need to analyze, and some of them are really long. So I'll mention the """important""" code.
@@ -171,7 +186,9 @@ Here we have a lot of functions we need to analyze, and some of them are really 
 First, we have a **kind of mock, which performs some validations**. For example, if the geolocation **is simulated** and the **source of the information**.
 
 The **`locationManager()`** function have these checks.
+
 It is a **`CoreLocation`** callback method **that processes location updates**.
+
 This function **receives an array of `CLLocations`** and get the *last location*.
 
 **Anti simulation/Xcode** detection:
@@ -283,6 +300,7 @@ if (local_2c0 <= local_2b8) {
 ```
 
 Also, there are another **`locationManager()`** more **short** in **Exports**. But this handle the **permissions** of location.
+
 Anyway, we will set the **authorization** always as **true** (3).
 ```C
 void __thiscall
@@ -308,6 +326,7 @@ WhereAmIReally::LocationManager::locationManager
 ```
 
 - `0xc4/0xc0`: Probably `authorizedWhenInUse` (4) or `authorizedAlways` (3).
+
 - `0xbc/0xb8`: *Probably another authorized state*.
 
 In our hook, we will use this part of script:
@@ -343,8 +362,11 @@ try {
 ```
 
 But, **what is the correct location for complete the challenge**...?
+
 Let's move to the **`$$WhereAmIReally.ContentView.(df`** functions!
+
 You can found that in the **Symbol Tree** panel:
+
 ![[8ksec-whereAmIReally3.png]]
 
 We can see the **`isMocked()`** function:
@@ -383,6 +405,7 @@ bool $WhereAmIReally.ContentView.(isMocked_in__8E3FC3B3FEF0CBBE848D4767CE9AAAEA)
 ```
 
 Additionally we will see a *function that is decrypting a hardcoded string*. Not our business.
+
 What is our interest? **`isWithinGeofence()`**:
 ```C
 bool $WhereAmIReally.ContentView.(isWithinGeofence_in__8E3FC3B3FEF0CBBE848D4767CE9AAAEA)(location: _ __C.CLLocation) -> _Swift.Bool
@@ -407,7 +430,9 @@ latitude = double::init(0x4048888888888889);
 longitude = double::init(0x400299999999999a);
 ```
 - **latitude**: `49.0666666667` approximately.
+
 - **longitude**: `2.3250000000` approximately.
+
 Also, this function **check the distance**:
 ```C
 _objc_msgSend(param_1, "distanceFromLocation:");
@@ -494,20 +519,35 @@ Spawned `com.8ksec.WhereAmIReally.YX4C7J2RLK`. Resuming main thread!
 ![[8ksec-whereAmIReally4.png]]
 
 And we **got the flag**!
+
 **Flag**: **`CTF{EVFJNVGNWV}`**
+
 #### Glossary
+
 - **`CLLocationManager`** (Objective-C)
+
 Apple's framework used to *receive GPS updates*, request location permissions, detect entry/exit of geofences, etc. It is the actual delegate in iOS.
+
 - **`_TtC14WhereAmIReally15LocationManager`** (Swift)
+
 This app's internal Swift class implements **delegate methods**, such as `locationManager:didUpdateLocations:`. We **intercept this class because it processes the location within the app binary**.
+
 - **`CLLocation`**
+
 Object that *encapsulates latitude, longitude, speed, altitude, timestamp*, etc.
+
 Our injection **replaces this object with a controlled one** that represents the desired geolocation.
+
 - **`CLLocationSourceInformation`**
+
 *Introduced in iOS 15*. Allows you to **determine if a location was simulated by software**.
+
 Key method: `isSimulatedBySoftware` → Bool. *We hook it to return false*.
+
 - **`NSFileManager`**
+
 API used to **validate the existence of system files**.
+
 In `isJailbroken()` is used to detect jailbreak paths.
 
 I hope you found it useful (:
