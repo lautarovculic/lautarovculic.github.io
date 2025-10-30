@@ -116,11 +116,15 @@ jobs:
                   paras=[x.strip() for x in re.split(r'\n\s*\n',body) if x.strip()]
                   desc=''
                   for para in paras:
-                      if para.lstrip().startswith(('{','<')):  # evita JSON-LD/HTML
-                          continue
-                      cand=strip_md(para)
-                      if len(cand)>=40:
-                          desc=cand; break
+                    stripped = para.lstrip()
+                    if stripped.startswith(('{','<')):  # evita JSON-LD/HTML
+                      continue
+                    cand=strip_md(para)
+                    # Saltear si después de limpiar empieza con "Description:"
+                    if cand.lower().startswith('description:'):
+                      continue
+                    if len(cand)>=40:
+                      desc=cand; break
                   if not desc and paras:
                       desc=strip_md(paras[0])
                   if desc:
