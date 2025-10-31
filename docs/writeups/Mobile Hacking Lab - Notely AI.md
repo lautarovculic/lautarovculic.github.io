@@ -13,10 +13,13 @@ When we run the application we can see that **we have a Frida security check**:
 ![[mhl-notelyAI2.png]]
 
 I wonder... **How can it detect if we have Frida, if we didn't spawn the app?**
+
 The application have a measure that **checks if the `frida-server` binary is running on our iOS device**.
+
 Maybe *the app also do the necessary checks on the port Frida usually uses* (`27042`)
 
 Let's connect via **ssh** to our device!
+
 And then, let's check for `frida-server` running:
 ```bash
 iPhoneHack:~ root# ps -e | grep frida-server
@@ -27,6 +30,7 @@ Output:
 ```
 
 We got the location and the **PID**.
+
 Let's *rename the binary*:
 ```bash
 mv /var/jb/usr/sbin/frida-server /var/jb/usr/sbin/system-daemon
@@ -55,6 +59,7 @@ We can notice that successful the **Frida security check** was **bypassed**!
 ![[mhl-notelyAI3.png]]
 ### Static Code Analysis
 Pay attention in the **Profile** tab, we can see a **role** based access level.
+
 Also, **Firebase** are incorporated.
 
 Inside of `Payload/notelyai.app` directory you will find the **binary** file:
@@ -64,6 +69,7 @@ notelyai: Mach-O 64-bit executable arm64
 ```
 
 Let's **import this binary in Ghidra**!
+
 After some **strings search** and some *references*, I found interesting **classes** and **functions**, really a little obfuscated in the whole code... But with patience (a lot) you can do amazing things.
 
 - **`void FUN_100037de0(void)`**
@@ -124,10 +130,13 @@ After some **strings search** and some *references*, I found interesting **class
 ```
 
 The **init** of *`notelyai.NotesService`*
+
 This function initializes `@Published _notes, _archivedNotes, _isLoading`.
+
 - `db = FIRFirestore.firestore()` (ObjC message to **`FIRFirestore`** and `retainee` from `return`).
 
 Looking the *end of the previous* code, we can see:
+
 - **`void FUN_100037f74(undefined8 param_1,Published *param_2)`**
 ```C
 {
@@ -208,9 +217,13 @@ Looking the *end of the previous* code, we can see:
 ```
 
 This is the **construction** of the **query and listener**.
+
 - `collectionWithPath:` → "**notes**".
+
 1. **First `where`** with *two strings* (*bridge*): **`"userId" == <uid>`**.
+
 2. **Second `where`** with *bool*: **`"isArchived" == <true|false>`**.
+
 `addSnapshotListener:` with a Block that **updates** the `@Published`.
 ### Getting the Notes
 This attack may LOOK LIKE SQLi (*omitting the part that we are working with Firestore, a NoSQL DB*).
@@ -218,7 +231,9 @@ This attack may LOOK LIKE SQLi (*omitting the part that we are working with Fire
 In a classic SQLi attack, **the attacker injects SQL code directly into relational database queries** (MySQL, PostgreSQL, etc.). This occurs *when the backend server fails to properly parameterize input*, allowing malicious code to be executed.
 
 In this case:
+
 - It is queried **from the client (app)** using a public API (`whereField:isEqualTo:`).
+
 - It **expects the client itself to apply access filters** (`userId`, `isArchived`, etc.).
 
 The **problem is that security depends exclusively on these client-side conditions**, and the server doesn't validate anything using rules (`firestore.rules`). This allows **Frida to manipulate client behavior at runtime**, leading to unauthorized access to data.
@@ -255,11 +270,17 @@ And we can now see the **Flag** note!
 ![[mhl-notelyAI4.png]]
 
 *What we learn?*
+
 Sometimes, the **confidentiality of archived notes depends exclusively on client-side** (`Firestore`) **filters based** on `userId` and `isArchived`.
+
 An attacker with instrumentation capabilities can:
+
 - Remove the `userId` filter.
+
 - Force `isArchived=true`.
+
 - View **all archived** notes (including administrators).
+
 *Fully applicable to thousands of real-world applications*
 
 **Flag**: **`MHC{4rch1v3d_n0t3s_4r3_n0t_s3cur3!}`**
