@@ -1,7 +1,3 @@
-{% extends "partials/header.html" %}
-
-{% block logo %}
 <a href="{{ config.site_url | default(nav.homepage.url, true) | url }}" class="md-header__button md-logo" aria-label="{{ config.site_name }}">
   {{ icons.logo }}
 </a>
-{% endblock %}
