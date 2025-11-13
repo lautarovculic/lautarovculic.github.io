@@ -1,1 +1,8 @@
-{{ icons.logo }}
+{% set icon = config.theme.icon.logo or "material/library" %}
+{% if not config.theme.logo %}
+  <span class="md-logo">
+    {% include ".icons/" ~ icon ~ ".svg" %}
+  </span>
+{% else %}
+  <img src="{{ config.theme.logo | url }}" alt="logo">
+{% endif %}

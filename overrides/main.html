@@ -1,15 +1,17 @@
 {% extends "base.html" %}
 
+{% block extrahead %}
+  {% include "partials/meta.html" %}
+{% endblock %}
+
 {% block content %}
   {{ super() }}
-
   {# #}
   {% if page.url and page.url.startswith("writeups/") and page.url != "writeups/" %}
     <div id="page-tags-data" hidden
          data-tags="{{ (page.meta.tags | join('|')) if page.meta.tags }}">
     </div>
   {% endif %}
-
   {#  #}
   {% if page.url == "writeups/" %}
     <div id="tags-container"></div>
