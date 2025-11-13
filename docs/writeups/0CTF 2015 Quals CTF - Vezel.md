@@ -1,3 +1,20 @@
+---
+title: 0CTF 2015 Quals CTF - Vezel
+description: "Evermars says he is good at repackaging Android applications."
+tags:
+  - ctf
+  - frida
+  - crypto
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/0ctf-2015-vezel/
+---
+
 **Description**
 Evermars says he is good at repackaging Android applications.
 
