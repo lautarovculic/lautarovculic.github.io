@@ -1,5 +1,4 @@
 ---
-title: Mobile Security Writeups
 description: "Android/iOS reversing, Frida hooks, WebView exploitation, Intent abuse, SSL pinning bypass"
 ---
 

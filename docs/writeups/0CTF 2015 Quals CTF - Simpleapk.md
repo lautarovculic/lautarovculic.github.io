@@ -1,3 +1,19 @@
+---
+title: 0CTF 2015 Quals CTF - Simpleapk
+description: "This is a simple apk, Could you find the flag?"
+tags:
+  - ctf
+  - adb
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - adb exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/0ctf-2015-simpleapk/
+---
+
 **Description**
 This is a simple apk, Could you find the flag?
 

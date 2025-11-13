@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {{ super() }}
+
+  {# #}
+  {% if page.url and page.url.startswith("writeups/") and page.url != "writeups/" %}
+    <div id="page-tags-data" hidden
+         data-tags="{{ (page.meta.tags | join('|')) if page.meta.tags }}">
+    </div>
+  {% endif %}
+
+  {#  #}
+  {% if page.url == "writeups/" %}
+    <div id="tags-container"></div>
+    <div id="filtered-writeups"></div>
+    <div id="writeups-data" hidden>
+      {% for p in nav.pages %}
+        {% if p.url and p.url.startswith("writeups/") and p.url != "writeups/" and p.meta.tags %}
+          <div class="wu" data-title="{{ p.title|e }}" data-url="{{ p.url|url }}"
+               data-tags="{{ p.meta.tags|join('|') }}"></div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}

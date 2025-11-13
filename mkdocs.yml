@@ -51,7 +51,7 @@ theme:
     - toc.integrate
 
   icon:
-    logo: material/security
+    logo: material/cellphone-lock
     repo: fontawesome/brands/github
     edit: material/pencil 
     view: material/eye
@@ -173,6 +173,7 @@ extra_css:
   - stylesheets/extra.css
 
 extra_javascript:
-  - javascripts/mathjax.js
+#  - javascripts/mathjax.js
+  - javascripts/tags-filter.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
