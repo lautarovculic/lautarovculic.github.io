@@ -1,4 +1,5 @@
 ---
+title: ""
 description: "Android/iOS reversing, Frida hooks, WebView exploitation, Intent abuse, SSL pinning bypass"
 ---
 

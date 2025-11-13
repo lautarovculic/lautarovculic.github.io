@@ -11,6 +11,7 @@ edit_uri: ""
 strict: false
 
 theme:
+  logo: null
   name: material
   language: en
   custom_dir: overrides
