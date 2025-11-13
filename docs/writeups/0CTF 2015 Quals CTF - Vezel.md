@@ -2,7 +2,6 @@
 title: 0CTF 2015 Quals CTF - Vezel
 description: "Evermars says he is good at repackaging Android applications."
 tags:
-  - ctf
   - frida
   - crypto
 keywords:
