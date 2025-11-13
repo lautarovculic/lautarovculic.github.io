@@ -3,6 +3,7 @@ title: 0CTF 2015 Quals CTF - Simpleapk
 description: "This is a simple apk, Could you find the flag?"
 tags:
   - adb
+  - android
 keywords:
   - android reversing
   - ctf writeup

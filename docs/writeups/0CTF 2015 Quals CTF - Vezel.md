@@ -4,6 +4,7 @@ description: "Evermars says he is good at repackaging Android applications."
 tags:
   - frida
   - crypto
+  - android
 keywords:
   - android reversing
   - ctf writeup
