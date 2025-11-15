@@ -1,6 +1,31 @@
+---
+title: Supermarket – Hack The Box
+description: "My supermarket list is too big and I only have $50. Can you help me get the Discount code?"
+tags:
+  - frida
+  - hook
+  - smali
+  - patching
+  - HackTheBox
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackTheBox
+  - HTB
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Supermarket%20%E2%80%93%20Hack%20The%20Box/
+---
+
 ![[market1.png]]
+
 **Difficult:** Medium
+
 **Category**: Mobile
+
 **OS**: Android
 
 **Description**: My supermarket list is too big and I only have $50. Can you help me get the Discount code?
@@ -8,6 +33,7 @@
 ---
 
 Download the **.zip** and install the APK vía ADB.
+
 ![[market2.png]]
 
 ```bash
@@ -15,6 +41,7 @@ adb install -r supermarket.apk
 ```
 
 Reading the application code and taking into account the **description of the challenge**, apparently we have to **get the discount coupon** (flag) in a certain way. This particularly caught my attention:
+
 ![[market3.png]]
 
 ![[market4.png]]
@@ -33,7 +60,9 @@ Here, a Cipher object is being used to perform the **decryption operation** (**d
 The stringFromJNI value is obtained from the call to MainActivity.this.stringFromJNI(). In the context, **this method probably contains the logic to get the encrypted string**.
 
 So indeed, the **result of this decryption operation is crucial** and probably **contains the “flag”** or discount code (the flag) you are looking for.
+
 So, we need identify this piece in the **smali code**!
+
 After some research, I can take the right smali file, it’s **MainActivity$b.smali**
 
 From the line **98** until **125**
@@ -106,7 +135,9 @@ adb logcat | grep "MiAppTag"
 For grep the flag.
 
 And type some random input in the **Discount code** field.
+
 ![[market5.png]]
+
 And we get the flag!
 
 _Before I say goodbye, I want to clarify that although the APK can be run on the latest versions of Android, in my case I used Android 9 (SDK 29)._

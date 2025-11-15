@@ -1,3 +1,20 @@
+---
+title: THC CTF 2018 - Android serial
+description: "A paid android app for THC began to be developed, unfortunately its development stalled. In the end, it was never possible to buy this app, but be the first to unlock the app's premium features by finding a valid key."
+tags:
+  - python
+  - strings
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/THC%20CTF%202018%20-%20Android%20serial/
+---
+
 **Description**: A paid android app for THC began to be developed, unfortunately its development stalled. In the end, it was never possible to buy this app, but be the first to unlock the app's premium features by finding a valid key.
 
 **Download**: https://lautarovculic.com/my_files/THC.apk
@@ -10,11 +27,15 @@ adb install -r THC.apk
 ```
 
 We can see that we have the typical serial activation number.
+
 The format is: `XXXX-XXXX-XXXX-XXXX`
 
 So, let's inspect the **source code** with **jadx**.
+
 There are **two activities** in `com.thc.bestpig.serial` package name.
+
 **`MainActivity`** -> We have the input serial view ("home screen")
+
 **`PremiumActivity`** -> May be the flag?
 
 In `MainActivity` we see the `checkPassword` function:
@@ -40,6 +61,7 @@ protected boolean checkPassword(String serial) {
 ```
 
 We can see two messages: `Well done ;)` and `Premium activation failed`.
+
 Also, the description.
 
 But notice the difference between both, in the first `if` condition (which we need this), we have the `onClick()` method:
@@ -53,6 +75,7 @@ public void onClick(DialogInterface dialog, int which) {
 ```
 
 Notice that this send an `Intent` to open `PremiumActivity`.
+
 But before, in the first line, we have the `if` condition `validation`.
 ```java
 if (validateSerial(serial)) {
@@ -89,7 +112,9 @@ protected boolean validateSerial(String serial) {
 ```
 
 Pay attention, this is an **String**! So, the length as we can see in the code is `19`.
+
 So, in `XXXX-XXXX-XXXX-XXXX` the `-` are string.
+
 Notice that piece of `serial.charAt()`
 ```java
 && serial.charAt(4) == '-' 
@@ -99,6 +124,7 @@ Notice that piece of `serial.charAt()`
 And their position.
 
 Let's approach this by setting up the relationships and solving for each character.
+
 We'll use ASCII values for characters
 
 ```python
@@ -185,6 +211,7 @@ print("Serial:", solve_serial())
 ![[thc2018_3.png]]
 
 So, as the message say:
+
 Flag: **`HB7G-KJ6G-BPIG-OHSK`**
 
 I hope you found it useful (:

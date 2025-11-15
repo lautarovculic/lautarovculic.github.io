@@ -1,3 +1,20 @@
+---
+title: Ilam CTF 2018 - Android Reverse
+description: ""
+tags:
+  - smali
+  - patching
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Ilam%20CTF%202018%20-%20Android%20Reverse/
+---
+
 Download **APK**: https://lautarovculic.com/my_files/ilam_ctf_2018.zip
 
 ![[ilam_CTF1.png]]
@@ -8,6 +25,7 @@ adb install -r app.apk
 ```
 
 We can notice that the app is *totally broken*, because it's crash when we try to launch.
+
 Decompile the app with **apktool**
 ```bash
 apktool d app.apk
@@ -16,6 +34,7 @@ apktool d app.apk
 Let's proceed to inspect the *source code* it with **jadx** (gui version)
 
 See that the package name is `com.example.ctf.ctf` and there are just one activity.
+
 Which is `MainActivity` and this is the content
 ```java
 public class MainActivity extends AppCompatActivity {  
@@ -68,7 +87,9 @@ public class LiIl {
 The problem here is some operation that **divide by zero** as logs show.
 
 So, let's patch the **smali code**.
+
 Go to `smali/com/example/ctf/ctf/` and inside we have the `LiIl.smali` file.
+
 At the end of the file, we find this
 ```smali
 .method public static yolo(I)V
@@ -83,7 +104,9 @@ At the end of the file, we find this
 .end method
 ```
 Pay attention to `div-int/lit8 p0, p0, 0x0`
+
 According to **dalvik opcodes** (https://quantiti.github.io/dalvik-opcodes/) we can change `div-int/lit8` by `add-int/lit8`
+
 Save the file.
 
 This will change the java code to 
@@ -114,13 +137,17 @@ adb install -r app/dist/app.apk
 ```
 
 I'll remove the original apk file (`rm app.apk`), move the new apk (`mv app/dist/app.apk .` and delete the folder (`rm -rf app`).
+
 So, let's run again **apktool** for decompile the app and **jadx** for see the changes.
 
 And if we no *run again the app, we can see the button "CLICK ME"*!
+
 Also, notice that now the **java** code in `LiIl.yolo()` has been successful patched.
 
 But *it crash again* if we press the button.
+
 And in the **logs**, there say that the class **YoYo** in **function** `yo()` have a problem.
+
 Here's the code
 ```java
 public class YoYo {  
@@ -139,10 +166,13 @@ public class YoYo {
 ```
 
 Another division by zero.
+
 Let's move to the *new folder created* with apktool from the new apk that previously we patched. And make the new process in `smali/com/example/ctf/ctf` but now with the file `YoYo.smali`.
 
 Open with nano and search by **div-int**.
+
 We can see in the line `68` the code `div-int/2addr v3, v1`
+
 Change `div` by `add` and then, make the **rebuilding** process again.
 
 I install the **new apk**, and delete folders, and apk previously patched, just using the new one.
@@ -153,23 +183,35 @@ lautaro > ~/Desktop/CTF/MOBILE/ilam_ctf_2018 >> rm -rf app
 lautaro > ~/Desktop/CTF/MOBILE/ilam_ctf_2018 >> apktool d app.apk
 ```
 Open again **jadx** and see the code.
+
 Also, uninstall the now old version by the new in the device.
 
 If we press the button **CLICK ME**, now we get the following string
+
 ![[ilam_CTF2.png]]
 
 It may be the flag?
+
 Yes, it's the flag. **But broken**.
+
 At the end, this was made patch twice the app for nothing, it always has been just a simple **base64** decode from the **hardcoded strings** in the **called classes**
+
 - `MainActivity()`
+
 - `C0002Hist()`
+
 - `Hah()`
+
 - `Hay()`
+
 - `Yuohuo()`
+
 - `Hello()`
+
 - `YoYo()`
 
 Which, the final **base64** string is
+
 `aWxhbV9jdGZfMGEwOTUxOTRkYmNmNGY3OTg3NTFhYWFmZGZiXzFkYjZiMmVkMzM5ZjQ2OThiNmIzOGI1ZTdhZQ==`
 
 Just
@@ -178,6 +220,7 @@ echo 'aWxhbV9jdGZfMGEwOTUxOTRkYmNmNGY3OTg3NTFhYWFmZGZiXzFkYjZiMmVkMzM5ZjQ2OThiNm
 ```
 
 The flag is: **`ilam_ctf_0a095194dbcf4f798751aaafdfb_1db6b2ed339f4698b6b38b5e7ae`**
+
 At least we practiced patching exercises (:
 
 I hope you found it useful (:

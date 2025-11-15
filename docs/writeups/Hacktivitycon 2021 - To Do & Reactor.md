@@ -1,6 +1,26 @@
+---
+title: Hacktivitycon 2021 - To Do & Reactor
+description: "I made my own app to remind me of all the things I need to do."
+tags:
+  - SQLite
+  - react
+  - python
+  - deobfuscation
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Hacktivitycon%202021%20-%20To%20Do%20%26%20Reactor/
+---
+
 ## To Do
 
 **Description**: I made my own app to remind me of all the things I need to do.
+
 **Download**: https://lautarovculic.com/my_files/todo.apk
 
 ![[hackticitycon2021_1.png]]
@@ -11,6 +31,7 @@ adb install -r todo.apk
 ```
 
 Let's inspect the **source code** with **jadx**.
+
 Meanwhile, we can see that we have an password text field, if we insert any char, we get the message "*Wrong password*".
 
 Looking in the **`com.congon4tor.todo.LoginActivity`** java code, the following content:
@@ -38,17 +59,22 @@ public class LoginActivity extends AppCompatActivity {
 ```
 
 Basically here says that:
+
 if the password is **`testtest`** then, a new activity is launched (`com.congon4tor.todo.MainActivity`).
+
 Else, a toast message is showed (Wrong password).
 
 Just put the password `testtest` and you can get the flag.
+
 Also, looking in the `AndroidManifest.xml` file, we can see that the `MainActivity` is exported.
+
 So, we can **bypass the login** just using **ADB**. Close the app and then run:
 ```bash
 adb shell am start -n com.congon4tor.todo/.MainActivity
 ```
 
 But, where the notes are stored?
+
 We can see in the `MainActivity` that when is created, call to an *database helper*
 ```java
 public void onCreate(Bundle bundle) {  
@@ -86,6 +112,7 @@ public class MyDatabase extends SQLiteAssetHelper {
 ```
 
 In `AndroidManifest.xml` file we can see that the `android:allowBackup="true"` attribute is true, so, you can basically create with **ADB** a *backup* and then, get the `todo.db` file.
+
 Also, if you got a *rooted device*, just make the following sequential commands:
 ```bash
 adb shell
@@ -123,6 +150,7 @@ Flag: **`flag{526eab04ff9aab9ea138903786a9878b}`**
 ## Reactor
 
 **Description**: We built this app to protect the reactor codes
+
 **Download**: https://lautarovculic.com/my_files/reactor.apk
 
 ![[hackticitycon2021_2.png]]
@@ -133,8 +161,11 @@ adb install -r reactor.apk
 ```
 
 Take a look to **source code** with **jadx**.
+
 We just have a *single activity* (`com.reactor.MainActivity`)
+
 But! This is a *react native* app!
+
 We can see in the code:
 ```java
 public class MainActivity extends ReactActivity {  
@@ -146,21 +177,27 @@ public class MainActivity extends ReactActivity {
 ```
 
 We can see that we need to insert a **4 digits PIN**.
+
 Any PIN will give us an broken text. 
+
 May be if we insert the *correct PIN* we **get the flag**?
 
 First, we need look for the **source code**.
+
 Using **apktool** we can *decompile the `.apk` file*
 ```bash
 apktool d reactor.apk
 ```
 Then, inside of the new `reactor` directory, we can see in `asset` directory.
+
 Inside, the `index.android.bundle`.
 
 But this file is like obfuscated. So, you can go to:
+
 https://prettier.io/
 
 Or just, download the code from my website already copied ;)
+
 https://lautarovculic.com/my_files/reactorCode.js
 
 Inside of the JavaScript code, we can see this function searching for some *already known strings*:
@@ -306,17 +343,25 @@ __d(
 ```
 
 That confirms that **it's not standard Base64**, although it looks like it.
+
 What they **used is a custom implementation of Base64 in JavaScript**, and the key is in this line:
+
 `var t = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";`
 
 **`n`** = "`U1VTUE5aVFVFVXDVEBUFoHDlZcAQYDXApTAg8GA1RaBlQCCVMGB0Q=`" (Base64 encoded ciphertext)
+
 **`decode(n)`** → decode that Base64 string.
+
 **`decrypt(key)`** does: **`XOR(key, decode(n))`**
 
 So, let's brute force that!
+
 We try *all the 4-digit PINs*, and for *each one*:
+
 Extend the PIN to equal the length of the decoded text.
+
 - We XOR byte by by byte.
+
 - If the result is printable (and/or contains a keyword).... it is the correct PIN!
 
 ```python
@@ -350,6 +395,7 @@ python3 brute.py | grep flag
 ```
 
 Output:
+
 `[+] PIN: 5927 → flag{cfbb4c6ec59ce316e8d7644ac4c70a12}`
 
 Flag: **`flag{cfbb4c6ec59ce316e8d7644ac4c70a12}`**

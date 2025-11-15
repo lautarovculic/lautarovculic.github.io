@@ -1,3 +1,21 @@
+---
+title: NahamCon 2024 - Guitar
+description: "Have you ever wanted to play the guitar on your phone? Here's a free app, with all guitar strings included for free!"
+tags:
+  - strings
+  - NahamCon
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - NahamCon
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/NahamCon%202024%20-%20Guitar/
+---
+
 **Description**: Have you ever wanted to play the guitar on your phone? Here's a free app, with all guitar strings included for free!
 
 **Download**: https://lautarovculic.com/my_files/guitar.apk
@@ -10,6 +28,7 @@ adb install -r guitar.apk
 ```
 
 As the description say, probably the flag are **hardcoded** in the **`strings.xml`** resources.
+
 To make the writeup not so short, let's make an **explanation** about the `strings.xml` resources.
 
 Android resources are **files used to store static app data**, such as *text*, *images*, *colors* or *layouts*, in an organized manner **outside the source code**.
@@ -23,14 +42,18 @@ For example, `strings.xml` contains **strings used in the interface**, facilitat
 ```
 
 Knowing this, **we can search by the word “flag”**.
+
 Let's *decompile the apk* with **apktool**
 ```bash
 apktool d guitar.apk
 ```
 
 Then, go to the *new directory* and search in `guitar/res/values/strings.xml`
+
 We can found this line in XML code
+
 `<string name="secret_string">VGhlIGZsYWcgaXM6IGZsYWd7NDZhZmQ0ZjhkMmNhNTk1YzA5ZTRhYTI5N2I4NGFjYzF9Lg==</string>`
+
 Which, is a *simple base64* encode.
 
 Flag: **`flag{46afd4f8d2ca595c09e4aa297b84acc1}`**

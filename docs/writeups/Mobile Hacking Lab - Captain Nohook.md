@@ -1,24 +1,60 @@
+---
+title: Mobile Hacking Lab - Captain Nohook
+description: "Welcome to the iOS Application Security Lab: Captain No Hook Anti-Debugging Challenge. This challenge focuses on a fictitious app called Captain No Hook, which implements advanced anti-debugging / jailbreak detection techniques. Your objective is to bypass these protections and retrieve the hidden flag within the app."
+tags:
+  - frida
+  - hook
+  - jailbreak
+  - strings
+  - bypass
+  - debug
+  - javascript
+  - rev-binaries
+  - MobileHackingLab
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Captain%20Nohook/
+---
+
 **Description**: Welcome to the **iOS Application Security Lab: Captain No Hook Anti-Debugging Challenge**. This challenge focuses on a fictitious app called Captain No Hook, which implements advanced anti-debugging / jailbreak detection techniques. Your objective is to bypass these protections and retrieve the hidden flag within the app.
 
 **Download**: https://lautarovculic.com/my_files/noHook.ipa
+
 **Link:** https://www.mobilehackinglab.com/path-player?courseid=lab-captain-nohook
 
 ![[noHook1.png]]
 
 Install an **IPA** file can be difficult.
+
 So, for make it more easy, I made a YouTube video with the process using **Sideloadly**.
+
 **LINK**: https://www.youtube.com/watch?v=YPpo9owRKGE
 
 Let's **unzip the `.ipa`** file.
+
 We can see that when we *open the App*, we have an button that says "**Flag 'ere!**"
+
 But if we press the button, an *pop-up message* spawn:
+
 "**Noncompliant device detected!**"
+
 "*Yerr hook won't work!*"
 
 We need bypass these protections, *anti jailbreak / debug*.
+
 Probably we need use frida for this work.
 
 Let's start analyzing the **binary file** searching for some useful strings.
+
 In the **`.plist`** file I don't found anything useful.
 
 In first instance, I just search for some strings that I just thought in the moment
@@ -70,6 +106,7 @@ pSelectFlag
 ```
 
 We can see some interesting *functions* and may be *classes*.
+
 So, let's inspect this output better in **ghidra**. Import the binary and let's search for these functions.
 
 We have an **function** called **`_disable_gdb`**
@@ -87,6 +124,7 @@ void _disable_gdb(void)
 ```
 
 Also, **two similar functions** are in the binary
+
 **`amIReverseEngineered`**
 ```CPP
 dword __thiscall Captain_Nohook::ReverseEngineeringToolsChecker::amIReverseEngineered(void)
@@ -240,6 +278,7 @@ LAB_10000d760:
 ```
 
 Also, the function:
+
 **`amIReverseEngineeredWithFailedChecks`**
 ```CPP
 undefined  [16] __thiscall
@@ -399,6 +438,7 @@ LAB_10000d760:
 ```
 
 And we have this **function**
+
 **`get_failedChecks`**
 ```CPP
 undefined8
@@ -412,6 +452,7 @@ Captain_Nohook::ReverseEngineeringToolsChecker::ReverseEngineeringToolsStatus::g
 ```
 
 More **functions**...
+
 `undefined8 Captain_Nohook::ImageResource::get_noHook(void)`
 ```CPP
 undefined8 Captain_Nohook::ImageResource::get_noHook(void)
@@ -447,6 +488,7 @@ undefined8 * Captain_Nohook::ImageResource::noHook::unsafeMutableAddressor(void)
 ```
 
 `void Captain_Nohook::ImageResource::one_time_init_for_noHook(void)`
+
 Which contains
 ```CPP
 void Captain_Nohook::ImageResource::one_time_init_for_noHook(void)
@@ -480,6 +522,7 @@ dword Captain_Nohook::ReverseEngineeringToolsChecker::ReverseEngineeringToolsSta
 ```
 
 The
+
 `NSPersistentContainer * __thiscall Captain_Nohook::AppDelegate::get_persistentContainer(AppDelegate *this)`
 
 ```CPP
@@ -522,6 +565,7 @@ Captain_Nohook::AppDelegate::get_persistentContainer(AppDelegate *this)
 ```
 
 And the **most important function**
+
 The **`get_flag`**
 ```CPP
 undefined  [16] __thiscall Captain_Nohook::ViewController::getFlag(ViewController *this)
@@ -1024,6 +1068,7 @@ undefined  [16] __thiscall Captain_Nohook::ViewController::getFlag(ViewControlle
 ```
 
 Here's another function, called
+
 **`is_noncompliant_device`**
 ```CPP
 dword Captain_Nohook::is_noncompliant_device(void)
@@ -1268,8 +1313,11 @@ void __thiscall Captain_Nohook::ViewController::whereIsflag(ViewController *this
 ```
 
 There are a **lot of functions**.
+
 In fact, in my case, as I use a **rootless device**, Idk if some checks like *ports, gdb, etc* affect to me.
+
 Anyways, I try bypass all the mechanism as a possible.
+
 First, we need **understand the flow**, what *check* is first **triggered**, what is called, from where, etc.
 
 With **`frida-trace`** tool we can inspect what functions is called if we press the *blue button*
@@ -1304,10 +1352,13 @@ $s14Captain_Nohook30ReverseEngineeringToolsCheckerC32checkExistenceOfSuspiciousF
 ```
 
 These functions **check if the device is jailbroken**, if there are *suspicious processes running and if there are files or libraries related to Frida or other debugger tools*.
+
 How we can bypass it?
+
 We **hook all these functions and force their return to `false` or `0`**, so that they always pass the checks.
 
 **Flag 'ere!** button interaction
+
 When the user presses the button to get the flag, the function is called:
 ```bash
 $s14Captain_Nohook14ViewControllerC11whereIsflagyySo8UIButtonCF
@@ -1319,12 +1370,19 @@ Let's make some bypasses.
 ## Initial Analysis
 
 1. Anti-debugging protection (`_disable_gdb`)
+
 2. Detection of reversing tools (`amIReverseEngineered`)
+
 3. Check for suspicious files (`checkExistenceOfSuspiciousFiles`)
+
 4. Open ports check (`checkOpenedPorts`)
+
 5. DYLD Injection Detection (`checkDYLD`)
+
 6. App integrity validation (`is_noncompliant_device`)
+
 7. Checking process permissions (`PSelect Flag`) (`checkPSelectFlag`)
+
 8. Running `getFlag()`: It had to be intercepted to get the actual flag.
 
 After obtaining the list of functions using Frida (`frida-trace`) and `Radare2` (`r2frida`), we proceeded to exploit each check.
@@ -1346,7 +1404,9 @@ INFO: resumed spawned process
 ```
 
 Also, we can enumerate the *real name function* of `getFlag`
+
 `:iE~+getFlag`
+
 Output:
 ```bash
 0x1044d8ac0 f $s14Captain_Nohook14ViewControllerC7getFlagSSyF
@@ -1354,7 +1414,9 @@ Output:
 ```
 
 ## Bypass
+
 The app uses `_disable_gdb` to detect debuggers.
+
 We patch it in Frida to prevent it from terminating the process:
 ```javascript
 Interceptor.replace(Module.findExportByName(null, "ptrace"),
@@ -1362,7 +1424,9 @@ Interceptor.replace(Module.findExportByName(null, "ptrace"),
 ```
 
 `is_noncompliant_device()`
+
 The` is_noncompliant_device()` function checked *if the app was running* in a “*modified*” environment (*jailbreak*, *Frida*, etc.).
+
 We replaced it with:
 ```javascript
 var isNoncompliant = Module.findExportByName(null, "$s14Captain_Nohook22is_noncompliant_deviceSbyF");
@@ -1375,7 +1439,9 @@ if (isNoncompliant) {
 ```
 
 `amIReverseEngineered()`
+
 The `amIReverseEngineered()` function *attempted to detect reversing tools*.
+
 It was overwritten to **always return false**:
 ```javascript
 var reverseEngineered = Module.findExportByName(null, "$s14Captain_Nohook30ReverseEngineeringToolsCheckerC20amIReverseEngineeredSbyFZ");
@@ -1388,7 +1454,9 @@ if (reverseEngineered) {
 ```
 
 `checkExistenceOfSuspiciousFiles()`
+
 This function **checked files on the system related to tools like Frida**.
+
 We hooked `fopen()` to always return `/dev/null` when *looking for “suspicious” files*:
 ```javascript
 var fopen = Module.findExportByName(null, "fopen");
@@ -1404,7 +1472,9 @@ Interceptor.attach(fopen, {
 ```
 
 `checkOpenedPorts()`
+
 `checkOpenedPorts()` was trying to **detect suspicious connections on specific ports**.
+
 We replaced it *with a function that always returns a “safe” value*:
 ```javascript
 var checkOpenedPorts = Module.findExportByName(null, "$s14Captain_Nohook30ReverseEngineeringToolsCheckerC16checkOpenedPortsSSyF");
@@ -1417,7 +1487,9 @@ if (checkOpenedPorts) {
 ```
 
 `checkDYLD()`
+
 `checkDYLD()` checked if the **app had been manipulated** with `DYLD_INSERT_LIBRARIES`.
+
 It was replaced to *always return false*:
 ```javascript
 var checkDYLD = Module.findExportByName(null, "$s14Captain_Nohook30ReverseEngineeringToolsCheckerC6checkDYLDSSyF");
@@ -1430,7 +1502,9 @@ if (checkDYLD) {
 ```
 
 `checkPSelectFlag()`
+
 `checkPSelectFlag()` checked **process permissions**.
+
 It was *forced to return false* to **avoid detections**:
 ```javascript
 var checkPSelectFlag = Module.findExportByName(null, "$s14Captain_Nohook30ReverseEngineeringToolsCheckerC32checkExistenceOfSuspiciousFilesSSyF");
@@ -1443,7 +1517,9 @@ if (checkPSelectFlag) {
 ```
 
 ## Intercepting `getFlag()` and Extracting the Flag
+
 Initially, `getFlag()` returned `nil` (https://stackoverflow.com/questions/24043589/null-nil-in-swift), indicating **that the flag was stored in the UI instead of being returned directly**.
+
 Instead of **just hooking the function**, we **captured the `UILabel` that displayed it**.
 
 Intercepting `whereIsflag()` and **capturing the flag in the UI**:
@@ -1472,7 +1548,9 @@ if (whereIsFlag) {
 ```
 
 After > 20 scripts
+
 ![[noHook2.png]]
+
 And dealing with `nil`
 
 The full script

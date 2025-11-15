@@ -1,3 +1,24 @@
+---
+title: HackerOne H1-702 - Challenge 3
+description: "We could not find the original apk, but we got this. Can you make sense of it?"
+tags:
+  - dex
+  - odex
+  - crypto
+  - HackerOne
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackerOne CTF
+  - HackerOne
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/HackerOne%20H1-702%20-%20Challenge%203/
+---
+
 **Description**: We could not find the original apk, but we got this. Can you make sense of it?
 
 Download **APK**: https://lautarovculic.com/my_files/challenge3_h1-702.zip
@@ -5,41 +26,57 @@ Download **APK**: https://lautarovculic.com/my_files/challenge3_h1-702.zip
 ![[h1-702_challenge3-1.png]]
 
 We can see, unzipping the file, two files, `base.odex` and `boot.oat`
+
 But, what are these files?
+
 **OAT** and **ODEX** files are `binary formats` used in the Android environment to *optimize application execution*. Each has a specific purpose related to the performance and **precompilation** of applications on the system.
 
 ### ODEX (Optimized Dalvik Executable)
+
 **Description**
+
 - ODEX files `are optimized versions of DEX` (Dalvik Executable) files, which *contain the bytecode of Android applications*. The system generates these files to *improve the startup time* of applications by optimizing certain parts of the code.
 
 **Purpose**
+
 - To reduce the loading time of applications.
+
 - Prevent the Dalvik/JVM virtual machine from having to perform runtime optimization.
 
 **Generation**
+
 - Prior to Android 5.0 (Lollipop), the **dexopt optimizer generated ODEX files** during application installation.
 
 **Location**
+
 - Usually stored in the same directory as the APK or in the system cache (`/data/dalvik-cache`)
 
 ### OAT (Optimized Android Runtime)
+
 **Description**
+
 - OAT files *were introduced with Android 5.0 (Lollipop)* as part of the **transition from Dalvik to ART** (Android Runtime). *These files contain precompiled versions of the DEX*, but are *designed specifically for ART*. They **can include both the original bytecode** and **native code optimized** for the device architecture.
 
 **Purpose**
+
 - *Improve runtime performance by precompiling applications* with `Ahead-Of-Time` (AOT) Compilation.
+
 - Reduce *resource consumption on devices* with limited hardware.
 
 **Generation**
+
 - *During the system installation* or upgrade process, the `dex2oat` compiler creates the OAT files.
 
 **Location**
+
 - In `/data/dalvik-cache/` for user applications.
+
 - In system partitions (`/system/framework/`) for system libraries and applications.
 
 ![[h1-702_challenge3-2.png]]
 
 So, this is like a **dex file** basically.
+
 Then, we can use **backsmali** tool for get **dex** file.
 ```bash
 baksmali deodex -o output/ base.odex
@@ -61,17 +98,21 @@ mv base-dex2jar.jar challenge3_h1.jar
 ```
 
 Now, it's time to use **jadx** tool.
+
 Let's take a look to the **source code**.
 
 We can see **3 functions**.
 
 **`checkFlag`**
+
 This function **checks whether the entered string is a valid flag**. Inside function, a *comparison is made with a value* that is generated from the **`encryptDecrypt`** function. From the `encryptDecrypt` function.
 
 **`encryptDecrypt`**
+
 This function **uses a character array** as a **key** to perform an **XOR operation** with a *byte array*. The *input for this function is generated* from a string that is **manipulated** (*reverse* and *replace* characters).
 
 **`hexStringToByteArray`**
+
 Converts a **hexadecimal string into a byte array**, which is **then used in the encryption function**.
 
 We can *create a java code* (`MainActivity.java`) that do the work for us

@@ -1,6 +1,25 @@
+---
+title: Sharif University CTF 2016  - Android App
+description: "Find the Flag!!"
+tags:
+  - rev-libraries
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Sharif%20University%20CTF%202016%20%20-%20Android%20App/
+---
+
 **Description**: Find the Flag!!
+
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/Sharif_CTF.apk
@@ -18,7 +37,9 @@ apktool d Sharif_CTF.apk
 ```
 
 We can see an **input** that need a **serial number** for login.
+
 Let's inspect the **source code** with **jadx** (GUI Version)
+
 The **package name is** `com.example.ctf2`
 
 Here's the **MainActivity** java code
@@ -53,6 +74,7 @@ public class MainActivity extends Activity {
 ```
 
 And we can found a **library** called `adnjni`
+
 And `IsCorrect(String str)` is an **function** from this library.
 
 For the **a** class (**onClick** method)
@@ -89,7 +111,9 @@ public void onClick(View view) {
 ```
 
 Here's what occur when we click the **login** button, get the **text** from edit text.
+
 Call to the **native functions** (that we talked previously) and an **string is created** that sum the **d** value and the result of `processObjectArrayFromNative`
+
 Finally, this string is **passed** to an **md5sum**.
 
 Let's inspect the **libnative**.
@@ -99,13 +123,17 @@ Sharif_CTF/lib/armeabi
 ```
 
 I'll use **ghidra**
+
 ![[sharif_ctf_2016_2.png]]
 
 We can see that the **strcmp** is comparing the value of `ef57f3fe3cf603c03890ee588878c0ec`
+
 If we insert this value in the **input** field, we get the flag
+
 ![[sharif_ctf_2016_3.png]]
 
 Flag is
+
 **`Sharif_CTF(833489ef285e6fa80690099efc5d9c9d)`**
 
 I hope you found it useful (:

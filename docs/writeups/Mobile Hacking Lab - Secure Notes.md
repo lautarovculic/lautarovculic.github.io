@@ -1,6 +1,32 @@
+---
+title: Mobile Hacking Lab - Secure Notes
+description: "Welcome to the Secure Notes Challenge! This lab immerses you in the intricacies of Android content providers, challenging you to crack a PIN code protected by a content provider within an Android application. It's an excellent opportunity to explore Android's data management and security features."
+tags:
+  - content-provider
+  - python
+  - adb
+  - intents-extra
+  - content-resolver
+  - strings
+  - MobileHackingLab
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Secure%20Notes/
+---
+
 **Description**: Welcome to the **Secure Notes Challenge**! This lab immerses you in the intricacies of Android content providers, challenging you to crack a PIN code protected by a content provider within an Android application. It's an excellent opportunity to explore Android's data management and security features.
 
 **Download**: https://lautarovculic.com/my_files/secureNotes.apk
+
 **Link**: https://www.mobilehackinglab.com/path-player?courseid=lab-secure-notes
 
 ![[secureNotes.png]]
@@ -11,13 +37,16 @@ adb install -r secureNotes.apk
 ```
 
 We can see that we need insert a **4 digit numbers PIN**.
+
 Let's decompile it with **apktool**
 ```bash
 apktool d secureNotes.apk
 ```
 
 Also, let's check the **source code** with **jadx**.
+
 Notice that the **directory that apktool** drop us, inside of `assets` directory, we have the `config.properties` file.
+
 Which have this content:
 ```txt
 encryptedSecret=bTjBHijMAVQX+CoyFbDPJXRUSHcTyzGaie3OgVqvK5w=
@@ -78,9 +107,13 @@ Output:
 This is so dirty.... let's hack as MHL want.
 
 Let's move to **source code**.
+
 The package name is `com.mobilehackinglab.securenotes`.
+
 We have just **one activity** which is `com.mobilehackinglab.securenotes.MainActivity`.
+
 Also, is exported.
+
 Notice that we have an **Content Provider** (*Exported* & *Enabled*)
 ```XML
 <provider  
@@ -100,6 +133,7 @@ Notice that we have an **Content Provider** (*Exported* & *Enabled*)
 ```
 
 We can see the **code** where this provider are implemented. Is an class named **`SecretDataProvider`**.
+
 In the `onCreate()` method we can see the information that we was work with the **AES** decrypt method.
 
 Useful code is
@@ -111,8 +145,11 @@ String removePrefix = StringsKt.removePrefix(selection, (CharSequence) "pin=");
 ```
 
 Problem:
+
 - A `pin=` parameter is expected in the query, but no robust validation is performed on the value.
+
 - An **attacker can send common pins or perform a brute force attack** directly.
+
 - There is no mechanism for **rate limiting** (limit attempts per minute).
 
 Also, we have a response
@@ -122,15 +159,21 @@ $this$query_u24lambda_u243_u24lambda_u242.addRow(new String[]{secret});
 ```
 
 Problem:
+
 - *If the pin is correct*, the application **returns the secret in a response without any additional obfuscation** or validation.
+
 - The attacker **receives the decrypted content directly**.
 
 But, the **main problem** is that the **provider is exported** (as in `AndroidManifest.xml` can see).
+
 This mean that **any app installed on device can make unlimited query**.
 
 So, we have the uri:
+
 `content://com.mobilehackinglab.securenotes.secretprovider`
+
 How we can get this?
+
 Simple, in **android manifest** or just **unzipping** the **apk** file, then, search for **strings** in the **`classes.dex`** files.
 ```bash
 strings classes* | grep content://
@@ -145,6 +188,7 @@ adb shell content query \
 Notice that `--where` is because we have a *provider with selection* (mentioned in "useful code").
 
 We can't **update**, **delete** or **insert** PINs because there aren't implementation if you look the code.
+
 Also, check in the source code that the line
 ```java
 String format = String.format("%04d", Arrays.copyOf(new Object[]{Integer.valueOf(Integer.parseInt(removePrefix))}, 1));
@@ -152,8 +196,11 @@ String format = String.format("%04d", Arrays.copyOf(new Object[]{Integer.valueOf
 Clearly said that the PIN is between 0000 - 9999
 
 This query can be **bruteforceable**.
+
 But, let's make our **own** app.
+
 The concept is simple, just make many query **until you match with the secret** `CTF{`
+
 You can make a so **simple app**
 ```java
 package com.lautaro.insecurenotes;
@@ -203,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
 Or use some beautiful like the mine ;)
 
 ![[secureNotes2.png]]
+
 **Download**: https://lautarovculic.com/my_files/insecureNotes-MHL.apk
 
 I hope you found it useful (:

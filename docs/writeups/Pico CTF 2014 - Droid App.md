@@ -1,8 +1,30 @@
+---
+title: Pico CTF 2014 - Droid App
+description: "An Android application was released for the toaster bots, but it seems like this one is some sort of debug version. Can you discover the presence of any debug information being stored, so we can plug this? You can download the apk here."
+tags:
+  - smali
+  - patching
+  - logs
+  - logcat
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Pico%20CTF%202014%20-%20Droid%20App/
+---
+
 **Category**: Forensics
+
 **Description**: An Android application was released for the toaster bots, but it seems like this one is some sort of debug version. Can you discover the presence of any debug information being stored, so we can plug this? You can download the apk here.
 
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/ToasterBot.apk
@@ -21,6 +43,7 @@ apktool d ToasterBot.apk
 And now, let's inspect the **source code** with **jadx**
 
 The **MainActivity** in this case is **ToasterActivity**.
+
 That the **java code** is
 ```java
 package picoapp453.picoctf.com.picoapp;  
@@ -81,13 +104,16 @@ D/Debug tag( 4536): flag is: what_does_the_logcat_say
 ```
 
 Flag: `what_does_the_logcat_say`
+
 And notice that the flag is **hardcoded** in the **source code** :/
 ```java
 String mystery = "flag is: what_does_the_logcat_say";  
 ```
 
 Then... Let's make something funny.
+
 Let's try trigger the flag when we **press** the button.
+
 So, for this, we need identify the **smali** file to the **ToasterActivity**.
 ```bash
 ToasterBot
@@ -133,6 +159,7 @@ Let's modify this **method**
 ```
 
 Looking the method, we can do some changes.
+
 To modify the Smali code so that the Toast message displays the same string as the one used in the log, we need to **replace the constant string used for the Toast message** with the value of the field `mystery`.
 
 Here's the **new method**
@@ -180,6 +207,7 @@ Here's the **new method**
 Just delete the **old method** and paste the **new method**. Obviously, don't delete all the content. Just replace the method. (Important keep format and tab).
 
 Here a **simple** explanation:
+
 **Removed the constant string for the Toast**: The line `const-string v1, "Toasters don't toast toast, toast toast toast!"` was removed because we're now using the value of `mystery`.
 
 **Retrieve the value of `mystery` before the Toast**: The line `iget-object v1, p0, Lpicoapp453/picoctf/com/picoapp/ToasterActivity;->mystery:Ljava/lang/String;` retrieves the value of `mystery` from the object and stores it in `v1`.
@@ -209,6 +237,7 @@ adb install -r ToasterBot/dist/ToasterBot.apk
 ```
 
 Launch the app an we'll can see the **flag** as an **Toast Message**
+
 ![[droidApp2.png]]
 
 I hope you found it useful (:

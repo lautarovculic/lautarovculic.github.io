@@ -1,3 +1,25 @@
+---
+title: 8kSec - WhereAmIReally
+description: "WhereAmIReally is an iOS app that only reveals the flag if you’re in the right place 'physically'. It checks your GPS coordinates against a geofenced area and validates the authenticity of your location before granting access."
+tags:
+  - obj-c
+  - frida
+  - javascript
+  - hook
+  - rev-binaries
+  - 8ksec
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20WhereAmIReally/
+---
+
 
 **Link**: https://academy.8ksec.io/course/ios-application-exploitation-challenges
 

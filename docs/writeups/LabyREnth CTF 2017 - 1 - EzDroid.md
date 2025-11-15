@@ -1,5 +1,29 @@
+---
+title: LabyREnth CTF 2017 - 1 - EzDroid
+description: ""
+tags:
+  - smali
+  - patching
+  - logs
+  - logcat
+  - crypto
+  - python
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - LabyREnth
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/LabyREnth%20CTF%202017%20-%201%20-%20EzDroid/
+---
+
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/EzDroid.apk
@@ -35,6 +59,7 @@ public void onCreate(Bundle savedInstanceState) {
 [...]
 [...]
 ```
+
 And the `buh()` method is
 ```java
 public void buh() {  
@@ -67,6 +92,7 @@ public Boolean checkers(Context paramContext) {
 ```
 
 So, the value is `True` if our `PRODUCT` or `MODEL` contains **sdk** and also the **Android** compassion. So, while that is `True`, then the `buh()` method will be called.
+
 **`Else`**, this will don't call the `buh()` function.
 
 So, we need modify the **smali** file that contains this **hardcoded** strings. We can replace `sdk` and `Android` words by *any random string value*.
@@ -89,6 +115,7 @@ Here's are the line numbers of the **code** that we need change. I modify the `o
 ```
 
 So now, we need **rebuild** the app.
+
 We can use **apktool**
 ```bash
 apktool b EzDroid
@@ -110,10 +137,13 @@ adb install -r EzDroid/dist/EzDroid.apk
 ```
 
 And now we can see the activity:
+
 ![[laby2017_ezdroid1.png]]
 
 Notice that the code now will execute this line
+
 `String sVal = classOne.retIt();`
+
 This line call to `retIt()` method from `onoes` class.
 ```java
 public String retIt() {  
@@ -151,6 +181,7 @@ Output:
 I/System.out( 8828): Part1: PAN{ez_droid_
 ```
 We can see that the **flag is building**.
+
 So, let's keep doing the challenge for complete the flag.
 
 Now we need work with this part of the **EzMain** activity code
@@ -191,16 +222,22 @@ String sVal = classOne.retIt();
         });
 ```
 The correct order of **value** that we must insert is `3 2 7 3 7 4 6 1 7 2 7 4`
+
 But, when we send the last number, the app crash again.
+
 So, there are some bypass that we must to do.
 ```java
 if (!Build.PRODUCT.contains("sdk")) {  
     EZMain.this.checks(inputs);
 ```
 Here, as previously we do, change `sdk` for any random characters.
+
 Remember, now the **patch** must be in the **new** builded apk, that is in `EzDroid/dist/EzDroid.apk`
+
 For work better, move the **apk** to our actual directory.
+
 `mv EzDroid/dist/EzDroid.apk EzDroid2.apk` and rename with `2`
+
 Because we must decompile it with **apktool** again for access to the `smali files`.
 ```bash
 cat EZMain\$1.smali | grep "sdk"
@@ -222,6 +259,7 @@ Uninstall the **app** and reinstall the new apk
 adb install -r EzDroid2/dist/EzDroid2.apk
 ```
 Run the new apk installed and then, complete the inputs with this values
+
 `3 2 7 3 7 4 6 1 7 2 7 4` while you are running the **logcat** command
 
 ```bash
@@ -235,8 +273,11 @@ I/System.out( 8828): Part 2: 2start_
 At this point, the flag is **`PAN{ez_droid_2star`**
 
 Let keep doing the CTF.
+
 The app crashes when this line is executed
+
 `Boolean outAns = classTwo.lastCheck("72657031616365746831732121");`
+
 The Code of below is the rest
 ```java
 Boolean outAns = classTwo.lastCheck("72657031616365746831732121");  
@@ -248,6 +289,7 @@ Boolean outAns = classTwo.lastCheck("72657031616365746831732121");
 ```
 
 So, at this point, we need look the `lastCheck` method in `onoes` class.
+
 And too, the `getHexString` that will give us the **flag**.
 ```java
 public Boolean lastCheck(String strValue) {  
@@ -276,7 +318,9 @@ Process: com.labyrenth.manykeys.manykeys, PID: 11729
 java.lang.NumberFormatException: Invalid long: "72657031616365746831732121"
 ```
 That means that there an error formatting.
+
 Because, the string (72657031616365746831732121) is `20` chars and `long values` take 19 digits (20 but 1 less by index 0). Probably, the number is **negative** for take all `20` chars.
+
 The string `72657031616365746831732121` from `hex` is
 ```bash
 echo '72657031616365746831732121' | xxd -r  -p
@@ -284,6 +328,7 @@ echo '72657031616365746831732121' | xxd -r  -p
 Output: **rep1aceth1s!!**
 
 That seems like we need found a **correct value for `strValue`** of the `lastCheck` class.
+
 The **condition** is here
 ```java
 if ((Long.parseLong(strValue) * (-37)) + 42 == 17206538691L) {  
@@ -294,21 +339,33 @@ if ((Long.parseLong(strValue) * (-37)) + 42 == 17206538691L) {
 That, is **if True**, then the **getHexString take the value** and give us the flag.
 
 So now, we need get the **real value** for this.
+
 The problem involves integer overflow in Java's Long data type. We're trying to solve:
 
 `37x = 17206538649 (mod 2^64)`
+
 Long variables in Java use 64 bits, so when they overflow, they wrap around. To find x:
+
 1. Calculate the minimum overflow:
+
 `MAX_LONG + (0 - MIN_LONG + 1) + Overflow`
+
 In Java, a `long` can hold values from negative `9,223,372,036,854,775,808` to positive `9,223,372,036,854,775,807`
+
 2. Keep adding 2^64 until you get a number divisible by 37.
+
 3. Divide the result by 37 to get x.
 
 `9223372036854775807 + (0 - -9223372036854775808 + 1) + 17206538649`
+
 `9223372036854775807 + 9223372036854775809 + 17206538649`
+
 `2^64 + 17206538649`
+
 Then, the overflow is **18446744090916090265**
+
 Let's **bruteforce** for get the **value**.
+
 Here's a **python** script
 ```python
 from decimal import Decimal, getcontext
@@ -348,6 +405,7 @@ print("Calculation complete.")
 ```
 
 Output:  `11:  (-5982727808154625893 : 20)`
+
 Now, we need **modify** again the **smali** file.
 ```bash
 cat EZMain.smali | grep "72657031616365746831732121" -n
@@ -375,6 +433,7 @@ I/System.out(14286): Final Part: hard2defeat}
 ```
 
 Final flag
+
 **`PAN{ez_droid_2start_hard2defeat}`**
 
 I hope you found it useful (:

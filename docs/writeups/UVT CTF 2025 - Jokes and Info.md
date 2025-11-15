@@ -1,7 +1,26 @@
+---
+title: UVT CTF 2025 - Jokes and Info
+description: "We found an apk. It is useless, or isn't it?"
+tags:
+  - rev-libraries
+  - strings
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/UVT%20CTF%202025%20-%20Jokes%20and%20Info/
+---
+
 **Description**: We found an apk. It is useless, or isn't it?
 
 **Download**: https://lautarovculic.com/my_files/jokes_and_info.apk
+
 **NOTE**: This challenge makes a request to a host, which is probably no longer available at the time you are reading this write-up.
+
 You can learn anyway.
 
 ![[uvtCTF2025_1.png]]
@@ -12,6 +31,7 @@ adb install -r jokes_and_info.apk
 ```
 
 We can see some `JSON` cards information in the `MainActivity`.
+
 Let's check the **source code** with **jadx**.
 
 In `MainActivity` we can see the `Utils()` **class**.
@@ -34,6 +54,7 @@ public class Utils {
 }
 ```
 And also, call to **three functions**.
+
 Looking for strings in the code, I didn't see the `JSON` content, so, may be this can be a **URL Request**?
 
 Obviously, the `getHiddenFlag()` is what we need.
@@ -44,9 +65,13 @@ apktool d jokes_and_info.apk
 ```
 
 And then, inside of `lib` directory we can see the `libnative.so`.
+
 Load this into **Ghidra** tool and notice the three functions that previously has been seen in the *java code*:
+
 - `Java_com_example_uvt_1ctf_12025_Utils_ getHiddenFlag`
+
 - `Java_com_example_uvt_1ctf_12025_Utils_ getJoke`
+
 - `Java_com_example_uvt_1ctf_12025_Utils_ getUVTCTF`
 
 The `getHiddenFlag()` function is:

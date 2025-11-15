@@ -1,3 +1,21 @@
+---
+title: NahamCon CTF 2022 - Mobilize
+description: "Autobots. ROLLL OUTT!!!!!!"
+tags:
+  - strings
+  - NahamCon
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - NahamCon
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/NahamCon%20CTF%202022%20-%20Mobilize/
+---
+
 **Description**: Autobots. ROLLL OUTT!!!!!!
 
 **Download**: https://lautarovculic.com/my_files/mobilize.apk
@@ -10,9 +28,11 @@ adb install -r mobilize.apk
 ```
 
 This app doesn't nothing haha.
+
 ![[nahamcon2022_mobilize2.png]]
 
 Just, extract the app with **jadx** or just **unzip**.
+
 Inside of `res/values/strings.xml` you can find the **flag**.
 
 Or just

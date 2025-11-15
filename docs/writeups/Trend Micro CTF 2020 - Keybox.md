@@ -1,7 +1,23 @@
-**Description**: The flag file is built into this Android application APK file.
-The flag is encrypted using five keys.
-Below is shown the status of each of the five keys. Red is locked, green is unlocked.
-The challenge is to decrypt each of these keys so that you can decrypt the flag. Tap on each key to retrieve hints to help you to decrypt that key.
+---
+title: Trend Micro CTF 2020 - Keybox
+description: "The flag file is built into this Android application APK file. The flag is encrypted using five keys. Below is shown the status of each of the five keys. Red is locked, green is unlocked. The challenge is to decrypt each of these keys so that you can decrypt the flag. Tap on each key to retrieve hints to help you to decrypt that key."
+tags:
+  - adb
+  - intents-extra
+  - python
+  - crypto
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Trend%20Micro%20CTF%202020%20-%20Keybox/
+---
+
+**Description**: The flag file is built into this Android application APK file. The flag is encrypted using five keys. Below is shown the status of each of the five keys. Red is locked, green is unlocked. The challenge is to decrypt each of these keys so that you can decrypt the flag. Tap on each key to retrieve hints to help you to decrypt that key.
 
 **Download APK**: https://lautarovculic.com/my_files/Keybox.apk
 
@@ -19,6 +35,7 @@ apktool d Keybox.apk
 ```
 
 Move to **jadx** for inspect the **source code**.
+
 Here's the **`AndroidManifest.xml`** file
 ```XML
 <?xml version="1.0" encoding="utf-8"?>  
@@ -165,12 +182,15 @@ Here's the **`AndroidManifest.xml`** file
 ```
 
 If we go to **Key 0**, we can see that is **auto decrypted** and enabled.
+
 Also, there are information about the challenge.
 
 ### Key 1
 
 Let's do the **Key 1**.
+
 If we *press the button*, we can see that the **Hint is locked**.
+
 But we can see in the `AndroidManifest.xml` file the content of the hint:
 ```XML
 <activity
@@ -220,6 +240,7 @@ public class KEY1HintActivity extends AppCompatActivity {
 ```
 
 The activities looks for intent with **`hintkey0-4`** as extra.
+
 We can see the **Singleton object**, the java code is:
 ```java
 private Singleton() {
@@ -271,6 +292,7 @@ public String CreateKey(int keynumber) {
 }
 ```
 The value is `TrendMicro`.
+
 Remember the hint in **Key 0**. This is probably the **password** for set the **intent**.
 
 ```bash
@@ -285,15 +307,23 @@ To unlock Key 1, you must call Trend Micro
 ```
 
 In my mind, this is difficult due to this challenge was made in 2020, and we are in 2025.
+
 So, the *phone number was changed*.
+
 But using some **OSINT techniques** I found the profile of an *TrendMicro*:
+
 https://www.sendall.co/organization-lookup/Trend%20Micro/0361b2fb-1a84-4514-a92e-df5ba304484e
 
 Where says that the phone number is: `+81353343618`
+
 Let's understand how the *Key 1* is decrypted.
+
 We can see the **`Unlocker`** class, we see the line:
+
 `singleton.flagkey1_key = data2.replaceAll("[^\\d.]", "");`
+
 This apply a **regex** expression of the number phone, leaving the value `81353343618`.
+
 So, just delete all non-number characters.
 ```java
 if (action.equals("android.intent.action.PHONE_STATE")) {
@@ -333,15 +363,19 @@ value = ARC4(b'81353343618')
 print("The Key 1 is: " + value.encrypt(encryptedKey).decode())
 ```
 Output:
+
 `The Key 1 is:` **KEY1-1047645455**
 
 Until now we have:
+
 **Key 0** -> **`KEY0-7135446200`**
+
 **Key 1** -> **`KEY1-1047645455`**
 
 ### Key 2
 
 Let's start with **Key 2**!
+
 Open the Hint activity with
 ```bash
 adb shell am start -a com.trendmicro.keybox.UNLOCK_HINT -n com.trendmicro.keybox/.KEY2HintActivity -e hintkey2 "TrendMicro"
@@ -412,6 +446,7 @@ if (action.equals("android.provider.Telephony.SECRET_CODE")) {
 ```
 
 So, the **correct code is** `8736364275`.
+
 For this:
 ```java
 else {
@@ -429,16 +464,21 @@ value = ARC4(b'8736364275')
 print("The Key 2 is: " + value.encrypt(encryptedKey).decode())
 ```
 Output:
+
 `The Key 2 is:` **KEY2-9517232028**
 
 Until now we have:
+
 **Key 0** -> **`KEY0-7135446200`**
+
 **Key 1** -> **`KEY1-1047645455`**
+
 **Key 2** -> **`KEY2-9517232028`**
 
 ### Key 3
 
 The hint for this key is
+
 `Unlock KEY3 with the right text message`
 
 We found references for Key 3 in **Observer** class:
@@ -556,11 +596,15 @@ private boolean isValidSmsMessage(String columnName, String columnValue) {
     }
 ```
 This probably are taking a value from some column name, and the name as value.
+
 As **type** is the "second" (due to ` == 1` is the second value in Index context).
+
 According to **Android Documentation**
+
 https://developer.android.com/reference/android/provider/Telephony.TextBasedSmsColumns
 
 We can see that the **body** column is the second one.
+
 So, with this python script:
 ```python
 from arc4 import ARC4
@@ -571,37 +615,53 @@ value = ARC4(b'body')
 print("The Key 3 is: " + value.encrypt(encryptedKey).decode())
 ```
 Output:
+
 `The Key 3 is:` **KEY3-2510789910**
 
 Until now we have:
+
 **Key 0** -> **`KEY0-7135446200`**
+
 **Key 1** -> **`KEY1-1047645455`**
+
 **Key 2** -> **`KEY2-9517232028`**
+
 **Key 3** -> **`KEY3-2510789910`**
 
 ### Key 4
 
 The hint for this key is:
+
 `Visit the headquarters to unlock Key 4`
 
 You can get the **3 headquarters** from the Official Trend Micro pages:
+
 https://www.trendmicro.com/en_us/contact.html
 
 In this case we have
+
 - **Japan**
+
 - **Canada**
+
 - **USA**
 
 ![[keyboxTrendMicro2.png]]
 
 Set the location and the key will be prompted.
+
 **Key 4** -> **`KEY4-4721296569`**
 
 Until now we have:
+
 **Key 0** -> **`KEY0-7135446200`**
+
 **Key 1** -> **`KEY1-1047645455`**
+
 **Key 2** -> **`KEY2-9517232028`**
+
 **Key 3** -> **`KEY3-2510789910`**
+
 **Key 4** -> **`KEY4-4721296569`**
 
 ### The Flag
@@ -634,6 +694,7 @@ public class FlagActivity extends AppCompatActivity {
 ![[keyboxTrendMicro3.png]]
 
 The flag is:
+
 **`TMCTF{pzDbkfWGcE}`**
 
 I hope you found it useful (:

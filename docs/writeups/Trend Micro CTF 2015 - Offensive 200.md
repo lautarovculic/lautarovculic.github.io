@@ -1,5 +1,27 @@
+---
+title: Trend Micro CTF 2015 - Offensive 200
+description: ""
+tags:
+  - broadcast
+  - adb
+  - smali
+  - patching
+  - intents-extra
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Trend%20Micro%20CTF%202015%20-%20Offensive%20200/
+---
+
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/VirusClicker.apk
@@ -17,11 +39,15 @@ apktool d VirusClicker.apk
 ```
 
 We can notice that the **app isn't responding**. So I need install this app into an **Android API29**
+
 Let's inspect the **source code** with **jadx** (GUI version)
+
 We have the **SplashActivity**, **MainActivity**, and some other **Activities**.
+
 Launching the **app**, we can see an **button** and a counter until **10.000.000**
 
 So, we need a way for get the flag that we'll receive when we reach this number.
+
 We can see in the **XML** file **MainPreferences.xml** saved into `/data/data/com.tm.ctf.clicker`folder in the device
 ```XML
 <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
@@ -32,6 +58,7 @@ We can see in the **XML** file **MainPreferences.xml** saved into `/data/data/co
 ```
 
 I try override the file, but I don't have success.
+
 So, maybe we can modify the **CongratulationsActivity**
 ```java
 package com.tm.ctf.clicker.activity;  
@@ -90,6 +117,7 @@ public class CongraturationsActivity extends Activity {
 ```
 
 In this code we can see that the flag is showed.
+
 The flag is created in the method **m924a**
 ```java
 private void m924a(Canvas canvas, Paint paint) {  
@@ -130,6 +158,7 @@ public class ScoreBroadcastReceiver extends BroadcastReceiver {
 }
 ```
 This code send the data score for **some checks** to the app.
+
 So, get again the previous code of the **Congratulations** activity
 ```java
 if (10000000 != C0238a.m918c()) {  
@@ -137,15 +166,21 @@ if (10000000 != C0238a.m918c()) {
 } 
 ```
 Where compare with the **Intent** that is sent to the **Broadcast**.
+
 So, we can modify the **smali code**.
+
 The **CongraturationsActivity.smali** file is in `/VirusClicker/smali/com/tm/ctf/clicker/activity` directory.
+
 In the line `150` we can see the line `if-eq v0, v1, :cond_0`.
 
 So, changing the **if-eq** statement to **if-ne**
+
 Must look like this `if-ne v0, v1, :cond_0`
+
 Save the **smali** file.
 
 I notice that here (in the **c.class**) are an method that register **every touch screen**.
+
 And we have the **intent** that is sent to the **broadcast receiver**.
 ```java
 public boolean onTouchEvent(final MotionEvent motionEvent) {
@@ -175,12 +210,17 @@ public boolean onTouchEvent(final MotionEvent motionEvent) {
 }
 ```
 And we need reach the last **if condition** `f (10000000 <= this.g)`
+
 For get the "final message".
+
 Then, we need modify again the **smali** file for **c.smali** file in `/VirusClicker/smali/com/tm/ctf/clicker/activity`
+
 We can see in the **line 845** `if-gt v0, v1, :cond_0`
+
 You need change **if-gt** (if greater than) to **if-lt** (if less-than).
 
 The line must look like `if-lt v0, v1, :cond_0`
+
 Save the file and now is time for **rebuild** the **apk**.
 
 Build the **apk**
@@ -204,6 +244,7 @@ adb install -r VirusClicker/dist/VirusClicker.apk
 ```
 
 So now, launch the app. **Do not touch the app**.
+
 We can complete the challenge with adb. Sending the **intents** via **broadcast** the **value of SCORE** like the code do.
 
 Send this chain of broadcast with **adb**
@@ -230,13 +271,17 @@ adb shell am broadcast -a com.tm.ctf.clicker.SCORE -n com.tm.ctf.clicker/.receiv
 ```
 
 Let's explain the params of the **adb command**:
+
 - `adb shell`: Start a **shell session** with the device.
+
 - `am broadcast`: Sent the **Broadcast Intent**.
+
 - `-a com.tm.ctf.clicker.SCORE`: Set the **intent action**.
+
 - `-n com.tm.ctf.clicker/.receiver.ScoreBroadcastReceiver`: Specify the **component**.
+
 - `--ei SCORE <valor>`: Add the **extra integer** with the **SCORE** key and the **value**.
 
 So, just make a click and get the flag. A **black screen** with **white chars** must be printed. The flag is `TMCTF{Congrats_10MClicks}`
-
 
 I hope you found it useful (:

@@ -1,3 +1,26 @@
+---
+title: 8kSec - BackSync
+description: "BackSync appears to be a straightforward profile viewer with minimal functionality. However, beneath its unassuming interface lies a background process that periodically fetches remote configurations. These configurations can influence the app’s behavior in unexpected ways."
+tags:
+  - obj-c
+  - network
+  - mitm-proxy
+  - dylib
+  - frida
+  - rev-binaries
+  - 8ksec
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20BackSync/
+---
+
 **Description**: BackSync appears to be a straightforward profile viewer with minimal functionality. However, beneath its unassuming interface lies a background process that periodically fetches remote configurations. These configurations can influence the app’s behavior in unexpected ways.
 
 **Link**: https://academy.8ksec.io/course/ios-application-exploitation-challenges

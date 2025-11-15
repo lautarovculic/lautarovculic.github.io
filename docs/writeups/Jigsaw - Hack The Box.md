@@ -1,6 +1,33 @@
+---
+title: Jigsaw - Hack The Box
+description: "A secret lies hidden, protected by layers of logic and scattered clues. Your task is to uncover these fragments, piece them together, and solve the mystery. It’s a challenge of patience, creativity, and determination. Can you reveal the secret?"
+tags:
+  - dart
+  - rev-libraries
+  - python
+  - frida
+  - invoking
+  - crypto
+  - HackTheBox
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackTheBox
+  - HTB
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Jigsaw%20-%20Hack%20The%20Box/
+---
+
 ![[jigsaw1.png]]
+
 **Difficult:** Easy
+
 **Category**: Mobile
+
 **OS**: Android
 
 **Description**: A secret lies hidden, protected by layers of logic and scattered clues. Your task is to uncover these fragments, piece them together, and solve the mystery. It’s a challenge of patience, creativity, and determination. Can you reveal the secret?
@@ -12,6 +39,7 @@ Install the **APK** file using **ADB**
 adb install -r Jigsaw.apk
 ```
 We can see a *login activity*.
+
 Let's *decompile the `apk`* using **apktool**
 ```bash
 apktool d Jigsaw.apk
@@ -24,7 +52,9 @@ jadx-gui Jigsaw.apk
 We just have an activity, and some interesting classes.
 
 When the app is decompiled, *apktool* drop us an `/assets/flutter_assets` directory.
+
 Inside, we have **`kernel_blob.bin`** file.
+
 Looking for `strings`, we can get the **Dart source code** of the *application*.
 
 **`services.dart`**:
@@ -335,7 +365,9 @@ libmenascyber.so
 ```
 
 The `libmenascyber.so` will be useful in further.
+
 For now, let's focus in **dart code**.
+
 Notice in `flag.dart` this line:
 ```dart
 final String _encryptedFlagBase64 = 'aZ/KF0GsnN81j5XStQyKz3vXtktTVN5zFqy5lwTmub6fx5w70c+p08O0OWcn/9nh';
@@ -346,6 +378,7 @@ final flagData = await aesService.getflag();
 ```
 
 ### Part One - Hardcoded Key/IV con Shuffle
+
 In `services.dart` we have:
 ```dart
 final List<int> _hardcodedKey = List<int>.generate(32, (i) => (i + 1) % 256);
@@ -382,6 +415,7 @@ iv1  = 0d0e0f10
 ```
 
 Fun fact, in `main.dart` we have fake creds which are:
+
 - `nimda`:`guessme`
 ```dart
 if (_usernameController.text == 'nimda' && _passwordController.text == 'guessme')
@@ -389,8 +423,11 @@ if (_usernameController.text == 'nimda' && _passwordController.text == 'guessme'
 But a image will appear after login, just a little rabbit hole.
 
 ### Part Two - Flutter Channel & Kotlin Logic
+
 Let's move into the **source code** with **JADX**.
+
 We have the  `MainActivity.java`, `MainActivityKt.java` and `piecesOf.kt`.
+
 The app implements a `MethodChannel` to respond to the “`parttwo`” method from Dart:
 
 **`MainActivty.java`**
@@ -438,6 +475,7 @@ public final class MainActivityKt {
 ```
 
 And the **most important** part:
+
 **`piecesOf.java`**
 ```java
 public final class piecesOf {
@@ -583,10 +621,15 @@ iv2  = 5745c7c9
 ```
 
 ### Part Three - Dump with Frida from libs
+
 Open **ghidra** and *import* the `libmenascyber.so` library. Then, *analyze*.
+
 We can see the functions that we need for complete the IV and key:
+
 - `partthree_1()` => returns **32 bytes** (key)
+
 - `partthree_2()` => returns **16 bytes** (IV)
+
 These bytes are also derived with `randFunc2` based on *hardcoded data within the binary*.
 
 Let's dump the value using **FRIDA**. For this, I develop this script:
@@ -634,6 +677,7 @@ key = key1 + key2 + key3  # 32 bytes
 iv  = iv1  + iv2  + iv3   # 16 bytes
 ```
 Also, the **cyphertext**:
+
 - `aZ/KF0GsnN81j5XStQyKz3vXtktTVN5zFqy5lwTmub6fx5w70c+p08O0OWcn/9nh`
 
 We can *put all together and decrypt using python*:

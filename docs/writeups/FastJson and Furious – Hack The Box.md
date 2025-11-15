@@ -1,6 +1,30 @@
+---
+title: FastJson and Furious – Hack The Box
+description: "A couple years ago I was experimenting with Android Development and I created this application to hide my secret, but now I forgot how to get it back. Can you help me?"
+tags:
+  - smali
+  - patching
+  - vuln
+  - HackTheBox
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackTheBox
+  - HTB
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/FastJson%20and%20Furious%20%E2%80%93%20Hack%20The%20Box/
+---
+
 ![[fastjson1.png]]
+
 **Difficult:** Easy
+
 **Category**: Mobile
+
 **OS**: Android
 
 **Description**: A couple years ago I was experimenting with Android Development and I created this application to hide my secret, but now I forgot how to get it back. Can you help me?
@@ -8,18 +32,21 @@
 ----
 
 First, download the **.zip** file and extract them with **hackthebox** password.
+
 Then, we’ll use **apktool** for decompile and extract the **application content**.
 ```bash
 apktool d app-release.apk
 ```
 
 We can see that the compiled version **SDK** is 33, then, I’ll use an **Genymotion** Android device **API 31**.
+
 Install the apk file with
 ```bash
 adb install -r app-release.apk
 ```
 
 The app looks like
+
 ![[fastjson2.png]]
 
 The **package** is
@@ -36,7 +63,9 @@ public class MainActivity extends AppCompatActivity {
 ```
 
 The **succeed** variable is set in **false**.
+
 And the **function calcHash** ever will return **“ ”** if **succeed** is **false**.
+
 Then, we need modify the **MainActivity.smali** code, and change **false** for **true**.
 
 ```bash
@@ -84,6 +113,7 @@ adb install -r patchedFastAlignedSigned.apk
 ```
 
 And if we go to **jadx**, we can see that the **MainActivity.java** class is now **patched**.
+
 ![[fastjson4.png]]
 
 Then, now if we send a **valid** **json**
@@ -92,10 +122,13 @@ Then, now if we send a **valid** **json**
 ```
 
 We get this
+
 ![[fastjson5.png]]
 
 Assuming that now the app work correctly, let’s keep reviewing the source code searching “hints”
+
 Then, the app now is waiting for a **json** string.
+
 And this need **2** **keys**, we can conclude that because
 
 ```java
@@ -106,6 +139,7 @@ JSONObject parseObject = JSON.parseObject(str.replace("\":", POSTFIX + "\":"));
 
 
 If the **key** size isn’t 2, then return nothing.
+
 We can see in the class
 ```bash
 com.alibaba.fastjson.JSON
@@ -120,7 +154,9 @@ public abstract class JSON implements JSONStreamAware, JSONAware {
 ```
 
 After a simple research, I found this article
+
 [https://jfrog.com/blog/cve-2022-25845-analyzing-the-fastjson-auto-type-bypass-rce-vulnerability/](https://jfrog.com/blog/cve-2022-25845-analyzing-the-fastjson-auto-type-bypass-rce-vulnerability/)
+
 Then, after some hours, I conclude that we can craft the **key 1** (with @type vulnerability) and **key 2**, the **succeed** that we fixed for true.
 
 We need a **hinted** **java** **class** for this param.

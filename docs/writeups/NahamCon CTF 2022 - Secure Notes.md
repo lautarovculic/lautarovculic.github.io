@@ -1,3 +1,23 @@
+---
+title: NahamCon CTF 2022 - Secure Notes
+description: "None of the free note taking app offer encryption... So I made my own!"
+tags:
+  - python
+  - crypto
+  - SQLite
+  - NahamCon
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - NahamCon
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/NahamCon%20CTF%202022%20-%20Secure%20Notes/
+---
+
 **Description**: None of the free note taking app offer encryption... So I made my own!
 
 **Download**: https://lautarovculic.com/my_files/secure_notes.apk
@@ -10,13 +30,17 @@ adb install -r secure_notes.apk
 ```
 
 We can see that we need insert a **4-Digit PIN**.
+
 If we insert any number, we get the *Wrong password* message.
 
 Let's inspect the **source code** using **jadx**.
+
 The *package name* is `com.congon4tor.securenotes`.
 
 We have **two activities** in *`AndroidManifest.xml`* file:
+
 - `LoginActivity` -> MainActivity also?¿?¿ -> PIN Screen
+
 - `MainActivity` -> Just the "Menu screen app".
 
 ```XML
@@ -39,12 +63,17 @@ We have **two activities** in *`AndroidManifest.xml`* file:
 ```
 
 *This is controversial, and I don't know if it is intentional.*
+
 *Because we have two activities that have the category of LAUNCHER. This can cause problems when running the application in recent versions of Android, because both activities will appear in the “Home” of the device.*
 
 This behavior *officially not supported but allowed*, and in *certain versions of Android* (depending on the launcher) it can:
+
 - Show *two separate app icons*.
+
 - Break the normal launcher **flow**.
+
 - Generate conflicts with `taskAffinity`, `backstack` or *intent routing*.
+
 - In *older launchers it directly causes an activity to never appear*.
 
 If you have problems starting the application, you can use the following **ADB command**:
@@ -53,9 +82,11 @@ adb shell am start -n com.congon4tor.securenotes/com.congon4tor.securenotes.Logi
 ```
 
 Let's continue with the challenge.
+
 After search in `strings.xml` file, I didn't find nothing.
 
 So, it's time for *java code*.
+
 Starting as probably the flow is, let's start with **`LoginActivity`** code.
 
 Here's a **declaration of variables**:
@@ -81,6 +112,7 @@ public void onClick(View view) {
 }
 ```
 Where will try put the **same PIN** four **times** for **decrypt** the **`notes.db`** file.
+
 So, the **AES** key is **`PINPINPINPIN`**.
 
 Also we have
@@ -109,6 +141,7 @@ apktool d secure_notes.apk
 ```
 
 Inside of `/assets/databases` directory you will find the `db.encrypted` file.
+
 Notice that in my case, the **class** where the **decrypt** take place, is **`C0590d`**.
 ```java
 public static void m2126k(String str, File file, File file2) {
@@ -142,6 +175,7 @@ try {
 ```
 
 We just need **brute-force** the **PIN**. And then, *extract the `notes.db`* file.
+
 Here's a *python* script that do the work:
 ```python
 from Crypto.Cipher import AES

@@ -1,6 +1,30 @@
+---
+title: APKrypt – Hack The Box
+description: "Can you get the ticket without the VIP code?"
+tags:
+  - crypto
+  - smali
+  - patching
+  - HackTheBox
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackTheBox
+  - HTB
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/APKrypt%20%E2%80%93%20Hack%20The%20Box/
+---
+
 ![[apkrypt1.png]]
+
 **Difficult:** Easy
+
 **Category**: Mobile
+
 **OS**: Android
 
 **Description**: Can you get the ticket without the VIP code?
@@ -8,7 +32,9 @@
 ----
 
 Download the **zip** file and extract with the **hackthebox** password.
+
 There are a **README.txt** file that say
+
 1. Install this application in an API Level 29 or earlier (i.e. Android 10.0 (Google APIs)).
 
 Decompile the **apk** with **apktool**
@@ -24,6 +50,7 @@ adb install -r APKrypt.apk
 ![[apkrypt2.png]]
 
 Let’s check the **source code** with **jadx**
+
 We can see some interesting in the **MainActivity**
 ```java
 protected void onCreate(Bundle bundle) {
@@ -97,7 +124,9 @@ public void onClick(View view) {
 
 
 If we modify the **smali code**, we can get the flag without any data on the **textbox**
+
 Letme explain,
+
 The code **onClick** have a **smali code** that is represented as
 ```smali
 .method public onClick(Landroid/view/View;)V
@@ -191,8 +220,11 @@ if-eqz p1, :cond_2d
 ```
 
 That say
+
 “_if “code” is p1 (encrypted code), then cond_2d that is the toast message with the flag_”
+
 If-eqz is **equal**
+
 If-nez is **not-equal**
 
 Then, we go to
@@ -206,16 +238,20 @@ nano MainActivity\$1.smali
 ```
 
 Search the onClick **method** (**line 65 probably**)
+
 And change **if-eqz** to **if-nez**
+
 ![[apkrypt3.png]]
 
 Save the file and go to the start of the folder
+
 **Build** a new apk with **apktool**
 ```bash
 apktool b APKrypt
 ```
 
 And go to **/APKrypt/dist/**
+
 Then generate a new key with keytool
 ```bash
 keytool -genkey -keystore lautaro.keystore -validity 1000 -alias lautaro
@@ -227,12 +263,14 @@ jarsigner -keystore lautaro.keystore -verbose APKrypt.apk lautaro
 ```
 
 Delete the previous **apk installed**
+
 And install the new apk with **adb**
 ```bash
 adb install -r APKrypt.apk
 ```
 
 Now run again the **app** and press the button
+
 ![[apkrypt4.png]]
 
 I hope you found it useful (:

@@ -1,4 +1,22 @@
+---
+title: Mystiko - Kryptonite
+description: "This challenge intends to show how to enumerate android apps in search for hidden information."
+tags:
+  - crypto
+  - SQLite
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mystiko%20-%20Kryptonite/
+---
+
 **Category**: Crypto
+
 **Description**: This challenge intends to show how to enumerate android apps in search for hidden information.
 
 Download **APK**: https://lautarovculic.com/my_files/kryptonite.apk
@@ -11,10 +29,13 @@ adb install -r krypto.apk
 ```
 
 We can see that we have an **encrypt/decrypt** message app.
+
 The text is in *leet speak*.
+
 And the title says: *`AES is kryptonite for haxors`*
 
 Notice that, trying the *length* of the key randomly, I see the correct char length is **16**.
+
 Also, check in the *source code*, in `MainActivity` we can verify the length:
 ```java
 if (obj2.length() != 16 && obj2.length() != 24 && obj2.length() != 32) {
@@ -23,10 +44,13 @@ if (obj2.length() != 16 && obj2.length() != 24 && obj2.length() != 32) {
 ```
 
 So, let's **analyze the source code** with **jadx**.
+
 The **package name** is **`com.example.kryptonite`**
 
 We have **two activities**.
+
 - `MainActivity`
+
 - `H1dD3N`
 
 ```XML
@@ -49,6 +73,7 @@ We have **two activities**.
 ```
 
 The **`H1dD3N`** activity must be launched with **ADB**.
+
 I seen a `.db` file in **jadx**. Inside of `assets` directory. Let's inspect that.
 ```bash
 mkdir kryp && cd kryp && unzip ../krypto.apk
@@ -73,6 +98,7 @@ M4r14|vEpr9q0DVMSbe7pDyqz7TtjWEhxZZ03uDcksStPArvo=
 ```
 
 We can see some **AES** text.
+
 Then, let's see the **`H1dD3N`** activity content using **ADB**
 ```bash
 am start -n com.example.kryptonite/com.example.kryptonite.H1dD3N
@@ -84,6 +110,7 @@ OUSRuRRHNCtyyvHMQq3G+9QCE0z+tuHB/bWq8EZG3YGg/4H1uflzq1NzT2faKtMy
 ```
 
 Probably the **message**?
+
 In the **java code** of `H1dD3N` activity, we can see:
 ```java
 C0508a.m1814f(H1dD3N.this, R.string.c5, "test12");
@@ -91,6 +118,7 @@ C0508a.m1814f(H1dD3N.this, R.string.c6, "test12 (re-testing...)");
 ```
 
 The `c5` and `c6` string resources looks suspicious.
+
 Let's take a look to the `res/values/strings.xml`
 ```XML
 <string name="c5">Kyrpt... Error found when processing current gas element...</string>
@@ -98,8 +126,11 @@ Let's take a look to the `res/values/strings.xml`
 ```
 
 We can see `KrYp70N1t3_k1LLz_$uPerM4N&amp;H4ck3R`
+
 But, `&amp;` is `&`
+
 Finally, the **key** (*16 chars*) is:
+
 **`KrYp70N1t3_k1LLz_$uPerM4N&H4ck3R`**
 
 Using
@@ -117,9 +148,11 @@ M4r14 = #36kRyPtoN_GaZ_4_LuNCH?@
 ```
 
 But, what about the **AES text** in the **`H1dD3N`** activity?
+
 `OUSRuRRHNCtyyvHMQq3G+9QCE0z+tuHB/bWq8EZG3YGg/4H1uflzq1NzT2faKtMy`
 
 Let's use as message, and, *try each plain text* that we get previously.
+
 After 3 tries, if we use the `M4r14` **key** (`#36kRyPtoN_GaZ_4_LuNCH?@`), we got the flag.
 
 ![[mystiko_kryptonite2.png]]

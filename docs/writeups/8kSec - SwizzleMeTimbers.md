@@ -1,3 +1,24 @@
+---
+title: 8kSec - SwizzleMeTimbers
+description: "SwizzleMeTimbers is a pirate-themed iOS app with a secret buried deep inside its view controller. A simple button reads “Unlock Treasure”, but it’s protected by a method that always returns false, unless you’re crafty enough to change its behavior at runtime."
+tags:
+  - obj-c
+  - rev-binaries
+  - frida
+  - enum
+  - 8ksec
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20SwizzleMeTimbers/
+---
+
 **Description**: SwizzleMeTimbers is a pirate-themed iOS app with a secret buried deep inside its view controller. A simple button reads “Unlock Treasure”, but it’s protected by a method that always returns false, unless you’re crafty enough to change its behavior at runtime.
 
 **Link**: https://academy.8ksec.io/course/ios-application-exploitation-challenges

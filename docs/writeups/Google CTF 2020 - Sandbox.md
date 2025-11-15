@@ -1,3 +1,24 @@
+---
+title: Google CTF 2020 - Sandbox
+description: ""
+tags:
+  - dex2jar
+  - jd-gui
+  - python
+  - GoogleCTF
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - GoogleCTF
+  - Google
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Google%20CTF%202020%20-%20Sandbox/
+---
+
 **Download**: https://lautarovculic.com/my_files/google2020reverse.apk
 
 ![[googleCTF2020sandbox1.png]]
@@ -8,40 +29,55 @@ adb install -r google2020reverse.apk
 ```
 
 Let's inspect the **source code** with **jadx**.
+
 We can see that jadx doesn't work.
+
 So move to **dex2jar** tool.
 ```bash
 d2j-dex2jar google2020reverse.apk
 ```
 
 The `MainActivity` is called `ő`.
+
 The code is malformed, that why we can't decompile the code and then, read it.
 
 The constructor and `onCreate()` are obfuscated with **invalid try/catch** (such as `catch I`, which is invalid because int is **not a Throwable**).
 
 So we need **patch the apk** in the *smali code*.
+
 First, we need decompile with **apktool**
 ```bash
 apktool d google2020reverse.apk
 ```
 
 So, what is broken?
+
 The `catch I` and `catch J` are not **child classes of Throwable**.
+
 So we need go to
+
 `/smali/com/google/ctf/sandbox/ő.smali`
+
 And edit with nano, looking for *invalid catches* and then, delete.
+
 Delete any `.catch` lines that use primitive types, such as:
+
 `.catch I` → int
+
 `.catch J` → long
+
 `.catch Z`, `.catch F`, etc.
 
 Stay only with `.catches` that have `L<class>;`, such as `Ljava/lang/Exception;`.
+
 Also, you must fix the `.catch` in `ő$1.smali`
 
 I deleted in `ő$1.smali`
+
 `.catch I {:try_start_0 .. :try_end_0} :catch_1`
 
 And in `ő$1.smali`
+
 `.catch J {:try_start_0 .. :try_end_0} :catch_0`
 
 So now we just need *rebuild the APK*
@@ -59,6 +95,7 @@ jd-gui google2020fixed-dex2jar.jar
 ```
 
 Now we can see the `ő` class fully.
+
 In the end of the code, we see that here's the validation:
 ```java
 this();
@@ -79,6 +116,7 @@ if (editText.getText().toString().equals(exception.toString())) {
 ```
 
 And we see that the flag have a length of `48`
+
 `arrayOfObject[48] = Integer.valueOf(63);`
 
 We see in the `R` class this kind of encoding:
@@ -94,6 +132,7 @@ public final class R {
 ```
 
 But anyway, I will use **jadx** for a better reading.
+
 `jadx-gui google2020fixed-dex2jar.jar`
 
 No we can see the **full code** more clearly:
@@ -177,9 +216,13 @@ public class ActivityC0007 extends Activity {
 We can see the encoding, that iterates over the **input of the user** (4 char) at a time and create the **array** of **12 values**.
 
 We can make an **bruteforce** script in python using **numba** and **numpy** for a **high speed**.
+
 Why?
+
 The problem is that a normal script is taking too long or is getting “**stuck**” because:
+
 - The **search space is huge**: `(128-32)^4 = 96^4 = 84,934,656` combinations per `4-character` segment.
+
 In total -> `1,019,215,872` combinations!!!
 
 So, here's a python script:

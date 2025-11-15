@@ -1,3 +1,24 @@
+---
+title: 8kSec - DroidCave - Secure Password Management
+description: "DroidCave offers a robust and intuitive password management solution for Android users. Store all your credentials in one secure location with military-grade encryption."
+tags:
+  - SQLi
+  - examples 
+  - java
+  - content-provider
+  - 8ksec
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - apk decompilation
+  - adb exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20DroidCave%20-%20Secure%20Password%20Management/
+---
+
 **Description**: DroidCave offers a robust and intuitive password management solution for Android users. Store all your credentials in one secure location with military-grade encryption.
 
 **Link**: https://academy.8ksec.io/course/android-application-exploitation-challenges
@@ -12,6 +33,7 @@ adb install -r DroidCave.apk
 When using the application we see *that it is an everyday password manager*. Where we have *several functions such as adding to favorite a list, placing a URL and notes to each password*, and, finally, **encrypting credentials**.
 
 Let's analyze the **source code** with **JADX**.
+
 In the **`AndroidManifest.xml`** file, we can see this interesting **Content Provider**
 ```XML
 <provider
@@ -22,10 +44,13 @@ In the **`AndroidManifest.xml`** file, we can see this interesting **Content Pro
 ```
 
 Pay attention in:
+
 - `android:exported="true"` ➜ Any *third‑party app can hit the provider over IPC*.
+
 - No `android:permission` attribute ➜ **No authentication** gate.
 
 So, we have a **world‑readable `ContentProvider` that stores passwords**.
+
 In **java code**, we can see the following curious code in the class **`PasswordContentProvider`**:
 ```java
 static {  
@@ -108,10 +133,15 @@ private static final String PATH_DISABLE_ENCRYPTION = "disable_encryption";
 private static final String PATH_ENABLE_ENCRYPTION = "enable_encryption";
 ```
 ##### `disable_encryption`
+
 - Sets `SharedPreferences` key `encryption_enabled = false`.
+
 - Iterates over `passwords` rows, **decrypts each BLOB** and rewrites plaintext + `isEncrypted = 0`.
+
 - One IPC call converts every **credential to clear‑text BLOBs**.
+
 ##### `enable_encryption`
+
 - `/enable_encryption` performs the **inverse** (*encrypts all rows*).
 
 We can see the full code logic in the `case 6`
@@ -195,16 +225,23 @@ uriMatcher.addURI(AUTHORITY, "passwords", 1);
 - `/passwords` (or the SQLi path) **returns a cursor**; after bypass the encryption mechanism, the `password` column already **contains readable ASCII**.
 
 The **step by step** in short is:
+
 1. Turn off encryption & decrypt DB -> `content://com.eightksec.droidcave.provider/disable_encryption`
+
 2. Exfiltrate clear‑text secrets -> SQLi or just make a Cursor query.
+
 3. Enable encryption -> _(optional)_ `…/enable_encryption`
 
 The incident in this app:
+
 1. **Exported provider without permission** ➜ Improper IPC exposure.
+
 2. **Raw SQL endpoint** ➜ Classical SQLi.
+
 3. **Feature toggle via IPC** ➜ Flawed crypto implementation; security control can be disabled externally.
 
 Let's create an PoC app!
+
 **`AndroidManifest.xml`**
 ```XML
 <?xml version="1.0" encoding="utf-8"?>  

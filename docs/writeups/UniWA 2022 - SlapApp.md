@@ -1,3 +1,22 @@
+---
+title: UniWA 2022 - SlapApp
+description: " A heard there is an easy way to make money. All you have to do, is slap `1.000.000.000` times."
+tags:
+  - hook
+  - frida
+  - UniWA
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - UniWA
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/UniWA%202022%20-%20SlapApp/
+---
+
 **Description**: A heard there is an easy way to make money. All you have to do, is slap `1.000.000.000` times.
 
 **Download**: https://lautarovculic.com/my_files/SlapApp-signed.apk
@@ -10,9 +29,11 @@ adb install -r SlapApp-signed.apk
 ```
 
 We can see a button that **Slap**.
+
 We need **reach** the `1.000.000.000`
 
 Let's analyze the **source code** with **jadx**.
+
 We have **two activities** if we look into `AndroidManifest.xml` file:
 ```XML
 <activity
@@ -28,9 +49,11 @@ We have **two activities** if we look into `AndroidManifest.xml` file:
 </activity>
 ```
 - `ShowFlag`
+
 - `MainActivity`
 
 We just need work with `MainActivity` class.
+
 This is the **java code**
 ```java
 public class MainActivity extends AppCompatActivity {
@@ -87,14 +110,19 @@ public class MainActivity extends AppCompatActivity {
 ```
 
 We can see a series of messages as the counter advances, until we reach `1,000,000,000,000`
+
 Then, **it will make us wait 4 days to display the flag**!
 
 Not only that, but the counter **is not saved**! So, intentionally, we *should leave the phone on with the app in the foreground for 4 days*, **we will not do that**!
 
 For this, we can use a simple **frida script to make our work easier**.
+
 This script *intercept the `onClick()` method* and access to the *instance* of `MainActivity` with `this.this$0.value`.
+
 And modify the value by `1.000.000.000` (and bypass the accumulated clicks).
+
 Then, **send the Intent** to `ShowFlag` with the `extra` as *`True`*.
+
 Script:
 ```javascript
 Java.perform(() => {
@@ -126,9 +154,11 @@ Launch the app, run the **frida server** in the device, and then:
 frida -U "SlapApp" -l hook.js
 ```
 Slap one time and you will see this message:
+
 `[Redmi Note 8::SlapApp ]-> [+] Slap & Flag 3:)`
 
 Also, the flag!
+
 ![[uniwa2022_slapapp2.png]]
 
 Flag: **`UNIWA{sl4pp_l1k3_th1s!}`**

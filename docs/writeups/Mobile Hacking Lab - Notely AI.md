@@ -1,3 +1,27 @@
+---
+title: Mobile Hacking Lab - Notely AI
+description: "Notely AI is a note keeper app for iOS which can create AI summaries of notes and  implements multiple security layers. However, these security measures may not be as robust as they appear. Can you bypass the security mechanisms and access the hidden flag in the archived notes section?"
+tags:
+  - firebase
+  - obj-c
+  - frida
+  - rev-binaries
+  - hook
+  - MobileHackingLab
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Notely%20AI/
+---
+
 **Description**: Notely AI is a note keeper app for iOS which can create AI summaries of notes and  implements multiple security layers. However, these security measures may not be as robust as they appear. Can you bypass the security mechanisms and access the hidden flag in the archived notes section?
 
 **Link**: https://www.mobilehackinglab.com/course/lab-notelyai-mhc
@@ -7,7 +31,9 @@
 Install an **IPA** file can be difficult. So, for make it more easy, I made a YouTube video with the process using **Sideloadly**. **LINK**: [https://www.youtube.com/watch?v=YPpo9owRKGE](https://www.youtube.com/watch?v=YPpo9owRKGE)
 
 Once you have the app installed, let's proceed with the challenge. **unzip** the **`.ipa`** file.
+
 ### Recon
+
 When we run the application we can see that **we have a Frida security check**:
 
 ![[mhl-notelyAI2.png]]

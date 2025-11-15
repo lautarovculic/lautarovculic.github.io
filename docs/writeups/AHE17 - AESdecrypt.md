@@ -1,9 +1,33 @@
+---
+title: AHE17 - AESdecrypt
+description: ""
+tags:
+  - crypto
+  - rev-libraries
+  - python
+  - AHE
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - AHE
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/AHE17%20-%20AESdecrypt/
+---
+
 ### AHE17 : Android Hacking Events 2017
+
 For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 For download the **APK**
+
 https://team-sik.org/wp-content/uploads/2017/06/AES-Decrypt.apk_.zip
 
 Now, installing the **APK**, we can see a button and two text box for decrypt something.
@@ -15,7 +39,9 @@ Then, let's take around the **code** with **jadx**.
 ![[aesDecrypt2.png]]
 
 Just we need this piece of Java code for understand the **workflow** of the application.
+
 Focus in the loaded library, **native-lib**.
+
 If we unpack the **.apk** file we can found this library in
 ```bash
 lib
@@ -28,6 +54,7 @@ lib
 ```
 
 We can found the **native-lib.so** file and other libraries about **crypto**.
+
 Then, let's use **r2** for a **Static Analysis** of the lib.
 
 ```bash
@@ -56,6 +83,7 @@ Check the **exports** (global symbols)
 ```
 
 Now we will **disassemble the function**.
+
 This function is an **global exported**, then, we can inspect this.
 ```bash
 [0x00003518]> pdf 3
@@ -182,6 +210,7 @@ nth paddr      vaddr      len size section type  string
 ```
 
 A **lot of text**.
+
 So, let's see the **imports**
 ```bash
 [0x00003518]> ii
@@ -223,11 +252,13 @@ nth vaddr      bind   type lib name
 We can found some interesting **functions** of **OPENSSL**, and Encryption/Decryption.
 
 And will use the **EVP_DecryptInit_ex** function. Why?
+
 Looking with **ghidra**, we have this information
 
 ![[aesDecrypt3.png]]
 
 In this function, we have the **IV** and the **Key**.
+
 Then, hooking the **function** with **frida**, we have the following **Key**:
 ```bash
 AMKyAMuv7U4Us1KTVjb2AGV8QGy7jynAoU+77LatjlQ=
@@ -269,6 +300,7 @@ print("Flag:", plaintext)
 ```
 
 The **ciphertext_b64** variable is the **base64** string on the startup app message.
+
 And the flag is
 ```bash
 Flag: AHE17{Frida!}

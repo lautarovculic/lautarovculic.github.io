@@ -4,25 +4,30 @@ description: "Evermars says he is good at repackaging Android applications."
 tags:
   - frida
   - crypto
+  - 0CTF
   - android
 keywords:
   - android reversing
   - ctf writeup
+  - 0CTF
   - mobile writeups
   - apk decompilation
   - frida tool
   - mobile security research
-canonical: https://lautarovculic.github.io/writeups/0ctf-2015-vezel/
+canonical: https://lautarovculic.github.io/writeups/0CTF%202015%20Quals%20CTF%20-%20Vezel/
 ---
 
 **Description**
 Evermars says he is good at repackaging Android applications.
 
 For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 For download the **APK**
+
 https://lautarovculic.com/my_files/vezel.apk
 
 ![[vezel1.png]]
@@ -33,6 +38,7 @@ adb install -r vezel.apk
 ```
 
 We can see a **text edit** and an **button**.
+
 Let's decompile the **apk** with **apktool**
 ```bash
 apktool d vezel.apk
@@ -40,6 +46,7 @@ apktool d vezel.apk
 The **package name** is `com.ctf.vezel`
 
 Let's inspect the **source code** with **jadx**.
+
 We just have **one** activity, that is **MainActivity**
 ```java
 package com.ctf.vezel;  
@@ -131,6 +138,7 @@ public class MainActivity extends ActionBarActivity {
 ```
 
 Let's talk method by method for this code.
+
 Let's start for **confirm**
 ```java
 public void confirm(View v) {  
@@ -147,13 +155,21 @@ public void confirm(View v) {
 ```
 
 **getPackageName()**
+
 Get the name of the package `com.ctf.vezel`
+
 **getSig(String s)**
+
 Get the signature or something and is parse into a string
+
 **getCrc()**
+
 Retrieve a string that is a CRC
+
 **flag**
+
 Is a build string `0CTF{<first><next>}`
+
 And the condition, is if the **flag** is equal with the **text** that the user insert. Then, will be yes.
 
 Now, the **getSig()** method
@@ -173,20 +189,31 @@ private int getSig(String packageName) {
 ```
 
 **PackageManager pm = getPackageManager()**
+
 Get an `PackageManager` object, that is used for access to related info with the packages installed in the device.
+
 **getPackageInfo(packageName, 64)**
+
 Use `PackageManager` for get info from the specified package.
+
 64, is a flag (`PackageManager.GET_SIGNATURES`) that indicates, get the signature info from package.
+
 **Signature[] s = pi.signatures**
+
 Get an array `Signature`that contains sign of the package.
+
 **s[0].toCharsString().hashCode()**
+
 Convert the `first signature` to an string and then calculate the `hashCode`. This value is used as an numeric representation of the signature.
+
 Return the value of `hashCode`.
 
 Then, until now, we have the following format of the flag
+
 0CTF{`hashCode`}
 
 Now, the **last method**
+
 **getCrc**
 ```java
 private String getCrc() {  
@@ -203,19 +230,29 @@ private String getCrc() {
 ```
 
 **ZipFile zf = new ZipFile(getApplicationContext().getPackageCodePath())**
+
 Open the **apk** file, using the **path** of the **actual app**.
+
 **ZipEntry ze = zf.getEntry("classes.dex")**
+
 Search and get a entry reference to the **zip** file (apk). This file contains the bytecode.
+
 **ze.getCrc()**
+
 Get the CRC value from `classes.dex` file. This numeric value is used for check the file integrity.
+
 **String s = String.valueOf(ze.getCrc())**
+
 Convert the CRC value into an string.
+
 Return the `CRC`value.
 
 The flag must look like
+
 `0CTF{<hashCode><CRC>}
 
 So, let's start by the **CRC**
+
 We can get the **CRC** of **classes.dex** with this **python** code
 ```python
 import zipfile
@@ -250,7 +287,9 @@ Java.perform(function () {
 We get the **CRC** number: `1189242199`
 
 Now, let's take the **sig** value.
+
 I read many methods, indeed, I read many people doing so extensive java code.
+
 But here are a simple way of do with **frida**
 ```javascript
 Java.perform(function() {
@@ -272,7 +311,9 @@ Java.perform(function() {
 ```
 
 The value that we get is `-183971537`
+
 So, the flag that we need insert is
+
 `0CTF{-1839715371189242199}`
 
 And the toast message will say **Yes!**

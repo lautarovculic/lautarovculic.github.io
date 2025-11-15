@@ -1,3 +1,22 @@
+---
+title: UniWA 2022 - CaptainHook
+description: "Captain Hook has applied for a position in Squid Game 2022, but in order to take part into the game, he got asked to bypass the login screen of this app. Help him bypass it and he wont have the crocodile eat your hand."
+tags:
+  - frida
+  - hook
+  - UniWA
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - UniWA
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/UniWA%202022%20-%20CaptainHook/
+---
+
 **Description**: Captain Hook has applied for a position in Squid Game 2022, but in order to take part into the game, he got asked to bypass the login screen of this app. Help him bypass it and he wont have the crocodile eat your hand.
 
 **Download**: https://lautarovculic.com/my_files/Captain_Hook.apk
@@ -10,10 +29,15 @@ adb install -r Captain_Hook.apk
 ```
 
 We can see a **login activity**. Which have `username` and `password` field with a **login button**.
+
 Let's inspect the **source code** with **jadx**.
+
 Looking in `AndroidManifest.xml` file, the *package name* is `com.example.captain_hook`.
+
 And we have **two activities**:
+
 - `MainActivity`
+
 - `Game`
 
 ```XML
@@ -97,9 +121,11 @@ public class MainActivity extends ActivityC0491h {
 ```
 
 In this *simple java code* we can find some functions and methods.
+
 For example, we notice that a *native lib* are loaded that returns a **String**.
 
 Here's the *if condition* when the *button is pressed* In this _simple java code_ we can find some functions and methods.  
+
 For example, we notice that a _native lib_ are loaded that returns a **String**.
 
 This will _trigger the Game method code_. And a **new `textView`** will appear with the flag if we press the button:
@@ -161,6 +187,7 @@ Output:
 ```
 
 We got the class `com.example.captain_hook.MainActivity$a`.  
+
 Now we can craft this JavaScript code that create a _new instance_ and intercept the `onClick()` method:
 ```javascript
 Java.perform(() => {
@@ -183,16 +210,19 @@ Java.perform(() => {
     };
 });
 ```
-Run the frida script and then, press the **LOGIN** button.  
+Run the frida script and then, press the **LOGIN** button.
+
 Output:
 ```bash
 [Redmi Note 8::Captain_Hook ]-> [+] FLAG: UNIWA{Y0u_Ar3_my_C4pt@in}
 ```
 
-Okey, we got the flag.  
+Okey, we got the flag.
+
 Flag: **`UNIWA{Y0u_Ar3_my_C4pt@in}`**
 
 However, *this approach doesn't trigger* the `Game` activity, since **we're calling the native method from a new instance**.
+
 To **replicate the full behavior of the original logic** (including *launching the Game activity*), we **can modify the hook as follows**:
 ```javascript
 Java.perform(() => {
@@ -223,6 +253,7 @@ Java.perform(() => {
 ```
 
 This will *trigger the Game method code*. And a **new `textView`** will appear with the flag if we press the button!
+
 ![[uniwa2022_captainhook2.png]]
 
 I hope you found it useful (:

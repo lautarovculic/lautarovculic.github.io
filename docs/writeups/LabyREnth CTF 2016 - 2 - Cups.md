@@ -1,19 +1,46 @@
+---
+title: LabyREnth CTF 2016 - 2 - Cups
+description: ""
+tags:
+  - malware
+  - smali
+  - patching
+  - crypto
+  - obfuscation
+  - LabyREnth
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - LabyREnth
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/LabyREnth%20CTF%202016%20-%202%20-%20Cups/
+---
+
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/3778e43f21797bb383108182fe200a928be8605ff5b078aaf4feac02850b91f4
+
 **Password**: infected
 
 ![[laby2016_cups1.png]]
 
 After **extract** the file, we get the **.apk**
+
 Install it with **adb**
 ```bash
 adb install -r ezFill.apk
 ```
 
 We can see a **login** activity
+
 So, for **understand what the app do**, we need **decompile it**.
 ```bash
 apktool d ezFill.apk
@@ -21,6 +48,7 @@ apktool d ezFill.apk
 And open the **apk** file with **jadx** (GUI version)
 
 We have just **one** activity in the package `mx.fill.ez.cups.ezfill`
+
 The **CupsLogin** class is so extended. So I will show you just the **necessary** code for make this challenge.
 
 We have some **hardcoded** usernames and password
@@ -29,6 +57,7 @@ private static final String[] l = {"foo@example.com:hello", "bar@example.com:wor
 ```
 
 If we press the button get cups, this will give us an **string**.
+
 More below, we have the method **a(char[] cArr)**
 ```java
 public char[] a(char[] cArr) {  
@@ -50,13 +79,19 @@ public char[] a(char[] cArr) {
 ```
 
 This method have an **obfuscation logic**.
+
 - `iArr` Is the **integer array** that have some chars.
+
 - `cArr` Is the **char array** passed as **arg**.
+
 - The method iterates in each element of `iArr`.
+
 - For each index (`i2`) of `iArr`, is realized an **XOR** operation.
 
 And we have another **class** and most important, the **g** class.
+
 We have the following **methods**
+
 - `a(char c, char c2)`
 ```java
 boolean a(char c, char c2) { return (c ^ c2) != 21;
@@ -94,11 +129,15 @@ boolean d(char c) {
 }
 ```
 This method take **one char** `c` and make **two AND**.
+
 The **first one** with **15** (for obtain **4 bits** less significant) and **check if result is 4**.
+
 The **second** with **240** (for obtain **4 bits** more significant) and **check if result is 96**.
 
 And
+
 - `a(String str, char c)`
+
 Use the **previous methods** for **verify** each char of the **password**. And then, **build an char array**.
 
 So, here's a **python** script that make the **brute force** process.
@@ -146,12 +185,17 @@ brute_force()
 ```
 
 And here's the **four corrects flags**
+
 ![[laby2016_cups2.png]]
 
 Flags
+
 **`PAN{da_cups_is_halfEmpty_||_halfFull} (=fluids)`**
+
 **`PAN{da_cups_is_halfEmpty_||_halfFull} (>fluids)`**
+
 **`PAN{da_cups_is_halfEmpty_||_halfFull} (?fluids)`**
+
 **`PAN{da_cups_is_halfEmpty_||_halfFull} (@fluids)`**
 
 I hope you found it useful (:

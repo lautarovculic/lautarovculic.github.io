@@ -1,3 +1,25 @@
+---
+title: 8kSec - BorderDroid - International Border Protection
+description: "Crossing international borders as a highly targeted individual? BorderDroid provides the ultimate protection against unauthorized device seizures and searches."
+tags:
+  - intents
+  - intents-extra 
+  - broadcast
+  - network
+  - bypass
+  - 8ksec
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - apk decompilation
+  - adb exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20BorderDroid%20-%20International%20Border%20Protection/
+---
+
 **Description**: Crossing international borders as a highly targeted individual? BorderDroid provides the ultimate protection against unauthorized device seizures and searches.
 
 **Link**: https://academy.8ksec.io/course/android-application-exploitation-challenges
@@ -28,6 +50,7 @@ I'm trying to put *my code*, **but isn't work**.
 The kiosk mode, *is working*.
 
 Let's analyze the **source code** using **JADX**.
+
 The *package name* is `com.eightksec.borderdroid`.
 
 And in the `AndroidManifest.xml` file we can see this **receiver** exported as `true`.
@@ -117,9 +140,11 @@ private void unlockAndReturnToDashboard() {
 }
 ```
 We can see this sequence:
+
 - `unlockAndReturnToDashboard()` → `stopLockTask()`, **`setKioskState(false)`**, **stop** `HttpUnlockService` **and open** `DashboardActivity`.
 
 But, what is the sequence?
+
 Well, it's easy. In `YouAreSecureActivity` class, we can see the following list:
 ```java
 private final List<Integer> targetSequence;
@@ -135,19 +160,26 @@ public YouAreSecureActivity() {
 ```
 
 The *sequence*: `24, 25, 24, 25`.
+
 Remember the `onKeyDown()` function?
+
 Pay attention in these lines:
 ```java
 if (i == 24 || i == 25) {
     Log.d(TAG, "Volume key pressed: ".concat(i == 24 ? "UP" : "DOWN"));
 ```
 So:
+
 - `UP` -> `24`
+
 - `DOWN` -> `25`
+
 **Sequence: `UP`, `DOWN`, `UP`, `DOWN`**
+
 In kiosk mode, **just follow the sequence** and the *kiosk mode must be turned off*!
 ### HTTP Remote using PIN via Wi-Fi
 We can see that the app set up a **Nano HTTP Server** locally.
+
 Check it with:
 ```bash
 sudo arp-scan -I wlan0 --localnet
@@ -158,6 +190,7 @@ Output:
 ```
 
 Let's check some classes, but the **most important class** is **`HttpUnlockService`**.
+
 Ill put the *entire class code*:
 ```java
 public class HttpUnlockService extends Service {  
@@ -295,7 +328,9 @@ public NanoHTTPD.Response serve(NanoHTTPD.IHTTPSession iHTTPSession) {
 ```
 
 So, we have:
+
 - `POST http://192.168.0.124:8080/unlock`
+
 And *finally*, we have the **body content**!
 ```java
 if (status == NanoHTTPD.Response.Status.OK && str2 != null) {
@@ -312,6 +347,7 @@ if (status == NanoHTTPD.Response.Status.OK && str2 != null) {
 Is **`pin`**!
 
 If we *send the correct PIN*, this function will be triggered:
+
 `broadcastVulnerableUnlockIntentWithPin()`, passed the PIN as *extra*:
 ```java
 private void broadcastVulnerableUnlockIntentWithPin(String str) {
@@ -323,6 +359,7 @@ private void broadcastVulnerableUnlockIntentWithPin(String str) {
 }
 ```
 And the `RemoteTriggerReceiver` will be called with *intents*!
+
 When it's receive the intent, will execute this code:
 ```java
 public void onReceive(Context context, Intent intent) {
@@ -350,6 +387,7 @@ Look at:
 PinStorage().verifyPin(context, stringExtra)
 ```
 Will *verify the PIN* with the *extra string*.
+
 And then, call `performUnlockActions()` function:
 ```java
 private void performUnlockActions(final Context context) {
@@ -377,7 +415,9 @@ static /* synthetic */ void lambda$performUnlockActions$0(Context context) {
 ```
 
 How we can abuse of this vulnerability?
+
 Simple, just **brute forcing** the PIN **via Request**.
+
 But just for be a little concise, Ill show you the *curl* command.
 ```bash
 curl -i -X POST http://192.168.0.6:8080/unlock \

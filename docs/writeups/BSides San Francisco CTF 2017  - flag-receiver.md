@@ -1,7 +1,34 @@
+---
+title: BSides San Francisco CTF 2017 - flag-receiver
+description: "Here is a simple mobile application that will hand you the flag.. if you ask for it the right way."
+tags:
+  - intents
+  - broadcast
+  - rev-libraries
+  - frida
+  - python
+  - strings
+  - BSides
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - BSides
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/BSides%20San%20Francisco%20CTF%202017%20%20-%20flag-receiver/
+---
+
 **Description**: Here is a simple mobile application that will hand you the flag.. if you ask for it the right way.
+
 P.S, it is meant to have a blank landing activity :) Use string starting with Flag:
+
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/flagstore.apk
@@ -18,6 +45,7 @@ Then, decompile it with **apktool**
 apktool d flagstore.apk
 ```
 We can see that we have an **"empty"** activity.
+
 Let's inspect the **source code** with **jadx**
 
 We can see in **strings.xml** some interesting harcoded strings
@@ -69,12 +97,17 @@ Here's the **AndroidManifest.xml** file
 </manifest>
 ```
 We can see four things
+
 - `com.flagstore.ctf.flagstore` is the package name of the android app.
+
 - Two permissions, `ctf.permissions._MSG` and `ctf.permissionn._SEND`
+
 - Three activities, `MainActivity`, `Send_to_Activity` and `CTFReceiver`
+
 - And one receiver called `Send_to_Activity` (used in the activity with the same name)
 
 We can see in the **Manifest** class, we just can look that the permissions are called.
+
 And in the **MainActivity**
 ```java
 public class MainActivity extends Activity {  
@@ -93,6 +126,7 @@ public class MainActivity extends Activity {
 ```
 
 We can see that the intent is used for **launch** the **Send_to_Activity** when is received.
+
 The **Send_to_Activity** look like
 ```java
 public class Send_to_Activity extends BroadcastReceiver {  
@@ -116,7 +150,9 @@ adb shell am broadcast -a com.flagstore.ctf.INCOMING_INTENT -e "msg" "OpenSesame
 Send an **intent** with the **extra** string **msg**, and the **value** is **`OpenSesame`**
 
 And we can see that a new activity is launched
+
 ![[bside_flagstore2.png]]
+
 We can see just an **button** with the label **BROADCAST**, which means that we need send an **Broadcast** message.
 
 Here's the **onCreate** method in **CTFReceiver** class
@@ -150,7 +186,9 @@ public void onCreate(Bundle savedInstanceState) {
 ```
 
 Which load an **native-lib** binary, that we can inspect with **ghidra**
+
 In the function `Java_com_flagstore_ctf_flagstore_CTFReceiver_getPhrase`
+
 We can found this piece of code
 ```C
   local_14 = *(int *)(in_GS_OFFSET + 0x14);
@@ -166,6 +204,7 @@ We can found this piece of code
   local_fc = 0x487e4140;
   ```
 Following the logic of the code, we get the string `@A~HfHENDAdwBo_eMjiPlr}v^`
+
 Which in the java code we have
 ```java
 String a = CTFReceiver.this.getResources().getString(R.string.str3) + "fpcMpwfFurWGlWu`uDlUge";
@@ -219,11 +258,13 @@ Java.perform(function() {
 ```
 
 Setup frida in your emulator and then, get the process app running the **broadcast** view activity.
+
 Then, run automatically
 ```bash
 frida -U -p $(frida-ps -Uai | grep "flagstore" | awk '{print $1}') -l script.js
 ```
 The `-U` parameter is for attach frida to the process (`-P`) that is the output of the *middle command*, then, run the script that I share previously.
+
 When we press the **BROADCAST** button, we get the following output
 ```bash
 [Pixel 2::PID::8893 ]-> Intercepting getPhrase
@@ -236,7 +277,9 @@ getPhrase: CongratsGoodWorkYouFoundIBTZGxaOEUj[Q]@MFEu]GZjMS{\wndTDzx[HighR~p|Ky
 ```
 
 So, we have **half**-flag. We need complete this.
+
 Going back to the library, I notice that in some part of the code in C from `Java_com_flagstore_ctf_flagstore_CTFReceiver_getPhrase`
+
 We have this
 ```C
   do {

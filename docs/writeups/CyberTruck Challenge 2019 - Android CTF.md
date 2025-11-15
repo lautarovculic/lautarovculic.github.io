@@ -1,18 +1,41 @@
+---
+title: CyberTruck Challenge 2019 - Android CTF
+description: "A new mobile remote keyless system CyberTruck has been implemented by one of the most well-known car security companies NowSecure Mobile Vehicles. The car security company has ensured that the system is entirely uncrackable and therefore attackers will not be able to recover secrets within the mobile application."
+tags:
+  - crypto
+  - frida
+  - hook
+  - strings
+  - rev-libraries
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/CyberTruck%20Challenge%202019%20-%20Android%20CTF/
+---
+
 **Description**: A new mobile remote keyless system “**CyberTruck**” has been implemented by one of the most well-known car security companies “**NowSecure Mobile Vehicles**”. The car security company has ensured that the system is entirely **uncrackable** and therefore attackers will not be able to recover secrets within the mobile application.
 
 If you are an experienced Android reverser, then enable the `tamperproof` button to harden the application before unlocking your cars. Your goal will consist on **recovering up to 6 secrets in the application**.
 
 **Challenge 1 to unlock car1. "DES key: Completely Keyless. Completely safe"**
+
 - `50pts`: There is a secret used to create a DES key. Can you tell me which one?
 
 - `100pts`: There is a token generated at runtime to unlock the `carid=1`. Can you get it? (flag must be submitted in hexa all lowercase)
 
 **Challenge 2 to unlock car2: "AES key: Your Cell Mobile Is Your Key"**
+
 - `50pts`: This challenge has been obfuscated with ProGuard, therefore you will not recover the AES key.
 
 - `100pts`: There is a token generated at runtime to unlock the `carid=2`. Can you get it? (flag must be submitted in hexa all lowercase)
 
 **Challenge 3 to unlock car3. "Mr Truck: Unlock me Baby!"**
+
 - `50pts`: There is an interesting string in the native code. Can you catch it?
 
 
@@ -26,20 +49,26 @@ adb install -r cybertruck.apk
 ```
 
 We can notice that is an *app with many functions*.
+
 Let's take a look to the **source code** with **jadx** (GUI version).
+
 But before, *decompile it* with **apktool**
 ```bash
 apktool d cybertruck.apk
 ```
 
 #### General Recon
+
 The **package name** is `org.nowsecure.cybertruck` and the *unique activity* is **MainActivity**.
+
 But, we can see that there are other classes like `c`, `a`, `HookDetector`, `Challenge1`.
 
 #### Challenge 1
+
 *DES key: Completely Keyless. Completely safe*
 
 *There is a secret used to create a DES key. Can you tell me which one?*
+
 We can see the class **`Challenge1`**, where the code show the lines
 ```java
 protected byte[] generateDynamicKey(byte[] bArr) {
@@ -54,6 +83,7 @@ protected byte[] generateDynamicKey(byte[] bArr) {
 Response: **`s3cr3t$_n3veR_mUst_bE_h4rdc0d3d_m4t3!`**
 
 *There is a token generated at runtime to unlock the `carid=1`. Can you get it? (flag must be submitted in hexa all lowercase)*
+
 Looking the **`MainActivity`** class, when the *button is pressed*:
 ```java
 public void onClick(View view) {
@@ -64,6 +94,7 @@ public void onClick(View view) {
 }
 ```
 The *method `k()`* is launched.
+
 Which is
 ```java
 protected void k() {
@@ -127,10 +158,13 @@ Attaching...
 Flag: **`046e04ff67535d25dfea022033fcaaf23606b95a5c07a8c6`**
 
 #### Challenge 2
+
 *AES key: Your Cell Mobile Is Your Key*
 
 *This challenge has been obfuscated with ProGuard, therefore you will not recover the AES key.*
+
 So, we need *recover* the *AES* key.
+
 We can follow *again* the `k()` method called when *press the UNLOCK button*
 ```java
 protected void k() {
@@ -140,6 +174,7 @@ protected void k() {
 }
 ```
 There are a *`a`* class.
+
 Which have some *interesting function*:
 ```java
 public class a {  
@@ -188,13 +223,17 @@ public class a {
 ```
 
 The **AES key** is here:
+
 `SecretKeySpec secretKeySpec = new SecretKeySpec(bArr2, "AES");`
+
 Which corresponds to **`ch2.key`** file.
+
 Why `uncr4ck4ble_k3yle$$` isn't the key? because the `secretKeySpec` uses `bArr2` and the *hardcoded string* is `bArr`.
 
 So, you can find the `ch2.key` file in the **assets** directory, the response of this challenge part is `d474_47_r357_mu57_pR073C73D700!!`.
 
 *There is a token generated at runtime to unlock the `carid=2`. Can you get it? (flag must be submitted in hexa all lowercase)*
+
 Again, like the previous challenge, we need *hook* the class and methods.
 
 Here's the script
@@ -253,14 +292,19 @@ Attaching...
 ```
 
 Flag: **`512100f7cc50c76906d23181aff63f0d642b3d947f75d360b6b15447540e4f16`**
+
 **NOTE**
+
 The **`HookDetector`** is used in this second challenge, but, just check if there are a `frida-server` file in the *Android device*, if you frida server binary has named like the code say, just *rename it*.
 
 #### Challenge 3
+
 *Mr Truck: Unlock me Baby!*
 
 *There is an interesting string in the native code. Can you catch it?*
+
 Mmmm, let's do it.
+
 In the **`MainActivity`** class, this is the *loaded library*
 ```java
 static {
@@ -269,6 +313,7 @@ static {
 ```
 
 So, go to the *apktool directory* that has dropped, inside of the *lib* directory you will find a file called `libnative-lib.so`. No matters what *arch* you choose.
+
 We are looking for *a string*, then, let's show all strings with
 ```bash
 strings libnative-lib.so

@@ -1,3 +1,26 @@
+---
+title: HackerOne H1-702 - Challenge 2
+description: "Looks like this app is all locked up. Think you can figure out the combination?"
+tags:
+  - python
+  - frida
+  - smali
+  - logs
+  - logcat
+  - HackerOne
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackerOne CTF
+  - HackerOne
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/HackerOne%20H1-702%20-%20Challenge%202/
+---
+
 **Description**: Looks like this app is all locked up. Think you can figure out the combination?
 
 Download **APK**: https://lautarovculic.com/my_files/challenge2_h1-702.apk
@@ -14,11 +37,15 @@ apktool d challenge2_h1-702.apk
 ```
 
 We can see a **PIN** app, which have **six** numbers combination.
+
 So, we can simply try the `1.000.000` combinations (`C= 10⁶ = 1.000.000`) or **look the source code**.
 
 Open **jadx** (GUI Version) for **analyze** the code.
+
 The package name is `com.hackerone.mobile.challenge2`
+
 And the **unique** activity is the **MainActivity**.
+
 But, we have some **extra classes** like `SecretBox`, `PinLockView`, `IndicatorDots`
 
 Here's the **main code** of our interest
@@ -66,9 +93,11 @@ public class MainActivity extends AppCompatActivity {
 The code use **native code** for decrypt the flag. We can see the `getKey` function that work with the pin code.
 
 We can **hook the `onComplete`** function for inspect **how it work**.
+
 The `PinLockListener` use an **anonymous class**.
 
 Anonymous classes generate a class name like `<aClassName>$<id>`.
+
 The `id` start from 1 until the *last anonymous class*. In this case we can find the anonymous class in `com.hackerone.mobile.challenge2.MainActivity$1`.
 
 We can find this with
@@ -84,6 +113,7 @@ smali/com/hackerone/mobile/challenge2
 ```
 
 Let's hook the `onComplete` with frida.
+
 Here's the script
 ```javascript
 Java.perform(function () {
@@ -113,7 +143,9 @@ Java.perform(function () {
 ```
 
 we can see that this work, but also **every 50 attempts**, there are an **wait**. This can make more *difficult* to bruteforce the pin.
+
 So, the next challenge is that we need *bypass* the *protection*.
+
 Which is **another native code** in `resetCoolDown();` function.
 
 This functions is like an *ok, start again the process*. So, we need call it every 50 attempts. Like
@@ -157,6 +189,7 @@ Java.perform(function () {
 ```
 
 And we can see that the bruteforce *run without* stoppers.
+
 The **final step** is *know what is the correct PIN*, right? We need **check** of some way the *correct pin*.
 
 Looking in **logcat** if the code work
@@ -179,7 +212,9 @@ public byte[] decrypt(byte[] bArr, byte[] bArr2) {
 ```
 
 This return the **decrypted data** if it *could be decrypted successfully*.
+
 Let's hook the method.
+
 We can implement this code
 ```javascript
     let success = false;
@@ -198,6 +233,7 @@ We can implement this code
     };
     ```
 For work with the method.
+
 Also, this code
 ```javascript
 Listener.onComplete.implementation = function (key) {
@@ -232,6 +268,7 @@ Listener.onComplete.implementation = function (key) {
         }
 ```
 Will modify the call to `onComplete()` for check if this is correct.
+
 I'll start from the beginning, this will take a long of time, but, I'll get the dinner while the code is running.
 
 The final code look like
@@ -322,6 +359,7 @@ And the code works!!
 ```
 
 PIN: `918264`
+
 Flag: **`flag{wow_yall_called_a_lot_of_func$}`**
 
 I hope you found it useful (:

@@ -1,6 +1,30 @@
+---
+title: Waiting – Hack The Box
+description: "The app stores a secret and says it is stored securely even in case the application has been tampered. Are you able to retrieve it?"
+tags:
+  - rev-libraries
+  - crypto
+  - python
+  - HackTheBox
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackTheBox
+  - HTB
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Waiting%20%E2%80%93%20Hack%20The%20Box/
+---
+
 ![[waiting1.png]]
+
 **Difficult:** Medium
+
 **Category**: Mobile
+
 **OS**: Android
 
 **Description**: The app stores a secret and says it is stored securely even in case the application has been tampered. Are you able to retrieve it?
@@ -16,12 +40,15 @@ apktool d app-release.apk
 The **SDK** is **31**, then we can use our **Android 12 (SDK API 31)** of Genymotion.
 
 Now, install the **apk** with **adb**.
+
 ![[waiting2.png]]
 
 ![[waiting3.png]]
 
 If you **press the button** again, you **will get a new token**. With the **same data**.
+
 Let’s inspect the **source code** with **jadx**.
+
 I can find this code in **com.example.waiting.Secrets**
 ```java
 package com.example.waiting;
@@ -51,10 +78,13 @@ public final class Secrets {
 ```
 
 Then, it’s a library. We need know what are in the **apk** file
+
 ![[waiting4.png]]
 
 We have **libnative-lib.so** and **libsecrets.so**
+
 Probably we want inspect **libresecrets**.
+
 Then, let’s open **ghidra** and the **file**.
 
 We have the **Java_com_example_waiting_Secrets_getdxXEPMNe** function
@@ -84,9 +114,13 @@ __int64 __fastcall Java_com_example_waiting_Secrets_getdxXEPMNe(__int64 a1, __in
 ```
 
 There are an **SHA256 encrypt** (**v4**) and is stored in **v10**.
+
 Then, is **XORed** with **byte_13B5**
+
 The **value of sha256** is **com.example.waiting**
+
 Just we need “**crack**” it, I don’t know if this is the **intended path**, but this challenge Is so weird.
+
 I spend so much time with the **fields** 
 
 You can use this **python** script

@@ -1,3 +1,23 @@
+---
+title: UniWA 2022 - WarmupApp
+description: " A new game is released, but not everyone are allowed to play. Can you get the access code?"
+tags:
+  - strings
+  - smali
+  - patching
+  - UniWA
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - UniWA
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/UniWA%202022%20-%20WarmupApp/
+---
+
 **Description**: A new game is released, but not everyone are allowed to play. Can you get the access code?
 
 **Download**: https://lautarovculic.com/my_files/WarmupApp-signed.apk
@@ -10,6 +30,7 @@ adb install -r WarmupApp-signed.apk
 ```
 
 Let's analyze the **source code** with **jadx**.
+
 The *package name* is **`com.example.warmupapp`** and in the **`MainActivity`** class we can get the flag.
 ```java
 public class MainActivity extends AppCompatActivity {
@@ -43,7 +64,9 @@ public class MainActivity extends AppCompatActivity {
 Flag: **`UNIWA{w4rm1ng_my_4pp_up!!}`**
 
 But pay attention, that we don't "resolve" the challenge.
+
 If we try **Get Access**, we receive the "*error*" message.
+
 So, let's **patch the APK** with smali!
 
 Decompile the **APK** with **apktool**
@@ -70,11 +93,15 @@ We can see inside of **constructor** the **initialization** of the `isUser` bool
 .end method
 ```
 We have the line `const/4 v0, 0x0`
+
 `0x0` -> False
+
 `0x1` -> True
 
 Set to `0x1` and save the `MainActivity.smali` file.
+
 Now it's **rebuild** time!
+
 Go back until directory dropped by apktool and then, rebuild:
 ```bash
 apktool b WarmupApp-signed
@@ -103,6 +130,7 @@ adb install -r WarmupApp-signed-2.apk
 ```
 
 Now the app are patched!
+
 ![[uniwa2022_warmup2.png]]
 
 I hope you found it useful (:

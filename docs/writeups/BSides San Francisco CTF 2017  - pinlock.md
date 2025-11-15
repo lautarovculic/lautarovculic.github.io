@@ -1,6 +1,32 @@
+---
+title: BSides San Francisco CTF 2017 - pinlock
+description: "It's the developer's first mobile application. They are trying their hand at storing secrets securely. Could one of them be the flag?"
+tags:
+  - adb
+  - SQLite
+  - patching
+  - crypto
+  - activity
+  - logs
+  - BSides
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - BSides
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/BSides%20San%20Francisco%20CTF%202017%20%20-%20pinlock/
+---
+
 **Description**: It's the developer's first mobile application. They are trying their hand at storing secrets securely. Could one of them be the flag?
+
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/pinstore.apk
@@ -17,6 +43,7 @@ Then, **decompile with apktool**
 apktool d pinstore.apk
 ```
 Notice that we have a **simple pin code** check. Just **integers**.
+
 Let's analyze the **source code** with **jadx**.
 
 I notice in the **AndroidManifest.xml** file we have **two activities**
@@ -38,6 +65,7 @@ adb shell am start -n pinlock.ctf.pinlock.com.pinstore/.SecretDisplay
 ![[bside_pinlock2.png]]
 
 It's look like a **database**...
+
 Then, we can **check** that is a **database** inside of the app if we inspect the **log** with **logcat** when we try insert a **incorrect pin**.
 ```bash
 adb logcat -c && adb logcat
@@ -48,6 +76,7 @@ W/SQLiteConnectionPool( 2114): A SQLiteConnection object for database '/data/dat
 ```
 
 So, going inside of our **emulator** file system. And it's correct, there are a **database**.
+
 We can download to our host machine with adb
 ```bash
 adb pull /data/data/pinlock.ctf.pinlock.com.pinstore/databases/pinlock.db
@@ -71,7 +100,9 @@ sqlite>
 ```
 
 We will use just the **first hash**
+
 `d8531a519b3d4dfebece0259f90b466a23efc57b`
+
 Let's crack it with **hashcat**
 ```bash
 hashcat -m 100 hash.txt /usr/share/seclists/rockyou.txt
@@ -104,12 +135,17 @@ v1.2:
 ```
 
 Now is time to **read the source code of** `SecretActivity` and `CryptoUtilies`
+
 After read, we have the string `t0ps3kr3tk3y` and this is using an algorithm to decrypt it.
 
 We have **two secrets**
+
 `hcsvUnln5jMdw3GeI4o/txB5vaEf1PFAnKQ3kPsRW2o5rR0a1JE54d0BLkzXPtqB`
+
 And
+
 `Bi528nDlNBcX9BcCC+ZqGQo1Oz01+GOWSmvxRj7jg1g=`
+
 We need **modify** the **smali** file for switch to the **second one**.
 
 Because we have in the **DatabaseUtilities** class
@@ -127,6 +163,7 @@ public String fetchSecret() throws IOException {
     }
 ```
 That the **rawQuery** is using `secretsDBv1` and we just change the `1` by `2`
+
 And in the **try** if the **SecretDisplay** class, we have the `v1` string. So we need switch to `v2`
 ```java
 try {  
@@ -143,6 +180,7 @@ cat DatabaseUtilities.smali | grep secretsDBv1 -n
 315:    const-string v1, "SELECT entry FROM secretsDBv1"
 ```
 In the **315** line of the code, just change `secretsDBv1` to `secretsDBv2`.
+
 Then, save the file.
 
 And
@@ -152,6 +190,7 @@ cat SecretDisplay.smali | grep v1 -n
 74:    const-string v7, "v1"
 ```
 In the **74** line, we have the last change that we must do. `v1` to `v2`
+
 Save the file
 
 And now, we just need **rebuild** the app with **apktool**
@@ -175,7 +214,9 @@ adb install -r pinstore/dist/pinstore.apk
 ```
 
 Insert the correct code that is `7498`
+
 And we got the flag
+
 ![[bside_pinlock3.png]]
 
 I hope you found it useful (:

@@ -1,3 +1,24 @@
+---
+title: 8kSec - AndroDialer - The Ultimate Phone Experience
+description: "AndroDialer is a powerful, feature-rich phone application designed to enhance your calling experience with advanced functionality and seamless integration."
+tags:
+  - intents
+  - components
+  - java
+  - priv-esc
+  - 8ksec
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - apk decompilation
+  - adb exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20AndroDialer%20-%20The%20Ultimate%20Phone%20Experience/
+---
+
 **Description**: AndroDialer is a powerful, feature-rich phone application designed to enhance your calling experience with advanced functionality and seamless integration.
 
 **Link**: https://academy.8ksec.io/course/android-application-exploitation-challenges
@@ -10,8 +31,12 @@ adb install -r AndroDialer.apk
 ```
 
 We can see in the settings functions some features of the app.
+
+
 Take a look to the app and try use it. It's important give all the permissions to the app.
+
 Also, **add the widget to Home Screen** and use it.
+
 Let's inspect the **source code**, for that, we'll use **JADX**.
 
 Looking in the `AndroidManifest.xml` file, we can notice that the *package name* is `com.eightksec.androdialer`.
@@ -87,6 +112,7 @@ if (str7.equals("8kd1aL3R_s3Cur3_k3Y_2023") ||
 Token: **`8kd1aL3R_s3Cur3_k3Y_2023`**
 
 Also notice the name of *variable*: **`enterprise_auth_token`**, this sound important.
+
 And here we can see how *scheme works*
 ```java
 [...]

@@ -1,4 +1,27 @@
+---
+title: PwnSec CTF 2024 - FireStorm
+description: "Descriptions are boring, just solve the challenge meh!"
+tags:
+  - frida
+  - python
+  - strings
+  - firebase
+  - hook
+  - PwnSec
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - PwnSec
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/PwnSec%20CTF%202024%20-%20FireStorm/
+---
+
 **Description**: Descriptions are boring, just solve the challenge meh!
+
 **Download content**: https://lautarovculic.com/my_files/firestorm.zip
 
 ![[pwnSec_firestorm1.png]]
@@ -14,6 +37,7 @@ apktool d FireStorm.apk
 ```
 
 Open **jadx** (GUI version) for *look the Java code* and inspect it.
+
 We can see in the **MainActivity** the following code
 ```java
 public String Password() {
@@ -39,9 +63,13 @@ public native String generateRandomString(String str);
 ```
 
 The following code takes some **strings** from the file **`strings.xml`**.
+
 The password would be predictable **except that there is a function that generates a random string**.
+
 So we will have to call the function, to obtain the output (**return**) of the *generated password*.
+
 For this, we will use **frida**.
+
 Here's a simple script
 ```javascript
 Java.perform(function () {
@@ -89,6 +117,7 @@ Attaching...
 ```
 
 My temporal password is `C7_dotpsC7t7f_._In_i.IdttpaofoaIIdIdnndIfC`.
+
 So, what can we do with the password?
 
 Checking the **`strings.xml`** file in the *resources folder* we can see that there are a **firebase** service.
@@ -105,6 +134,7 @@ Checking the **`strings.xml`** file in the *resources folder* we can see that th
 We have an *email*! And a *password*. So, let's log in!
 
 You need install some packages and modules, like `pyrebase4`
+
 After some problems, I was run
 ```bash
 pip uninstall pyrebase pyrebase4 requests urllib3

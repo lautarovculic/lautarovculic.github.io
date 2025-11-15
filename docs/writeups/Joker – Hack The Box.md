@@ -1,6 +1,32 @@
+---
+title: Joker – Hack The Box
+description: "The malware reverse engineering team got an alert about malware which is still published on Google’s PlayStore and has thousands of installs. Can you help them to identify the address of the command and control server in order to blacklist it ?"
+tags:
+  - malware
+  - smali
+  - patching
+  - crypto
+  - obfuscation
+  - HackTheBox
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackTheBox
+  - HTB
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Joker%20%E2%80%93%20Hack%20The%20Box/
+---
+
 ![[joker1.png]]
+
 **Difficult:** Hard
+
 **Category**: Mobile
+
 **OS**: Android
 
 **Description**: The malware reverse engineering team got an alert about malware which is still published on Google’s PlayStore and has thousands of installs. Can you help them to identify the address of the command and control server in order to blacklist it ?
@@ -8,12 +34,14 @@
 ----
 
 Download and **extract** the **.zip** file with **hackthebox** as password.
+
 Decompile the **.apk** file with **apktool**
 ```bash
 apktool d joker.apk
 ```
 
 I’ll use an **Android 12 (SDK 31)** with **genymotion**
+
 Install it
 ```bash
 adb install -r joker.apk
@@ -22,6 +50,7 @@ adb install -r joker.apk
 ![[joker2.png]]
 
 Let’s inspect the **source code** with **jadx**
+
 After see many code lines, this method catch my attention
 ```java
 public final boolean onCreate() {
@@ -44,13 +73,16 @@ return false;
 ```
 
 Never will execute.
+
 Searching for **f40a** string, we can found this **line**
+
 In **a2 → a** class
 ```java
 public static String f40a = c.a.o(new StringBuffer("Z3qSpRpRxWs"), new StringBuffer("3\\^>_>_>W"));
 ```
 
 That is stored in **c.a.o()**
+
 We can see the XOR logic of the function, XOR arg 1 and arg 2, for get a **“legible string”**.
 ```java
 public static String o(StringBuffer stringBuffer, StringBuffer stringBuffer2) {
@@ -75,6 +107,7 @@ public final boolean onCreate() {
 ```
 
 So we need patch it change the **if-nez** to **if-eqz** in the **smali code**
+
 The **smali code** look has
 ```smali
 .method public final onCreate()Z
@@ -118,6 +151,7 @@ The **smali code** look has
 ```
 
 We need change **if-nez v4, :cond_20** to **if-eqz v4, :cond_20**
+
 In this file:
 ```bash
 /joker/smali/meet/the/joker/JokerBr.smali
@@ -126,7 +160,9 @@ In this file:
 ![[joker3.png]]
 
 Then now, rebuild the **apk**
+
 I’ll skip the process, because there are so many easy and medium writeups on my web about this.
+
 But if you are getting this errors
 ```bash
 adb install -r joker/dist/joker_aligned.apk
@@ -157,6 +193,7 @@ Success
 ```
 
 Then, now open **jadx** with the **joker_signed.apk**
+
 And we can see that the code now is **patched**
 ```java
 public final boolean onCreate() {
@@ -171,8 +208,11 @@ public final boolean onCreate() {
 ```
 
 For know what function is called, we can see
+
 **a2 → a** and **c → a**
+
 **a2.a.b()** is calling **a → c.a.o()**
+
 Here is **b()**
 ```java
 public static void b(Context context) {
@@ -197,6 +237,7 @@ public static void b(Context context) {
 ```
 
 The **URL** is a **XOR** that we can brute with **CyberChef**
+
 ![[joker4.png]]
 
 URL
@@ -212,23 +253,30 @@ if (httpURLConnection.getResponseCode() == 200) {
 ```
 
 This code will never executed because if go to the **URL**, we receive a 404 **not found**.
+
 Then, the **a();** function will not executed.
+
 So, we need again, patch the **apk** file.
+
 The **smali** **code** that we need modify is
 ```smali
 if-ne v0, v1, :cond_45
 ```
 
 We need change **if-ne** to **if-eq** in
+
 **/joker/smali/a2/a.smali**
 
 ![[joker5.png]]
 
 Rebuild the **new** **apk**
+
 Then, installing the **new apk** and if we go to **a2 → a → b function**
+
 ![[joker6.png]]
 
 We’ll look the **! =**
+
 Now we **leave** **b()**, the **app** will entry to **a2.a.a()**
 ```java
 public static void a(Context context, String str) {
@@ -273,16 +321,20 @@ public static void a(Context context, String str) {
 ```
 
 We can see that the method is reading for **some** **files** in **assets**.
+
 And we have the **for** and **if** functions when the filename ends in **301.txt**, then, **call c.a.v()**
+
 ![[joker7.png]]
 
 ```java
 if (str2.endsWith(c.a.o(new StringBuffer("spqn484"), new StringBuffer("@")))) {
 ```
 Here we can **find** the “**txt**” files.. (they are binaries).
+
 ![[joker8.png]]
 
 Returning to **c.a.v()**
+
 Here is the **method**
 ```java
 public static void v(Context context, String str, String str2, String str3) {
@@ -318,8 +370,11 @@ public static void v(Context context, String str, String str2, String str3) {
 ```
 
 **str2** is the **key**, and **second arg**
+
 And, the **first arg** is **str**, that is **2 (DECRYPT_MODE)** in **AES** → **cipher.init**()
+
 So now, we just know the **str3** value.
+
 Looking in the **previous** java code, we can see that some is created as **temp file**.
 
 Go to
@@ -334,15 +389,18 @@ ll.temp: ELF shared object, 64-bit LSB arm64
 ```
 
 Here’s a **ELF** format, probably this is a **C native library** that we need inspect in deep.
+
 Then
 ```bash
 adb pull /data/user/0/meet.the.joker/cache/ll.temp /home/lautaro/Desktop/CTF/HTB/mobile/joker/joker2/ll.temp
 ```
 
 We can see this **XOR** string in **a()** function
+
 ![[joker9.png]]
 
 And here is the text
+
 ![[joker10.png]]
 
 Looking the **java source code**, we have **assetManager** in **JokerNat**
@@ -358,11 +416,13 @@ public class JokerNat {
 ```
 
 And inspecting in the **line 27 in the a()** function of **ll.temp**, we can see that the **eibephonenumerose300.txt** content is transferred to **d()** method:
+
 In **d()** method, we can see again in the **line 27**
 
 ![[joker11.png]]
 
 Following the **kdf** value is “**The flag is:**” for **XOR** the **.txt file**.
+
 Then, in **line 75** we can see that there is the previous **XOR** stored in
 ```bash
 /data/data/meet.the.joker/i
@@ -371,9 +431,11 @@ Then, in **line 75** we can see that there is the previous **XOR** stored in
 ![[joker12.png]]
 
 This conditions isn’t true, then we can try **upload** the **eibephonenumberse300.txt** file in **CyberChef** and try “**The flag is:**” as the **key**.
+
 ![[joker13.png]]
 
 And we can found the **flag**.
+
 _Note: M and T in the flag string is **lowercase**._
 
 I hope you found it useful (:

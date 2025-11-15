@@ -1,16 +1,44 @@
+---
+title: PwnSec CTF 2024 - Snake
+description: "Make sure to run the mobile application on Android API 28 or less (Android 9 or less)."
+tags:
+  - intents
+  - intents-extra
+  - logs
+  - logcat
+  - deserialization
+  - adb
+  - vuln
+  - PwnSec
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - PwnSec
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/PwnSec%20CTF%202024%20-%20Snake/
+---
+
 **Description**: Make sure to run the mobile application on Android API 28 or less (Android 9 or less).
+
 **Download content**: https://lautarovculic.com/my_files/snake.zip
 
 ![[pwnSec_snake1.png]]
 
 Install the **apk** with **ADB**.
+
 **NOTE**
+
 Ill use an **AVD** (Android Virtual Device) *non-rooted* from the **Android Studio** SDK.
 ```bash
 adb install -r snake.apk
 ```
 
 The *UI app* doesn't have nothing interesting. But is good notice that the **app ask for us about storage permissions**.
+
 In fact, the **`AndroidManifest.xml`** file have
 ```XML
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
@@ -22,6 +50,7 @@ Let's decompile the app with **apktool**
 apktool d snake.apk
 ```
 And inspect the **source code** with **jadx** (GUI version)
+
 The **MainActivity** has multiple *root detection*, *frida detection* and *storage permissions*.
 
 The unique interesting code in this activity is the `C()` method:
@@ -89,6 +118,7 @@ public class BigBoss {
 ```
 
 We have an **intent** that we can call with **`am`** (Activity Manager) tool from **adb**.
+
 This specific code
 ```java
 Intent intent = getIntent();
@@ -104,6 +134,7 @@ if (intent.hasExtra("SNAKE") && stringExtra.equals("BigBoss")) {
 }
 ```
 Is the *entry point*.
+
 We can run the following command for *start the app* with the *extra strings*
 ```bash
 adb shell am start -n com.pwnsec.snake/.MainActivity -e SNAKE BigBoss
@@ -149,6 +180,7 @@ public class BigBoss {
 ```
 
 And, here's more information about this **CVE** (CVE-2022-1471)
+
 https://www.veracode.com/blog/research/resolving-cve-2022-1471-snakeyaml-20-release-0
 
 So, according to the article and vulnerability, we can use the following exploit:

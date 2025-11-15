@@ -1,9 +1,34 @@
+---
+title: AHE16 - Strange Calculator
+description: ""
+tags:
+  - smali
+  - python
+  - patching
+  - AHE
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - AHE
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/AHE16%20-%20Strange%20Calculator/
+---
+
 ### AHE16 : Android Hacking Events 2016
+
 For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
+
 For download the **APK**
+
 https://team-sik.org/wp-content/uploads/2016/06/strangecalculator.apk_.zip
 
 ![[strangeCalculator1.png]]
@@ -18,6 +43,7 @@ And then, decompile this with **apktool**
 apktool d strangecalculator.apk
 ```
 Let's inspect the **source code** with **jadx** (GUI Version)
+
 We have 2 activities, **MainActivity** and **Parser** activity.
 
 Let's talk about **MainActivity** (Code can be shorted for the writeup)
@@ -180,6 +206,7 @@ public class Parser {
 ```
 
 This is the **entire** code of the activity.
+
 Take a time for analyze the code, if you pay attention, you can notice that this two **if conditions** is repeated:
 ```java
 if (v > 100.0d) {  
@@ -194,10 +221,13 @@ if (v > 100.0d) {
 ```
 
 These two conditions are **equals**, both compare if **v** (final value) is **>** than 100.
+
 But, **only the first one is executed**.
+
 So, the second condition is **skipped** (because the first is already executed)
 
 Then, we need modify **and rebuild** the **app** from the **smali** code.
+
 But before, let me explain the **second condition**
 ```java
 if (v > 100.0d) {  
@@ -209,6 +239,7 @@ if (v > 100.0d) {
 ```
 
 If the result **(v)** is **>** than **100**, then there is an array called **flarry** and there are an **XOR** operation with **1337** in every **element**, then, is passed via **log** with
+
 `Log.d("SUPER OUTPUT", Integer.toString(i ^ 1337))`
 
 Let's modify the **smali** file of the **activity**.
@@ -219,9 +250,13 @@ Let's modify the **smali** file of the **activity**.
 ```
 
 We can do **many** ways of modify the **smali** for bypass the first **if**.
+
 But in this case, this is a **writeup** and not a **smali lesson**. In a future Ill write a blog about **smali** in deep.
+
 For now, we can go to **Parser$1InternalParser.smali**
+
 And searching for **100**
+
 we can see
 ```smali
 229     .line 42
@@ -247,6 +282,7 @@ we can see
 ```
 
 We need change the `244     throw v4` line to an **nop** for bypass the **throw** exception.
+
 The final **piece of code** must look like:
 ```smali
 229     .line 42
@@ -353,6 +389,7 @@ D/SUPER OUTPUT( 8114): 125
 ```
 
 There is an ASCII chars.
+
 Use the following code in python
 ```python
 def ascii_to_string(ascii_codes):
@@ -420,6 +457,7 @@ AHE16{Java_4nalys1s_1s_r4th3r_3asy_1snt_1t}
 ```
 
 We can avoide the **patch**, **rebuild**, **analysis** process from the start of the **CTF**.
+
 Because, we can use the **java** logic and pass to **python** script like:
 ```python
 def process_value(v):

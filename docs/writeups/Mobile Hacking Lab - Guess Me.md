@@ -1,4 +1,26 @@
-**Description**: Welcome to the "**Guess Me**" Deep Link Exploitation Challenge! Immerse yourself in the world of cybersecurity with this hands-on lab. This challenge revolves around a fictitious "Guess Me" app, shedding light on a critical security flaw related to deep links that can lead to remote code execution within the app's framework.
+---
+title: Mobile Hacking Lab - Guess Me
+description: "Welcome to the 'Guess Me' Deep Link Exploitation Challenge! Immerse yourself in the world of cybersecurity with this hands-on lab. This challenge revolves around a fictitious 'Guess Me' app, shedding light on a critical security flaw related to deep links that can lead to remote code execution within the app's framework."
+tags:
+  - deep-links
+  - code-execution
+  - java
+  - adb
+  - webviews
+  - MobileHackingLab
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Guess%20Me/
+---
 
 **Download**: https://lautarovculic.com/my_files/guessMe.apk
 **Link**: https://www.mobilehackinglab.com/path-player?courseid=lab-guess-me

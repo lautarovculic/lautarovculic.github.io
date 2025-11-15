@@ -1,3 +1,25 @@
+---
+title: BSidesSF 2018 CTF - Reversing & Forensic Challenge
+description: ""
+tags:
+  - forensic
+  - crypto
+  - frida
+  - hook
+  - SQLite
+  - BSides
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - BSides
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/BSidesSF%202018%20CTF%20-%20Reversing%20%26%20Forensic%20Challenge/
+---
+
 Download **content**: https://lautarovculic.com/my_files/bsides_2018.zip
 
 ![[bsides2018_1.png]]
@@ -8,7 +30,9 @@ adb install -r passwordVault.apk
 ```
 
 But first let's take a look at the file `passwordVaultDiskImage`.
+
 We can see that is
+
 `passwordVaultDiskImage: XZ compressed data, checksum CRC64`
 
 We just need **extract** the file.
@@ -21,6 +45,7 @@ This will drop a **.fat** file, we can use **fatcat** tool for inspect the conte
 ```bash
 fatcat passwordVaultDiskImage\~ -l /pew
 ```
+
 ```bash
 Listing path /pew
 Directory cluster: 3
@@ -33,6 +58,7 @@ But also we can search for **deleted files**
 ```bash
 fatcat passwordVaultDiskImage\~ -l /pew -d
 ```
+
 ```bash
 Listing path /pew
 Directory cluster: 3
@@ -43,6 +69,7 @@ f 4/4/2018 00:03:52  password (ASSWORD)                                 c=445 s=
 ```
 
 Here's a *password* file.
+
 We can read this with
 ```bash
 fatcat passwordVaultDiskImage\~ -r /pew/password
@@ -56,11 +83,15 @@ git checkout -f master
 Then, looking for all commits (with `git log`) I found in the commit `55bb1750d984691c154aa7b8a4877e2e6ac3e055` (*Temp test file*) a `vault.db`.
 
 The `.db` file is in the new directories that git was dropped `app/testArtifact`.
+
 ![[bsides2018_2.png]]
+
 We can see an "**flag**" which is `J0yGSBs5EaApkR67G/iZjK12kkTk1XBMzWdy7P58iqGUDfLjLlGOZf/nryFXQqBh`.
 
 Come back to the **source code** of the a.pp. Inspect this with **jadx** (GUI version).
+
 The **package name** is `ctf.com.passwordvault` and there are **three activities**. But, we will focus on some *piece of code*.
+
 This code are present in the **`CryptoUtilities`** class
 ```java
 public SecretKeySpec getKey(String password) throws Exception {

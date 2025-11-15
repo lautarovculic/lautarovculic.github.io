@@ -1,6 +1,29 @@
+---
+title: Mobile Hacking Lab - Cyclic Scanner
+description: "Welcome to the Cyclic Scanner Challenge! This lab is designed to mimic real-world scenarios where vulnerabilities within Android services lead to exploitable situations. Participants will have the opportunity to exploit these vulnerabilities to achieve remote code execution (RCE) on an Android device."
+tags:
+  - code-execution
+  - logs
+  - logcat
+  - MobileHackingLab
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Cyclic%20Scanner/
+---
+
 **Description**: Welcome to the Cyclic Scanner Challenge! This lab is designed to mimic real-world scenarios where vulnerabilities within Android services lead to exploitable situations. Participants will have the opportunity to exploit these vulnerabilities to achieve remote code execution (RCE) on an Android device.
 
 **Download**: https://lautarovculic.com/my_files/cyclicScanner.apk
+
 **Link**: https://www.mobilehackinglab.com/path-player?courseid=lab-cyclic-scanner
 
 ![[cyclicScanner.png]]
@@ -16,11 +39,15 @@ apktool d cyclicScanner.apk
 ```
 
 Let's check the **AndroidManifest.xml** file. We can see that the **package name** is `com.mobilehackinglab.cyclicscanner`.
+
 Also, we can see just **one activity** with is **MainActivity**.
+
 But, looking the **source code** we can find another **two classes**.
 
 They are in `com.mobilehackinglab.cyclicscanner.scanner`.
+
 And the name of this classes are
+
 **`ScanService`** and **`ScanEngine`**.
 
 In the **`scanFile`** method, of **ScanEngine** class we can see this java code
@@ -56,6 +83,7 @@ public final boolean scanFile(File file) {
 ```
 
 But, let recap some steps, and go to **MainActivity** class. We need know about the **switch**.
+
 And here's the code:
 ```java
 public static final void setupSwitch$lambda$3(MainActivity this$0, CompoundButton compoundButton, boolean isChecked) {
@@ -68,7 +96,9 @@ public static final void setupSwitch$lambda$3(MainActivity this$0, CompoundButto
 }
 ```
 When is *checked*, the **ScanService** class is loaded.
+
 In the ScanService class we can see **loop logics that perform the scan**. Let's notice that the files that the application scans are from the **external directory**.
+
 This can be also checked for this permission:
 ```XML
 <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
@@ -158,6 +188,7 @@ public final class ScanEngine {
 ```
 
 We can found some *malware examples*. And their **checksum** respective.
+
 But, the line of code of our interest is
 ```java
 Process process = new ProcessBuilder(new String[0])
@@ -168,11 +199,15 @@ Process process = new ProcessBuilder(new String[0])
 ```
 
 Basically, every file is passed, leaving us a **RCE** vulnerability.
+
 Then, we simply need to **create an application**, which *creates a file with the command that is passed as an argument to the application with the vulnerability*.
+
 Like
+
 `file = file.txt; touch lautarovculic`
 
 So, you can find the project PoC here:
+
 **`MainActivity.java`**
 ```java
 package com.lautaro.cyclicrce;  
@@ -330,11 +365,15 @@ public class MainActivity extends AppCompatActivity {
 ```
 
 This will create a file in **Download** directory `/sdcard/Download/`
+
 Remember that in Android `/storage/emulated/0` is a **symlink**.
+
 But, the problem here is that the **Cyclic Scanner** app just check `Android`, `Music` and `Pictures` directories.
+
 And, in my device I can't create files in this directories with App.
 
 ![[cyclicScanner2.png]]
 
 So, you will need move the file or just find another way ;)
+
 I hope you found it useful (:

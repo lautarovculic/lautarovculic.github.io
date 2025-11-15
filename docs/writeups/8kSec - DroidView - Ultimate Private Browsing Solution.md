@@ -1,3 +1,29 @@
+---
+title: 8kSec - DroidView - Ultimate Private Browsing Solution
+description: "Worried about your online privacy? DroidView provides unmatched protection for your browsing activities! Our advanced security solution routes all your traffic through the secure Tor network, ensuring complete anonymity."
+tags:
+  - bypass
+  - network 
+  - injection
+  - aidl
+  - webviews
+  - theft-file
+  - services
+  - intents-extra
+  - broadcast
+  - 8ksec
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - apk decompilation
+  - adb exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20DroidView%20-%20Ultimate%20Private%20Browsing%20Solution/
+---
+
 **Description**: Worried about your online privacy? DroidView provides unmatched protection for your browsing activities! Our advanced security solution routes all your traffic through the secure Tor network, ensuring complete anonymity.
 
 **Link**: https://academy.8ksec.io/course/android-application-exploitation-challenges

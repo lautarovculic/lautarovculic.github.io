@@ -1,3 +1,25 @@
+---
+title: 8kSec - GeofenceGamble - The Ultimate Game of Speed
+description: "Embark on a thrilling adventure with GeofenceGamble! Explore your city to discover and collect virtual relics of varying rarities scattered across real-world locations."
+tags:
+  - bypass
+  - frida
+  - javascript
+  - root
+  - hook
+  - 8ksec
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - apk decompilation
+  - adb exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20GeofenceGamble%20-%20The%20Ultimate%20Game%20of%20Speed/
+---
+
 **Description**: Embark on a thrilling adventure with GeofenceGamble! Explore your city to discover and collect virtual relics of varying rarities scattered across real-world locations.
 
 **Link**: https://academy.8ksec.io/course/android-application-exploitation-challenges
@@ -10,7 +32,9 @@ adb install -r GeofenceGamble.apk
 ```
 
 In my case, I use a physical device for this challenge. *Once the app is launched and permissions are granted*, multiple **root detection checks are triggered**.
+
 In fact, these mechanism are:
+
 - `checkSuPaths`
 
 - `checkForMagisk`
@@ -43,9 +67,11 @@ In fact, these mechanism are:
 
 
 Since *BusyBox is embedded in my device’s system partition and cannot be easily removed*, I decided to **bypass all the checks dynamically with Frida**.
+
 But, first let's search the code where these mechanism was implemented!
 ### Bypass
 Let's analyze the **source code** using **JADX**.
+
 I search for busybox word and I found this class: **`RootDetector`** in **`com.eightksec.geofencegamble.security`** package.
 
 ```java
@@ -485,6 +511,7 @@ private final boolean checkForRootManagementApps() {
 ```
 
 That's the whole root detection class.
+
 Notice that **all detection functions return a boolean (`true` if suspicious)**. By hooking them with Frida and **forcing `false`**, we *neutralize every single detection vector without modifying the APK statically*.
 
 Run the *frida server* in your device and here's the frida script:
@@ -559,6 +586,7 @@ public final boolean isWithinCollectionRadius(GeoPoint userLocation, GeoPoint re
 }
 ```
 The most important part of the code, `<= 50.0d`.
+
 Basically, **if relic is in the radius of 50 meters**, we *can collect that*.
 
 The UI *displays “Distance:”* using:
@@ -843,11 +871,13 @@ public final void invoke2() {
 }
 ```
 The most important, is that the “Copy” button puts “**lat, lon**” on the **clipboard**.
+
 And the *distance shown on the card: also goes through `LocationUtils`*.
 
 By **intercepting the copy we can read those coordinates and use them to “move” our location to the relic**.
 
 And finally, the **`LocationService`** class!
+
 The *key function* is `startLocationUpdates` in this service:
 ```java
 public final void startLocationUpdates(final Function2<? super GeoPoint, ? super Boolean, Unit> onLocationUpdate) {
@@ -1073,6 +1103,7 @@ Java.perform(() => {
 ```
 
 In short:
+
 - **`RootDetector.*`** → `return false`.
 
 - **`NativeRootChecker.checkSuExists / checkProcMaps`** → `return false`.

@@ -7,21 +7,25 @@ tags:
 keywords:
   - android reversing
   - ctf writeup
+  - 0CTF
   - mobile writeups
   - apk decompilation
   - adb exploitation
   - mobile security research
-canonical: https://lautarovculic.github.io/writeups/0ctf-2015-simpleapk/
+canonical: https://lautarovculic.github.io/writeups/0CTF%202015%20Quals%20CTF%20-%20Simpleapk/
 ---
 
 **Description**
 This is a simple apk, Could you find the flag?
 
 For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 For download the **APK**
+
 https://lautarovculic.com/my_files/simple.apk
 
 ![[simpleApk1.png]]
@@ -32,6 +36,7 @@ adb install -r simple.apk
 ```
 
 We can see a **text edit** and an **button**.
+
 Let's decompile the **apk** with **apktool**
 ```bash
 apktool d simple.apk
@@ -39,7 +44,9 @@ apktool d simple.apk
 The **package name** is `easyre.sjl.gossip.easyre`
 
 Let's inspect the **source code** with **jadx**.
+
 There are an activity called **EasyRe**
+
 This have this method **init** when the app is launched
 ```java
 public void init() {  
@@ -58,6 +65,7 @@ public void init() {
     }
 ```
 In the **onCreate** method, we can see that the **init()** is called.
+
 The previous code, create a **flag.txt** file in our device with the flag content.
 
 And this we can confirm because we can see the **onClick** method that is executed when we press the **check** button
@@ -82,13 +90,16 @@ public void onClick(View view) {
 ```
 
 So, just run this **adb** command for get the flag.
+
 The flag is stored in `/data/data/<packageName>`
+
 We get the flag running
 ```bash
 adb shell "cat /data/data/easyre.sjl.gossip.easyre/files/flag.txt"
 ```
 
 Output: `0ctf{Too_Simple_Sometimes_Naive!!!}`
+
 ![[simpleApk2.png]]
 
 

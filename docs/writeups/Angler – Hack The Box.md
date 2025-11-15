@@ -1,6 +1,33 @@
+---
+title: Angler – Hack The Box
+description: "The skilled fisherman used his full strength and expertise to hook the fish. Can you beat him and set the fish free?"
+tags:
+  - adb
+  - intents-extra
+  - broadcast
+  - rev-libraries
+  - frida
+  - hook
+  - HackTheBox
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackTheBox
+  - HTB
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Angler%20%E2%80%93%20Hack%20The%20Box/
+---
+
 ![[angler1.png]]
+
 **Difficult:** Medium
+
 **Category**: Mobile
+
 **OS**: Android
 
 **Description**: The skilled fisherman used his full strength and expertise to hook the fish. Can you beat him and set the fish free?
@@ -139,21 +166,27 @@ Broadcast completed: result=0
 ```
 
 Result
+
 ![[angler3.png]]
 
 **am**
+
 Activity manager
 
 **broadcast**
+
 Send a broadcast message
 
 **-a**
+
 Intent action
 
 **android.intent.action.BATTERY_LOW**
+
 The intent action
 
 **—es**
+
 Extra string
 
 Now, in this point, the app will execute this piece of code:
@@ -170,7 +203,9 @@ public native String getInfo(String str);
 ```
 
 Because **getInfo();** is an **native method in android**.
+
 And the info is the content **of d.d(“XDR”)**, where in the static code, I don’t found any interesting.
+
 And the **method is compiled in C**, then, probably we need play with some **debugger** for an **Dynamic Analysis**.
 
 But before, we need know what **arch** of **proc** we are using, for that you can run
@@ -179,10 +214,13 @@ adb shell getprop ro.product.cpu.abi
 ```
 
 And, in my case is **x86_64** then, I’ll use **Angler/lib/x86_64/libangler.so**
+
 It’s time for use **ghidra** and analyze
+
 And we can see the function **Java_com_example_angler_MainActivity_getInfo**
 
 Where if inspect the code we can see that **getInfo** calls two functions, i**llusion** and **ne**.
+
 ![[angler4.png]]
 
 **illusion function**
@@ -241,7 +279,9 @@ else {
 ```
 
 This methods **have the strcmp** (String compare)
+
 That **if** the strings are **equals**, then **You found the flag**
+
 **else**, **I am not here**, **I am there**
 
 So, let’s keep this code
@@ -258,6 +298,7 @@ Then for list **exports** and **imports** We can use the **Module** **Enumerate*
 ```
 
 Copy and save the **output** in **two** **json** file (exp/imp).json
+
 I just copy the **export content** all that my terminal allowed me, then.
 
 Searching for the **illusion** function in **exp.json**
@@ -296,6 +337,7 @@ cat imp.json | grep strcmp -A 1 -B 2
 ```
 
 Now we need **hook the native library methods**
+
 We can use the **Interceptor methods** of **frida** for **intercept** the **strcmp calls**.
 
 Here’s an script.js
@@ -330,10 +372,13 @@ sudo adb shell am broadcast -a android.intent.action.BATTERY_LOW --es Is_on yes
 ```
 
 And
+
 ![[angler6.png]]
 
 Just parse the **hexcode**
+
 ![[angler7.png]]
+
 And get the flag
 
 I hope you found it useful (:

@@ -1,6 +1,27 @@
+---
+title: SECCON Quals CTF 2015 - Rock, Paper, Scissors
+description: "Please win 1000 times in rock-paper-scissors"
+tags:
+  - rev-libraries
+  - smali
+  - patching
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/SECCON%20Quals%20CTF%202015%20-%20Rock%2C%20Paper%2C%20Scissors/
+---
+
 **Description**: Please win 1000 times in rock-paper-scissors
+
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/rps.apk
@@ -18,11 +39,15 @@ apktool d rps.apk
 ```
 
 We can see the **game Rock, Paper and Scissors**.
+
 If we **win**, +1.
+
 **Draw** keep points and **loose all the points**
+
 We need (description say) **1000** points. Statistically impossible
 
 So let's inspect the **source code** with **jadx** (GUI version)
+
 We can see the **logic** on the **onClick** method
 ```java
 public void onClick(View v) {  
@@ -97,19 +122,29 @@ public class MainActivity extends Activity implements View.OnClickListener {
 ```
 
 Here is an simple logic. The **structure of the flag** is so easy.
+
 If the **counter** (of **wins**) is 1000, then. The flag is
+
 `SECCON{1000+calc*107}`
+
 We can **disassemble** the **lib**.
+
 With **ghidra** we can look the function of **libcalc.so** (look inside of **lib/x86** folder that **apktool** drop)
+
 ![[secconApk2.png]]
+
 The value that **calc** function returns is **7**.
+
 So the flag is `SECCON{1000+7*107}` => `SECCON{107749}`
 
 But where are you going?
+
 We don't resolve the CTF of this way.
+
 We need **make the flag printable**.
 
 So, come back and check the code.
+
 We can see that the **cnt** (counter of wins) variable is initialized in 0.
 ```java
 public class MainActivity extends Activity implements View.OnClickListener {  
@@ -125,6 +160,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 ```
 
 Because we can't change the **if** conditions in the smali code (cnt must have the 1000 value).
+
 So we need modify the value of **cnt when it is initialized** to **999**, because the flag is trigger **when** cnt is **1000** after win.
 
 Looking in the **MainActivity.smali** file, we can find the `int cnt = 0;` line in **51** and **52**
@@ -134,10 +170,13 @@ Looking in the **MainActivity.smali** file, we can find the `int cnt = 0;` line 
 ```
 
 We need change `const/4 v0, 0x0` to `const/16 v0, 0x3E7`
+
 **const/4**: is for small values that fit in 4 bits (up to 0xF or 15 in decimal). Since 999 is a larger value, you need to use const/16 to store a 16-bit value.
+
 **const/16**: allows you to assign **values of up to 16 bits**, such as **0x3E7** which corresponds to 999 in decimal.
 
 So the **51** line must look like `const/16 v0, 0x3E7`
+
 Save the file and now is time for **rebuild** the apk.
 
 With **apktool** rebuild the app
@@ -161,9 +200,9 @@ adb install -r rps/dist/rps.apk
 ```
 
 Now we **launch** the app. Now the **cnt** is 999, so we need **win** just one round for **print the flag**.
+
 *If we loose, we need close and re-launch the app again*
 
 ![[secconApk3.png]]
-
 
 I hope you found it useful (:

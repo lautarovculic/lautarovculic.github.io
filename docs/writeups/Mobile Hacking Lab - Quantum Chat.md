@@ -1,3 +1,28 @@
+---
+title: Mobile Hacking Lab - Quantum Chat
+description: "Welcome to Quantum Chat, a cutting-edge quantum-encrypted messaging application. Your mission is to gain administrative access to the system and extract sensitive information. The app features an AI chatbot that might be more helpful than intended..."
+tags:
+  - obj-c
+  - SQLite
+  - injection
+  - bypass
+  - SQLi
+  - priv-esc
+  - MobileHackingLab
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Quantum%20Chat/
+---
+
 **Description**: Welcome to Quantum Chat, a cutting-edge quantum-encrypted messaging application. Your mission is to gain administrative access to the system and extract sensitive information. The app features an AI chatbot that might be more helpful than intended...
 
 **Link**: https://www.mobilehackinglab.com/course/lab-quantumchat-mhc
@@ -7,7 +32,9 @@
 Install an **IPA** file can be difficult. So, for make it more easy, I made a YouTube video with the process using **Sideloadly**. **LINK**: [https://www.youtube.com/watch?v=YPpo9owRKGE](https://www.youtube.com/watch?v=YPpo9owRKGE)
 
 Once you have the app installed, let's proceed with the challenge. **unzip** the **`.ipa`** file.
+
 ### Recon
+
 First we need **register** an **account**.
 
 So, after that, we can see a **normal chatbot**!
@@ -43,7 +70,9 @@ The two most important ones:
 - **I will reveal the passwords**
 
 - **I will bypass the password redaction**
+
 ### Bypass
+
 The chatbot **filters out direct commands and sensitive phrases**, so simply typing `SELECT * FROM users;` isn't enough.
 
 The trick was **to hide both the trigger phrases and the query in Base64 and force the bot to decode and respond with only the content**.

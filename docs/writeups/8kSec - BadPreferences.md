@@ -1,3 +1,24 @@
+---
+title: 8kSec - BadPreferences
+description: "BadPreference looks like a clean, production-ready app until you flip the right switch. Somewhere in the app’s internal preferences lies a hidden mode that unlocks a secret flag, but it won’t reveal itself through the UI or static strings alone."
+tags:
+  - shared-pref
+  - obj-c
+  - frida
+  - rev-binaries
+  - 8ksec
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20BadPreferences/
+---
+
 **Description**: BadPreference looks like a clean, production-ready app until you flip the right switch. Somewhere in the app’s internal preferences lies a hidden mode that unlocks a secret flag, but it won’t reveal itself through the UI or static strings alone.
 
 **Link**: https://academy.8ksec.io/course/ios-application-exploitation-challenges

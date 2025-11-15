@@ -1,3 +1,24 @@
+---
+title: Mobile Hacking Lab - Shaken, not stirred
+description: "A spy has infiltrated a private intelligence company in Paris and was able to steal sensitive documents. Luckily, he is not a tech geek and could easily be tracked down by law enforcement 24 hours after infiltration. His mobile phone could be seized. However, it was damaged on purpose by the suspect and only a small fragment of user artifacts could be retrieved. The key for decrypting the flag could not be extracted. Are you able to find a way to decrypt it?"
+tags:
+  - forensic
+  - crypto
+  - MobileHackingLab
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Shaken%2C%20not%20stirred/
+---
+
 **Description**: A spy has infiltrated a private intelligence company in Paris and was able to steal sensitive documents. Luckily, he is not a tech geek and could easily be tracked down by law enforcement 24 hours after infiltration. His mobile phone could be seized. However, it was damaged on purpose by the suspect and only a small fragment of user artifacts could be retrieved. The key for decrypting the flag could not be extracted. Are you able to find a way to decrypt it?
 
 **Link**: https://www.mobilehackinglab.com/course/lab-shaken-not-stirred
@@ -83,6 +104,7 @@ This confirms the **KDF algorithm**.
 
 **Definition**:
 *A Key Derivation Function (KDF) is a cryptographic algorithm that transforms a primary secret, like a password or master key, into one or more secure cryptographic keys.
+
 KDFs strengthen weak inputs (such as passwords) and extract, expand, and format them into keys of the correct length and format, often using techniques like salting, hashing, and iterations to increase computational cost and resist brute force attacks.*
 
 Let's now take a look at the **images** in `Images` directory:
@@ -104,6 +126,7 @@ But we have more images in the directory that we must analyze.
 I use https://georgeom.net/StegOnline tool for image inspection, and I noticed that the **`School.png`** image contains something in the bit planes.
 
 This can been seen clearly in the *Red 0*:
+
 ![[mhl-shaken2.png]]
 
 So, let's use **`zsteg`** tool for extract all the data.

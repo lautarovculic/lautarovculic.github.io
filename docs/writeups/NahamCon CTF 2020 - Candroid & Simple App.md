@@ -1,5 +1,27 @@
+---
+title: NahamCon CTF 2020 - Candroid & Simple App
+description: "I think I can, I think I can!"
+tags:
+  - strings
+  - smali
+  - patching
+  - NahamCon
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - NahamCon
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/NahamCon%20CTF%202020%20-%20Candroid%20%26%20Simple%20App/
+---
+
 ## Candroid
+
 **Description**: I think I can, I think I can!
+
 **Download**: https://lautarovculic.com/my_files/candroid.apk
 
 ![[nahamcon2020_candroid1.png]]
@@ -15,7 +37,9 @@ apktool d candroid.apk
 ```
 
 The app name is "*Nahamcon1*"
+
 If we insert any text as password, a message will prompt saying:
+
 `Error: Reading the password file`
 
 Notice that a `password.txt` file is created in the **external directory**:
@@ -59,7 +83,9 @@ Output:
 Flag: **`flag{4ndr0id_1s_3asy}`**
 
 But let's make this app vulnerable!
+
 We just can **patch** the **APK** file.
+
 If we *pay attention in the code line*
 ```java
 if (editText.getText().toString().equals(MainActivity.this.checkPass.toString()) && MainActivity.this.checkPass.toString().length() != 0) {
@@ -68,6 +94,7 @@ if (editText.getText().toString().equals(MainActivity.this.checkPass.toString())
 ```
 
 We can see that if the **length** of the password `!= 0` as condition, the **`FlagActivity`** will be showed.
+
 Edit the `MainActivity$1.smali` file and in the **line** `139` you will found the validation:
 ```smali
 135     invoke-virtual {v0}, Ljava/lang/String;->length()I
@@ -77,7 +104,9 @@ Edit the `MainActivity$1.smali` file and in the **line** `139` you will found th
 139     if-eqz v0, :cond_0
 ```
 Just change `if-eqz` to `if-nez`
+
 Then, save the file and let's rebuild the **APK**.
+
 Uninstall the original app from the device and follow this steps:
 
 Rebuild the **APK** file:
@@ -108,12 +137,15 @@ adb install candroid-signed.apk
 Just press the **SUBMIT** button and then get the *flag activity*.
 
 ## Simple App
+
 **Description**: Here's a simple Android app. Can you get the flag?
+
 **Download**: https://lautarovculic.com/my_files/simple-app.apk
 
 ![[nahamcon2020_simpleApp1.png]]
 
 We have a **certification error** when we try *install the apk* file.
+
 So, as in the *previous challenge* we did, we need **align and sign** the `simple-app.apk` file.
 
 Align:
@@ -137,9 +169,11 @@ adb install simple-signed.apk
 ```
 
 Now you will can launch the app without problems.
+
 In the activity, we can see just a "**Flag checker**"
 
 So, let's decompile the **source code** using **jadx** (we'll use the *signed version*)
+
 In the **`MainActivity`** class, we can found the *hardcoded flag*
 ```java
 public final class MainActivity extends AppCompatActivity {
@@ -156,9 +190,13 @@ public final class MainActivity extends AppCompatActivity {
 ```
 
 Flag: **`flag{3asY_4ndr0id_r3vers1ng}`**
+
 Now we can check that in the App correctly (:
+
 For your practice, try make it persistent!
+
 Changing the
+
 `"Yay that is the flag!!!" : "Nope that is not the flag."` strings by the correct flag using **patching techniques**!
 
 I hope you found it useful (:

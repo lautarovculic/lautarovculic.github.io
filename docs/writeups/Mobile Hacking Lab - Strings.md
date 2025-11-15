@@ -1,6 +1,32 @@
-**Description**: Welcome to the **Strings** Challenge! In this lab,your goal is to find the flag. The flag's format should be "`MHL{...}`". The challenge will give you a clear idea of how intents and intent filters work on android also you will get a hands-on experience using Frida APIs.
+---
+title: Mobile Hacking Lab - Strings
+description: "Welcome to the Strings Challenge! In this lab,your goal is to find the flag. The flag's format should be '`MHL{...}`'. The challenge will give you a clear idea of how intents and intent filters work on android also you will get a hands-on experience using Frida APIs."
+tags:
+  - crypto
+  - frida
+  - intents
+  - activity
+  - adb
+  - intents-extra
+  - fridump
+  - strings
+  - MobileHackingLab
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Strings/
+---
 
 **Download**: https://lautarovculic.com/my_files/strings-MHL.apk
+
 **Link**: https://www.mobilehackinglab.com/path-player?courseid=lab-strings
 
 ![[strings.png]]
@@ -11,12 +37,14 @@ adb install -r strings-MHL.apk
 ```
 
 We can see a **textview** that say **"Hello from C++"**..... smells like libraries.
+
 Let's decompile it with **apktool**
 ```bash
 apktool d strings-MHL.apk
 ```
 
 Also, check the **source code** with **jadx**
+
 The **package name** is `com.mobilehackinglab.challenge`.
 
 Also, in the **AndroidManifest.xml** file we can found **two** activities.
@@ -71,7 +99,9 @@ This code is important to be executed because we need to “activate” the flag
 The `KLOW()` method **stores the current date** in `dd/MM/yyyy` format within the **SharedPreferences** under the key “**UUU0133**” in the **DAD4** file. This *ensures that another component of the app can validate the date as part of a specific logical flow*.
 
 We can **force** the execution with **frida**.
+
 But, before we can try understand **Activity2** code
+
 There are a `decrypt()` method
 ```java
 public final String decrypt(String algorithm, String cipherText, SecretKeySpec key) {
@@ -95,11 +125,13 @@ public final String decrypt(String algorithm, String cipherText, SecretKeySpec k
 ```
 
 We can use https://cyberchef.org for this work.
+
 The **IV** is hardcoded in `Activity2Kt` class, with the value `1234567890123456`
 
 ![[strings2.png]]
 
 The output is **`mhl_secret_1337`**.
+
 This must be converted to **base64** according the logic of the app, so, the value is `bWhsX3NlY3JldF8xMzM3`.
 
 This logic can be seem here
@@ -111,6 +143,7 @@ if (uri != null && Intrinsics.areEqual(uri.getScheme(), "mhl") && Intrinsics.are
 ```
 
 So, the app will decode the base64 for us, we just pass this **via Intent**.
+
 And here's the **javascript** script for **frida**
 ```javascript
 Java.perform(function () {
@@ -178,6 +211,7 @@ Java.perform(function () {
 ```
 
 This script will **ensure** that all code will be **executed** enumerating all.
+
 And, we can see that it's work
 ```bash
 [+] Starting combined exploit script...
@@ -216,7 +250,9 @@ adb shell am start -a android.intent.action.VIEW -n com.mobilehackinglab.challen
 ```
 
 This will drop us a Toast message saying **Success**.
+
 We can try **dump the memory now** with **fridump**
+
 You can find the tool here: https://github.com/Nightbringer21/fridump/
 
 Clone the repo and then, in a *new terminal* attach the app and run **fridump**

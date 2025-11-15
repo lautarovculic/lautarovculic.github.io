@@ -1,3 +1,24 @@
+---
+title: 8kSec - TraceTheChat
+description: "TraceTheChat is a seemingly innocent messaging app. Type a message, hit send, and it gets routed to a mysterious contact. But beneath the surface, the message travels through an obfuscated class that hides the details from plain sight."
+tags:
+  - obj-c
+  - frida-trace
+  - frida
+  - javascript
+  - 8ksec
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20TraceTheChat/
+---
+
 **Description**: TraceTheChat is a seemingly innocent messaging app. Type a message, hit send, and it gets routed to a mysterious contact. But beneath the surface, the message travels through an obfuscated class that hides the details from plain sight.
 
 **Link**: https://academy.8ksec.io/course/ios-application-exploitation-challenges

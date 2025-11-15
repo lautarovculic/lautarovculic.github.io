@@ -1,5 +1,24 @@
+---
+title: NahamCon CTF 2021 - Andra & Resourceful
+description: "You know what to do. :)"
+tags:
+  - strings
+  - NahamCon
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - NahamCon
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/NahamCon%20CTF%202021%20-%20Andra%20%26%20Resourceful/
+---
+
 ## Andra
 **Description**: You know what to do. :)
+
 **Download**: https://lautarovculic.com/my_files/andra.apk
 
 ![[nahamcon2021_andra1.png]]
@@ -10,6 +29,7 @@ adb install andra.apk
 ```
 
 We can see a *simple login* activity.
+
 Let's inspect the **source code** with **jadx**.
 
 We can see the **credentials** of this login in the **`MainActivity`** class:
@@ -19,6 +39,7 @@ final String str2 = "pink_panther@786";
 ```
 
 **Username**: `nahamcom`
+
 **Password**: `pink_panther@786`
 
 Then, the `com.example.hack_the_app.flag` activity will be showed with the flag.
@@ -26,7 +47,9 @@ Then, the `com.example.hack_the_app.flag` activity will be showed with the flag.
 Flag: **`flag{d9f72316dbe7ceab0db10bed1a738482`**
 
 ## Resourceful
+
 **Description**: I built my first ever android app with authentication!
+
 **Download**: https://lautarovculic.com/my_files/resourceful.apk
 
 ![[nahamcon2021_resourceful1.png]]
@@ -37,6 +60,7 @@ adb install resourceful.apk
 ```
 
 The application will ask us for a **password**.
+
 Let's search in the **source code** using **jadx**.
 
 We can found the password in the **`MainActivity`** class:
@@ -62,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
 ```
 
 The password is `sUp3R_S3cRe7_P4s5w0Rd`.
+
 So, we can insert the password and then. the **`FlagActivity`** will be launched.
 
 Also, in the **`FlagActivity`** we can see how the flag is crafted:

@@ -1,3 +1,22 @@
+---
+title: NahamCon 2024 - Kitty Kitty Bang Bang
+description: "I found a cool android app to play with a cowboy cat! There's has to be more going on with the app I can't see on my screen..."
+tags:
+  - logs
+  - logcat
+  - NahamCon
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - NahamCon
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/NahamCon%202024%20-%20Kitty%20Kitty%20Bang%20Bang/
+---
+
 **Description**: I found a cool android app to play with a cowboy cat! There's has to be more going on with the app I can't see on my screen...
 
 **Download**: https://lautarovculic.com/my_files/kittykittybangbang.apk
@@ -36,7 +55,9 @@ public static final boolean onCreate$lambda$0(MainActivity this$0, View view, Mo
 ```
 
 After a scare (I had the volume too loud) I noticed that the application **reacts after a screen tap**.
+
 And that's why app's called Kitty and there's a cat...
+
 ![[nahamCon2024_kitty2.png]]
 
 Just run **logcat** grepping *flag* string

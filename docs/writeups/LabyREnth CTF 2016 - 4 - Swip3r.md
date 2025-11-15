@@ -1,8 +1,27 @@
+---
+title: LabyREnth CTF 2016 - 4 - Swip3r
+description: ""
+tags:
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - LabyREnth
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/LabyREnth%20CTF%202016%20-%204%20-%20Swip3r/
+---
+
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/c6acf741819c9632cffd12aec0b61aa0dcee0b9f262ccc24262fd8458512c85c
+
 **Password**: infected
 
 ![[laby2016_swip3r1.png]]
@@ -17,10 +36,13 @@ Then, decompile this with **apktool**
 apktool d Swip3r.apk
 ```
 The app crashes when we press the button **give me the child**.
+
 Let's inspect the **source code** with **jadx**.
 
 There are **two** java classes.
+
 Pay attention, the **MainActivity** (Home) is **Swip3r**, no **MainActivity**.
+
 You can **notice** this reading the **AndroidManifest.xml** file
 ```XML
 <activity  
@@ -38,8 +60,11 @@ You can **notice** this reading the **AndroidManifest.xml** file
 ```
 
 The **Swip3r** class (MainActivity) isn't our interest.
+
 We will work with the **MainActivity** class.
+
 This activity loads an **native library** called **`swiipiin`**.
+
 We can found this as **`libswiipiin`**
 ```bash
 lib
@@ -49,6 +74,7 @@ lib
 But here I can't find anything.
 
 After inspecting the source code, I notice that the **app** takes the **gestures** of the **touch screen**.
+
 This is the **onFling** method that we need pay attention
 ```java
 public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent2, float f, float f2) {  
@@ -152,15 +178,21 @@ public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent2, float 
 ```
 
 This use **coordinates** and check if the **movement** is **up, down, left or right**.
+
 According to the **correct** swipe steps, we will get the flag.
+
 After some **tries** and erros.
+
 Reading the **source** code and the **resources folder** (`res/drawable`). I match with the **correct pattern** and is **`up, left, down, right, up, left, down, right`**.
+
 I install the **apk** in my **physic test device** because the **emulator** don't take the gestures.
 
 So, after try, I get the **flag**
+
 ![[laby2016_swip3r2.png]]
 
 **Flag:**
+
 **`PAN{jAr3d_sayz_'swwip3_!NO!_swipp11nn'}`**
 
 I hope you found it useful (:

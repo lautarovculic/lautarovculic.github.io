@@ -1,4 +1,24 @@
+---
+title: PwnSec CTF 2024 - FireInTheHole
+description: "Great job, Mark! You encrypted the files, inserted them into the mobile application, and then forgot how to decrypt them. Seriously? Now, we have to figure out your mess. Well done! And by the way... YOU'RE FIRED!"
+tags:
+  - firebase
+  - crypto
+  - PwnSec
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - PwnSec
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/PwnSec%20CTF%202024%20-%20FireInTheHole/
+---
+
 **Description**: Great job, Mark! You encrypted the files, inserted them into the mobile application, and then forgot how to decrypt them. Seriously? Now, we have to figure out your mess. Well done! And by the way... YOU'RE FIRED!
+
 **Download content**: https://lautarovculic.com/my_files/fire-in-the-hole.zip
 
 ![[pwnSec_fireinthehole1.png]]
@@ -9,18 +29,24 @@ adb install -r FireInTheHole.apk
 ```
 
 We can see some wallpaper screen.
+
 Let's check the **source code** with **jadx** (GUI version)
+
 But before, let's **decompile** it with **apktool**
 ```bash
 apktool d FireInTheHole.apk
 ```
 
 We can see in the **MainActivity** are a **frida-detection**. But we don't use frida today.
+
 Just taking around code and *resources*, check the **`strings.xml`** file.
+
 There are a **firebase** url
+
 ![[pwnSec_fireinthehole2.png]]
 
 Which using the classic **`/.json`** we can list the *database*.
+
 In Firebase, when you access the **Realtime Database** through a *URL*, you can see the **structure of the data in the database** through a URL, you can see the structure of the data in **JSON format**. The URL usually ends in *`.json`*, which indicates that you are requesting the data in JSON format.
 
 Or just we can use **curl**
@@ -28,8 +54,11 @@ Or just we can use **curl**
 curl -X GET "https://fire-in-the-hole-92c34-default-rtdb.firebaseio.com/.json"
 ```
 Output:
+
 **`KEY`**: `BwKZIxIyEkMyRK+uvyrDxA==`
+
 **`IV`**: `WFLjr63DwQ4GrDNAMLvBsw==`
+
 Both in **base64**.
 
 In the **Decrypter** class, we can see the following code in `onCreate()` method
@@ -69,8 +98,11 @@ public void onCreate(Bundle bundle) {
 ```
 
 We can see that try **decrypt** the `one.txt` file. Which can be found in the **assets** directory that **apktool** drop.
+
 Copy the content of `one.txt` or just *upload the file* in **cyberchef** (https://cyberchef.org/)
+
 But, trying all `.txt` files I don't have the flag, until I upload `Four.txt`
+
 ![[pwnSec_fireinthehole3.png]]
 
 Flag: **`PWNSEC{Y0uR_F!r3_L4ck5_d!sciplin3}`**

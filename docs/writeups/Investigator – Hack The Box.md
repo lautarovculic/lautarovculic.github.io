@@ -1,6 +1,30 @@
+---
+title: Investigator – Hack The Box
+description: "In one of the mobile forensics investigations we encountered, our agent gave us these files and told us that their owner using one password for almost everything. Can you extract the flag from the secret messages?"
+tags:
+  - forensic
+  - crypto
+  - SQLite
+  - HackTheBox
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackTheBox
+  - HTB
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Investigator%20%E2%80%93%20Hack%20The%20Box/
+---
+
 ![[investigator1.png]]
+
 **Difficult:** Medium
+
 **Category**: Mobile
+
 **OS**: Android
 
 **Description**: In one of the mobile forensics investigations we encountered, our agent gave us these files and told us that their owner using one password for almost everything. Can you extract the flag from the secret messages?
@@ -26,6 +50,7 @@ But we need a **password**
 ![[investigator2.png]]
 
 _Note: You need **android 5.0**_
+
 Let’s check the **system** folder.
 
 We have some interesting files:
@@ -56,8 +81,11 @@ In **devices_policies.xml**
 ```
 
 We can conclude that the **password** for restore the **backup file** is 5 lowercase letters of **5 digits**.
+
 The **gesture.key** is a file for set/get the **gesture patron**, but we don’t need that in this escenario.
+
 Normally, in the **backup** files on **Android 5.0**, the **password.key** file are a combination of **SHA1** and **MD5** uppercased.
+
 The **first** segment is an **SHA1** and the **rest is MD5**.
 
 **SHA1**
@@ -98,7 +126,9 @@ hashcat -m 110 hash.txt -a3 "?l?l?l?l?l"
 ```
 
 **-m 110** = sha1($pass.$salt)
+
 **-a3** = bruteforce
+
 **“?l?l?l?l?l”** = 5 chars lowercase.
 
 Hash cracked:
@@ -108,6 +138,7 @@ e135432c47718760b2fd7af5cff7a7608a926ed6:5ca5e19b48fb3b04:dycpr
 Then, the password for extract the **backup.ab** file is **dycpr**
 
 We can use this tool
+
 `https://sourceforge.net/projects/android-backup-processor/`
 
 For extract the **backup content** to our **directory** and **work in our desktop environmet**.
@@ -121,14 +152,18 @@ The **abp.jar** file is in
 ```
 
 Now let’s work with the **.tar** file
+
 We get **two folders**, **shared** and **apps**.
+
 We can see that WhatsApp is in the **folder shared**
 ```bash
 /shared/0/WhatsApp/Databases
 ```
 
 And there are an file: **msgstore.db.crypt14**
+
 This is the **WhatsApp** database cypher in **crypt14**.
+
 We need a key, that is stored in
 ```bash
 /apps/com.whatsapp/f/key

@@ -1,4 +1,23 @@
+---
+title: PwnSec CTF 2024 - ezmobile
+description: "Just an ez mobile chall for n00bies."
+tags:
+  - strings
+  - PwnSec
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - PwnSec
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/PwnSec%20CTF%202024%20-%20ezmobile/
+---
+
 **Description**: Just an ez mobile chall for n00bies.
+
 **Download content**: https://lautarovculic.com/my_files/ezmobile.zip
 
 ![[pwnSec_ezmobile1.png]]
@@ -9,9 +28,11 @@ adb install -r ezmobile.apk
 ```
 
 Let's inspect the **source code** with **jadx**.
+
 ![[pwnSec_ezmobile2.png]]
 
 And the flag is in the **`res/values/strings.xml`** resources.
+
 We can also paste the **flag decoded** into the app for check the flag.
 
 Flag: **`PWNSEC{w3lp_n07h!ng_Sp3Ci4l_Just_4_Fl4g_!n_7h3_s7r!ng5_xml_f!l3}`**

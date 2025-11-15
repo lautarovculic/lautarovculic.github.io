@@ -1,3 +1,28 @@
+---
+title: NahamCon 2024 - Fly Away
+description: "Lenny Kravitz lovers, this new app cleverly named 'Fly Away!' can give you random lines from one of his most popular songs. Can you figure out how the songs are being sent to the app?"
+tags:
+  - reflutter
+  - flutter
+  - patching
+  - dart
+  - frida
+  - hook
+  - rev-libraries
+  - NahamCon
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - NahamCon
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/NahamCon%202024%20-%20Fly%20Away/
+---
+
+
 **Description**: Lenny Kravitz lovers, this new app cleverly named “*Fly Away!*” can give you random lines from one of his most popular songs. Can you figure out how the songs are being sent to the app?
 
 **Download**: https://lautarovculic.com/my_files/flyaway.apk
@@ -10,13 +35,16 @@ adb install -r flyaway.apk
 ```
 
 This app was made in **reFlutter**. You need install it for proceed with this challenge.
+
 Once you install **reFlutter**, run
 ```bash
 reflutter flyaway.apk
 ```
 
 Then, choose `2. Display absolute code offset for functions` and set your **machine IP**.
+
 This will drop a file named `release.RE.apk`.
+
 Let's create a **key** for the *sign* process.
 
 ```bash
@@ -33,6 +61,7 @@ Then, **sign** the apk
 ```
 
 The final apk is `flyaway-signed.apk`.
+
 Let's install again in our device
 ```bash
 adb install flyaway-signed.apk
@@ -41,15 +70,20 @@ adb install flyaway-signed.apk
 This will drop a file in **sandbox** app directory, we go with `adb shell` here `/data/data/com.nahamcon2024.flyaway/`.
 
 Then, we can see this file `dump.dart`.
+
 Let's pull to **our machine**
+
 ![[nahamCon2024_flyaway2.png]]
+
 **NOTE**:
+
 If you have a **physical device** (like me) you need move *as root* to `sdcard` directory for pulling files as you can see in the image.
 
 We can see in the `dump.dart` the method `decryptIntegrityCheck` (In you case, it may vary), depends in some special case this **may** differ.
 ![[nahamCon2024_flyaway3.png]]
 
 `"method_name":"decryptIntegrityCheck","offset":"0x0000000000059484"`
+
 The **reFlutter** people have this *javascript* script for **frida**:
 ```javascript
 //frida -U -f <package> -l frida.js
@@ -117,8 +151,11 @@ setTimeout(hookFunc, 1000)
 ```
 
 So we need get the `_kDartIsolateSnapshotInstructions` from `libapp.so`.
+
 Let's decompile with **apktool** the **reflutter apk** and let's found the `libapp.so` file:
+
 ![[nahamCon2024_flyaway4.png]]
+
 Then
 ```bash
 readelf -Ws libapp.so | grep _kDartIsolateSnapshotInstructions
@@ -129,9 +166,11 @@ Output:
 ```
 
 The value that we need is `0000000000176940`.
+
 So, **according to the script** that **reFlutter** give us, we need make this sum `0x176940 + 0x59484`
 
 Which result in `0x1D5DC4`
+
 Modify `0x20801C` in the code by `0x1D5DC4`. Then, run the script with **frida**.
 
 We will get the flag.

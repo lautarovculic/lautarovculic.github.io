@@ -1,3 +1,23 @@
+---
+title: 8kSec - DroidWars - The Plugins Race
+description: "Experience the thrill of battle in DroidWars, a customizable Android gaming platform where players can expand their gaming experience with powerful plugins!"
+tags:
+  - dex
+  - local-storage
+  - theft-file
+  - 8ksec
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - apk decompilation
+  - adb exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20DroidWars%20-%20The%20Plugins%20Race/
+---
+
 **Description**: Experience the thrill of battle in DroidWars, a customizable Android gaming platform where players can expand their gaming experience with powerful plugins!
 
 **Link**: https://academy.8ksec.io/course/android-application-exploitation-challenges

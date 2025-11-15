@@ -1,6 +1,29 @@
+---
+title: Don’t Overreact – Hack The Box
+description: "Some web developers wrote this fancy new app! It’s really cool, isn’t it?"
+tags:
+  - javascript
+  - react
+  - HackTheBox
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackTheBox
+  - HTB
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Don%E2%80%99t%20Overreact%20%E2%80%93%20Hack%20The%20Box/
+---
+
 ![[overreact1.png]]
+
 **Difficult:** Very Easy
+
 **Category**: Mobile
+
 **OS**: Android (SDK 29)
 
 **Description**: Some web developers wrote this fancy new app! It’s really cool, isn’t it?
@@ -8,6 +31,7 @@
 ---
 
 I can’t see **any functions**.
+
 Let’s inspect the source code with **jadx**.
 
 After see the **source code**, I look the **assets folder** and there are a **file**
@@ -16,7 +40,9 @@ index.android.bundle
 ```
 
 And we can see an **Javascript code** **ofuscated**.
+
 Let’s go to [https://prettier.io](https://prettier.io)
+
 And paste the **code**.
 
 At the **end**, we can see:

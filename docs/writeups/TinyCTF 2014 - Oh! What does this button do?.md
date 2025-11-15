@@ -1,5 +1,25 @@
+---
+title: TinyCTF 2014 - Oh! What does this button do?
+description: ""
+tags:
+  - smali
+  - patching
+  - strings
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/TinyCTF%202014%20-%20Oh%21%20What%20does%20this%20button%20do%3F/
+---
+
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/rev200.zip
@@ -33,7 +53,9 @@ apktool d rev200.apk
 ```
 
 Let's inspect the **source code** with **jadx** (GUI version)
+
 The **package name** is `ctf.crackme`
+
 We have 2 activities that we are interested.
 
 **MainActivity**
@@ -79,13 +101,17 @@ public class MainActivity extends Activity {
 ```
 
 When **button is pressed**, the **OnClickListener** get the text from the field **password**.
+
 This **compare** with the string **EYG3QMCS**.
+
 If the **compare** is **successful**, this will call a new activity **FlagActivity**.
 
 Then, insert the password and we'll get the flag
+
 ![[tinyCTF2014_2.png]]
 
 But, let broke this app. Let's modify the **onClick** method.
+
 So the idea is that **any** string inserted, is the "**correct password**".
 
 For that, we need change this **if**

@@ -1,6 +1,30 @@
+---
+title: Pinned – Hack The Box
+description: "This app has stored my credentials and I can only login automatically. I tried to intercept the login request and restore my password, but this seems to be a secure connection. Can you help bypass this security restriction and intercept the password in plaintext?"
+tags:
+  - pinning-bypass
+  - proxy
+  - burpsuite
+  - HackTheBox
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackTheBox
+  - HTB
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Pinned%20%E2%80%93%20Hack%20The%20Box/
+---
+
 ![[pinned1.png]]
+
 **Difficult:** Easy
+
 **Category**: Mobile
+
 **OS**: Android
 
 **Description**: This app has stored my credentials and I can only login automatically. I tried to intercept the login request and restore my password, but this seems to be a secure connection. Can you help bypass this security restriction and intercept the password in plaintext?
@@ -8,6 +32,7 @@
 ---
 
 Download the **.zip** file and **extract** with **hackthebox** password.
+
 The **README.txt** file say that we need an **Android >12 (API 29)**
 
 Let’s extract the **.apk** file with **apktool**
@@ -23,6 +48,7 @@ adb install -r pinned.apk
 ![[pinned2.png]]
 
 Umh, okey.
+
 Let’s check the **source code**.
 
 We can see that the **password** is **1234567890987654**
@@ -35,7 +61,9 @@ if (mainActivity.s.getText().toString().equals("bnavarro") && mainActivity.t.get
 But, the **description** say that we need **do** a **SSL** **Pinning Bypass**.
 
 You don’t know about intercept **APP** **Traffic** with **Burpsuite** and **Bypass SSL**, I recommend read this two post
+
 `https://lautarovculic.com/intercept-android-app-traffic-with-burpsuite/`
+
 `https://lautarovculic.com/bypass-restrictions-with-frida/`
 
 Once all **setup**, we need an **Javasript** code **that bypass** the **SSL**.
@@ -94,6 +122,7 @@ frida -U -f com.example.pinned -l sslPinning.js
 And then, we need log in with the creds.
 
 But, if we go to **Burpsuite**, let’s check that in the **POST** we see the **flag**
+
 ![[pinned3.png]]
 
 I hope you found it useful (:

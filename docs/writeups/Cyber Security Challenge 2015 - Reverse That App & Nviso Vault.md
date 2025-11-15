@@ -1,8 +1,28 @@
+---
+title: Cyber Security Challenge 2015 - Reverse That App & Nviso Vault
+description: "We have intercepted a malicious Android binary, and we need your help analyzing the application! Reports from the wild say that this piece of malware is sending text messages to a premium number, resulting in a huge phone bill for the victims! This needs to stop… Can you identify the mobile number of the attacker so we can track him down? Answer in this format: `+XX XXX XXX XXX`"
+tags:
+  - strace
+  - strings
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Cyber%20Security%20Challenge%202015%20-%20Reverse%20That%20App%20%26%20Nviso%20Vault/
+---
+
 ## Reverse That App
+
 **Description**: We have intercepted a malicious Android binary, and we need your help analyzing the application! Reports from the wild say that this piece of malware is sending text messages to a premium number, resulting in a huge phone bill for the victims! This needs to stop… Can you identify the mobile number of the attacker so we can track him down? Answer in this format: `+XX XXX XXX XXX`
 
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/Kbank.apk
@@ -72,10 +92,13 @@ public class Sms {
 And there is the **flag**: `+79163525068`
 
 ## Nviso Vault
+
 **Description**: One of our programmers made a Vault that is used to store sensitive information. He says it’s safe, but come on, the application _must_ be leaking information somewhere… right?
 
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/NvisoVault.apk
@@ -93,13 +116,17 @@ apktool d NvisoVault.apk
 ```
 
 We can see that an algorithm is generated every second:
+
 ![[nvisoVault2.png]]
 
 We can use **strace**.
+
 But, what is **strace**?
+
 **strace is a tool that allows you to track all system calls** (syscalls) made by a process on **Linux** or **Android**. This includes operations such as opening files, accessing networks, working with memory, among others. It is very useful for debugging applications, analyzing malware, or as in this case, understanding how an application interacts with the system to find possible flags or passwords.
 
 For use **strace**, in this case, we need know the **PID** of the app before the **10 seconds**. So we need be **quickly**.
+
 Enter to your **genymotion** device running
 ```bash
 adb shell
@@ -115,6 +142,7 @@ You must look an output like this:
 u0_a84    5060  3597  999340 54040 00000000 f7584055 S be.nviso.nvisovault
 ```
 In this case, the **PID** is **5060**
+
 Run strace **quick**
 ```bash
 root@vbox86p:/ # strace -p 5060

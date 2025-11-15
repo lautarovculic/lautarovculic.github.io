@@ -1,3 +1,23 @@
+---
+title: BSides Canberra 2019 - You Shall Not Pass
+description: ""
+tags:
+  - rev-libraries
+  - python
+  - crypto
+  - BSides
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - BSides
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/BSides%20Canberra%202019%20-%20You%20Shall%20Not%20Pass/
+---
+
 **Download**: https://lautarovculic.com/my_files/PasswordCheckerAPKs.zip
 
 ![[bsides_2019-passwordChecker1.png]]
@@ -8,14 +28,18 @@ getprop ro.product.cpu.abi
 ```
 
 In my case, is `arm64-v8a`.
+
 Then, install with **ADB**
 ```bash
 adb install -r PasswordChecker-arm64-v8a.apk
 ```
 
 We can see a *simply password checker*.
+
 That *return **true** or **false***.
+
 Let's inspect the **source code** with **jadx** (GUI version).
+
 And, **decompile it** with **apktool**
 ```bash
 apktool d PasswordChecker-arm64-v8a.apk
@@ -49,9 +73,11 @@ public class MainActivity extends AppCompatActivity {
 ```
 
 Well, the only thing that we can check is the *libraries*. It can be found inside of the **lib** directory that **apktool** drop.
+
 Let's open it with **ghidra**.
 
 We just need need inspect the **`checkPassword3`** function from the *libnative*.
+
 ![[bsides_2019-passwordChecker2.png]]
 
 The *flag* start with the *string* `cybears`. This may be **useful** for work with the script.
@@ -117,6 +143,7 @@ if __name__ == "__main__":
 ```
 
 If we insert the flag to *password checker* app, the *result* is **true**.
+
 Flag: **`cybears{RU_SAT-15f13d?}`**
 
 I hope you found it useful (:

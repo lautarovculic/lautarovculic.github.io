@@ -1,6 +1,32 @@
-**Description**: Welcome to the "**IOT Connect**" **Broadcast Receiver Exploitation** Challenge! Immerse yourself in the world of cybersecurity with this hands-on lab. This challenge focuses on exploiting a security flaw related to the broadcast receiver in the "IOT Connect" application, allowing unauthorized users to activate the master switch, which can turn on all connected devices. The goal is to send a broadcast in a way that only authenticated users can trigger the master switch.
+---
+title: Mobile Hacking Lab - IOT Connect
+description: "Welcome to the 'IOT Connect' Broadcast Receiver Exploitation Challenge! Immerse yourself in the world of cybersecurity with this hands-on lab. This challenge focuses on exploiting a security flaw related to the broadcast receiver in the 'IOT Connect' application, allowing unauthorized users to activate the master switch, which can turn on all connected devices. The goal is to send a broadcast in a way that only authenticated users can trigger the master switch."
+tags:
+  - broadcast
+  - crypto
+  - python
+  - intents
+  - intents-extra
+  - adb
+  - logs
+  - logcat
+  - MobileHackingLab
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20IOT%20Connect/
+---
 
 **Download**: https://lautarovculic.com/my_files/iotConnect.apk
+
 **Link**: https://www.mobilehackinglab.com/path-player?courseid=lab-iot-connect
 
 ![[iotConnect.png]]
@@ -11,7 +37,9 @@ adb install -r iotConnect.apk
 ```
 
 We can see that the application **contains** a **login**, a **sign up** and within the application we can **control multiple devices**.
+
 Let's keep in mind that we are “**Guest**”.
+
 In addition, there is a feature called “**Master Switch**” that **asks for a 3-digit PIN**.
 
 Let's decompile the **APK** with **apktool**
@@ -21,7 +49,9 @@ apktool d iotConnect.apk
 Also, let's check the **source code** with **jadx**.
 
 Before we'll work with the **Master Switch** key.
+
 Is a **simple 3-digit PIN**, so, I found the class where it's implemented.
+
 The **`Checker`** class:
 ```java
 public final class Checker {  
@@ -64,12 +94,19 @@ public final class Checker {
 ```
 
 **AES key**
+
 - Generated from the integer and set to *16 bytes*.
+
 **AES ECB encryption**
+
 - We decrypt the `ds` text using the generated key.
+
 **Validation**
+
 - We compare the decrypted text with “`master_on`”
+
 **Output**
+
 - If we find the correct key, we print it.
 ```python
 import base64
@@ -113,6 +150,7 @@ Output:
 Keep in mind the *master key*: `345`.
 
 Let's continue with the challenge.
+
 This is about a **broadcast receiver**, and there is the **receiver**:
 ```XML
 <activity
@@ -131,25 +169,39 @@ This is about a **broadcast receiver**, and there is the **receiver**:
 So we can **craft an command** for **send the broadcast** to the action **`MASTER_ON`**.
 
 **NOTE**:
+
 This app have many code, many activities, etc.
+
 But remember that this is a **challenge**. Isn't pentest or bug bounty program.
+
 So, we will focus on the use of **broadcast receivers**.
 
 #### BroadcastReceiver & Intents
+
 A **BroadcastReceiver** **is not an Intent**, but **works with Intents**.
 
 1️⃣ **Intent**
+
 - It is an object that **transports data and instructions** between Android components (Activities, Services, BroadcastReceivers).
+
 - Used to **initialize components** or **send messages**.
+
 2️⃣ **BroadcastReceiver**
+
 - It is an **Android component** that **listens and responds to Intents sent via broadcasts**.
+
 - It acts as a **global message receiver**.
+
 3️⃣ **Relation**
+
 - An **Intent** carries the **broadcast** information.
+
 - The **BroadcastReceiver** receives the Intent and **acts accordingly**.
 
 The code in the app that *handle the broadcast and intent* is the **`CommunicationManager`** class.
+
 While **`MasterSwitchActivity`** isn't of our interest due to that we don't have as goal become a **master user**.
+
 Our goal es **Turn on all devices**.
 
 The **`CommunicationManager`** code is
@@ -262,26 +314,37 @@ public final void turnOnAllDevices(Context context) {
 ```
 
 We need *craft the ADB command* correctly.
+
 When we send an **extra** in an intent, we can use
+
 `--es`: Extra String.
+
 `--ei`: Extra Integer.
 
 This correspond to the **type of variable** that we'll handle.
+
 ![[iotConnect2.png]]
 
 In this case, **integer**.
 
 But what is an **extra** in an **intent**?
+
 In Android, an **Extra is a set of additional data that you can attach to an Intent to pass information between components of an application** (such as Activities, Services, or Broadcast Receivers).
 
 - **Intent**: A message used to communicate components (Activity, Service, Receiver).
+
 - **Extras**: They are key-value data attached to the Intent.
+
 - **Types of Extras**: They can be Strings, Integers, Booleans, Parcels, Arrays, and even serializable objects.
 
 **Key points about the Extras**
+
 - **Unique Keys**: Each extra has a unique key (as “**key**”).
+
 - **Correct Types**: It is **vital to use the correct type** when sending and receiving (`--ei` for Integer, `--es` for String).
+
 - **Access**: They are accessed through **methods** like `getStringExtra()`, `getIntExtra()`, etc.
+
 - **ADB usage**: `--ei`, `--es`, `--ez` are examples of how to specify the type of extra when sending Intents with ADB.
 
 Setup **logcat**
@@ -304,6 +367,7 @@ Notice the logs and screen of the device that *all devices are turn on*
 Let's develop a **simple app** as exploit that send the intent to this broadcast. **Taking advantage of the fact that this one is exported**.
 
 This is a **global broadcast receiver**, so we **don't need specific the activity, package name, etc**.
+
 We just need create an app that have this in the **MainActivity.java**
 ```java
 package com.lautaro.iotreconnect;

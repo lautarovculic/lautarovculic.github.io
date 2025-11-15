@@ -1,9 +1,33 @@
+---
+title: AHE17 - You Can Hide – But You Cannot Run
+description: ""
+tags:
+  - frida
+  - python
+  - local-storage
+  - AHE
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - AHE
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/AHE17%20-%20You%20Can%20Hide%20%E2%80%93%20But%20You%20Cannot%20Run/
+---
+
 ### AHE17 : Android Hacking Events 2017
+
 For this challenge, probably we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 For download the **APK**
+
 https://team-sik.org/wp-content/uploads/2017/06/YouCanHideButYouCannotRun.apk_.zip
 
 ![[youCanHideBYCR1.png]]
@@ -21,8 +45,11 @@ adb install -r YouCanHideButYouCannotRun.apk
 Launching the **app** we can see that we have a text that talk about **encryption** and **a button**. That say **Start** to **Running** if we press it.
 
 Let's **load** the **.apk** to **jadx** for see the **source code**.
+
 We have the following package:
+
 `hackchallenge.ahe17.teamsik.org.romanempire`
+
 And the **AndroidManifest.xml** file:
 ```XML
 <?xml version="1.0" encoding="utf-8"?>  
@@ -95,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
 ```
 
 In the **MainActivity**, we can see in **initialize()** method the **MakeThreads** class.
+
 That have this content:
 ```java
 public class MakeThreads {  
@@ -167,8 +195,11 @@ public class X04c3eb5ce6c5e299ad93dac871bbbed16da09e21 extends Thread {
 ```
 
 Which we have the **char c** variable and **sleepTillTime**.
+
 This will create the **scroll.txt** file in
+
 `/data/data/hackchallenge.ahe17.teamsik.org.romanempire/Rome`
+
 But, **every char** overwrite the previous char.
 
 I try, but without successful
@@ -176,9 +207,11 @@ I try, but without successful
 RandomAccessFile raf = new RandomAccessFile(scroll, "rw");  
 ```
 Change via **smali** code to **"rwd"** for write **as append** char by char. But don't work.
+
 And, the **chars** are printed and **saved** **Randomly**. Then, this don't make sense, but I mention because this can work (if random isn't present)
 
 Then, probably we need use frida for **hook** the function.
+
 Here's a **javascript** script that use **java.io.RandomAccessFile**
 ```javascript
 Java.perform(function() {
@@ -217,27 +250,32 @@ Java.perform(function() {
 ```
 
 Then, **run** frida server in your device and get the **PID** of the app (**Button must be in start condition**)
+
 With the **app running**, run in your terminal
 ```bash
 frida-ps -Uai
 ```
 
 Copy the **PID** of **RomanEmpire** app.
+
 Then, attach the **script** into the app with
 ```bash
 frida -U -p <PID> -l script.js
 ```
 
 Now **press the button** and when start running, you will see the code intercepting the functions.
+
 Just wait to the end until you see this output
 ```bash
 message: {'type': 'send', 'payload': 'PARTIAL:Aol jsvjrdvyr ohz ybzalk Puav h zapmm tvklyu hya zahabl, Whpualk if uhabyl, svhaolk if aol Thzzlz, huk svclk if aol mld. Aol nlhyz zjylht pu h mhpslk ylcpchs: HOL17{IlaalyJyfwaZ4m3vyKpl}!'} data: None
 ```
 
 In clean
+
 `Aol jsvjrdvyr ohz ybzalk Puav h zapmm tvklyu hya zahabl, Whpualk if uhabyl, svhaolk if aol Thzzlz, huk svclk if aol mld. Aol nlhyz zjylht pu h mhpslk ylcpchs: HOL17{IlaalyJyfwaZ4m3vyKpl}!`
 
 This is a Caesar's Cipher text, we can rote this in any online tool.
+
 But here's a **python** script
 ```python
 def caesar_cipher(text, shift):

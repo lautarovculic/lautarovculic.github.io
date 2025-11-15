@@ -1,20 +1,49 @@
-![[pedometer1.png]]**Difficult:** Hard
+---
+title: Pedometer - Hack The Box
+description: "I've been using this pedometer app for weeks, and I am convinced it's using me as a power supply for some hidden machine. I bet it holds the key or a map to some sort of treasure. If only I could figure out what it's doing…"
+tags:
+  - malware
+  - crypto
+  - obfuscation
+  - python
+  - HackTheBox
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - HackTheBox
+  - HTB
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Pedometer%20-%20Hack%20The%20Box/
+---
+
+![[pedometer1.png]]
+
+**Difficult:** Hard
+
 **Category**: Mobile
+
 **OS**: Android
 
 **Description**: I've been using this pedometer app for weeks, and I am convinced it's using me as a power supply for some hidden machine. I bet it holds the key or a map to some sort of treasure. If only I could figure out what it's doing…
 
 -----------------
 Download the **.zip** file and extract this with the password **hackthebox**.
+
 Decompile the **apk** with **apktool**
 ```bash
 apktool d pedometer.apk
 ```
 
 Let’s install the apk in our **Android 12**.
+
 ![[pedometer2.png]]
 
 Let’s walk around the **source code** with **JD-GUI**.
+
 We have just **one activity**, which is `MainActivity`.
 
 ### `MainActivity.java`
@@ -60,24 +89,33 @@ public final class MainActivity extends l {
 ```
 
 This code initialize the step sensor (*accelerometer*) and trigger the execution of the *malicious logic* (or *challenge*) when it detects movement:
+
 - `c c1 = new c(0);`
+
 Creates **an instance of a permissions handler** (`ActivityResultContract`, from package `b.c`) that *asks for permissions*.
 
 - `a a = new a(this);`
+
 **Creates an anonymous class** (`u1.a`) that extends `SensorEventListener`, in *charge of handling sensor events*.
 
 - `d = ((k)this).i.c(...)`
+
 **Registers a handler for the response of the `ACTIVITY_RECOGNITION` permission**. If already granted, calls `n()`. If not, it *triggers the permission request*.
 
 - `this.v = new c(this);`
+
 **Here is the key**. It creates an **instance of `u1.c`**, which **opens `assets/a`** (the *bytecode of the virtual machine*). That is, it **prepares the VM to be used later**.
 
 ### What is a Virtual Machine (VM)?
+
 A virtual machine (VM) in this **context is a custom interpreter that executes specific intermediate instructions**, often **encrypted or obfuscated**, without relying on the *original language or architecture of the device*.
+
 In this challenge, the VM is **fed by instructions stored in `assets/a`**, and **executes** each in response to *accelerometer events*.
+
 This **file contains instructions for the VM encrypted** by **dynamic XOR with a `d` value** that is *modified during execution*.
 
 Where find the `assets/a` file?
+
 When we *decompile the `apk` file* with **apktool**, inside of the new directory, we can found the `assets` directory.
 ```bash
 file a
@@ -120,15 +158,18 @@ Output:
 ```
 
 Let's continue with the challenge.
+
 #### Example:
+
 Instead of **directly coding instructions** like “*add two numbers*” in Java, the application **delegates that logic to a VM**. This **machine reads opcodes** such as **`PUSH`**, **`ADD`**, **`XOR`**, **`BUILD_FLAG`**, etc., from a *binary file and executes the operations dynamically*.
 
 This **technique is common in malware**, *emulators*, and also in `CTFs` to hide *the real logic of a program*.
 
 ### What are Opcodes?
-The opcodes (**operation codes**) are **numeric codes that tell the VM which operation to execute**. They are the *basis of the bytecode interpreted by the virtual machine*.
-In this challenge, the *opcodes are defined* by **enum** `u1.b`.
 
+The opcodes (**operation codes**) are **numeric codes that tell the VM which operation to execute**. They are the *basis of the bytecode interpreted by the virtual machine*.
+
+In this challenge, the *opcodes are defined* by **enum** `u1.b`.
 ```java
 package u1;
 
@@ -142,6 +183,7 @@ public enum b {
 ```
 
 ### What are the challenge opcodes?
+
 These were extracted using Frida with the following script:
 ```javascript
 Java.perform(function () {
@@ -178,7 +220,9 @@ Output:
 ```
 
 ### Class `u1.c`
+
 This class is the **core of the VM**, where the **state**, **input** and **execution stack** are **stored**.
+
 The code:
 ```java
 public final class c {
@@ -209,13 +253,17 @@ public final class c {
 ```
 
 This class:
+
 - **Loads** the `assets/a` file as `InputStream`.
+
 - **Initializes** a **LIFO** stack.
+
 - Declares a `d` register that **is used for dynamic XOR operations**.
 
 This class **does not execute instructions**, but is **used by the interpreter** (`u1.a`) to perform **stack operations**, *read bytes from the file and maintain context between instructions*.
 
 ### Class `u1.a` implements `SensorEventListener` - Virtual Machine Interpreter
+
 This class is t*he interpreter that executes instructions when motion is detected* in the **accelerometer**:
 ```java
 package u1;
@@ -269,10 +317,13 @@ public final class a implements SensorEventListener {
 [...]
 ```
 Notice that we have 850 commented lines.
+
 This is bytecode that **JD-GUI** try understand.
+
 Obviously, this code is a **little hard to understand**. So we can use the **AI power** for "*convert/translate*" the code.
 
 You can *choose literally any kind of language programming*.
+
 I use *Claude AI* and convert the *bytecode* to *java code* for a better understanding.
 ```java
 public final void onSensorChanged(SensorEvent paramSensorEvent) {
@@ -484,16 +535,23 @@ public final void onSensorChanged(SensorEvent paramSensorEvent) {
 ```
 
 ### Understanding its behavior
+
 - **Runs whenever** there is a **significant change** in motion.
+
 - **Reads a byte** from **file `a`**.
+
 - **Decrypts it with dynamic XOR** using the value `d`.
+
 - **Finds what operation** it *represents* (using **enum `u1.b`**).
+
 - **Executes the operation** by *manipulating the stack or updating* `d`.
+
 - If the **opcode is `0xFF`** (`BUILD_FLAG`), it **rebuilds the flag from the stack and displays it**.
 
 This is a typical implementation of a minimalist stack-based VM, which *executes bytecode instruction by instruction*.
 
 ### Getting the flag
+
 The **Python script replicates the VM**, *decrypting and executing the instructions* in the file to **obtain the flag**.
 
 ```python
@@ -619,21 +677,33 @@ print("Flag:", correct_flag)
 ```
 
 #### Explanation of the script
+
 ##### Initialization
+
 - `ptr`: **pointer** to the **current byte**.
+
 - `stack`: **execution stack** where *intermediate values are stored*.
+
 - `d`: **dynamic XOR value** used to *decrypt instructions*.
+
 - `flag`: final result extracted.
 
 ##### Main execution
+
 - **Reads each byte and performs XOR with `d`** to determine the *opcode*.
+
 - **The opcode defines the specific operation** to be *executed*.
+
 - **Updates the value of d according to specific instructions** to *decrypt subsequent bytes*.
 
 ##### Key instructions explained
+
 - **PUSH (`0x01`)**: Places an *encrypted value* on the stack.
+
 - **XOR and update `d` (`0x31`)**: Performs *XOR with values on the stack* and updates `d`.
+
 - **COND_SKIP (`0x40`)**: *Skips instructions* if a specific condition *is met*.
+
 - **BUILD_FLAG (`0xFF`)**: *Generates the flag by reading 22 characters* from the stack.
 
 Flag: **`HTB{X_m4rKs_teH_sp0t}`**

@@ -1,5 +1,28 @@
+---
+title: BYUCTF 2025 - Baby Android 1 & 2
+description: "If you've never reverse engineered an Android application, now is the time!! Get to it, already!! Learn how they work!!"
+tags:
+  - frida
+  - adb
+  - rev-libraries
+  - hook
+  - BYUCTF
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - BYUCTF
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/BYUCTF%202025%20-%20Baby%20Android%201%20%26%202/
+---
+
 ## Baby Android 1
+
 **Description**: If you've never reverse engineered an Android application, now is the time!! Get to it, already!! Learn how they work!!
+
 **Download**: https://lautarovculic.com/my_files/baby-android-1.apk
 
 ![[byuctf_babyandroid1_1.png]]
@@ -10,9 +33,11 @@ adb install -r baby-android-1.apk
 ```
 
 We can see a message when the app is *launched*:
+
 > Too slow!!
 
 So, let's **analyze the source code** with **jadx**.
+
 We can see the **`MainActivity`** class:
 ```java
 package byuctf.downwiththefrench;
@@ -106,6 +131,7 @@ public class Utilities {
 ```
 
 Clearly the *flag* is *cleaned* from the `textView` when the app is launched.
+
 We can use **frida** for **block** the `cleanUp()` function.
 
 Just running the following script:
@@ -121,8 +147,11 @@ Java.perform(() => {
 ```
 
 Then, we need **re-launch** the app using **ADB**.
+
 Due that if we close and then, *open the app*, the *frida hooked in the process will die*.
+
 So, we can call `MainActivity` again using **ADB** once the frida script are hooked.
+
 Then, the app will show the flag.
 
 ![[byuctf_babyandroid1_2.png]]
@@ -130,7 +159,9 @@ Then, the app will show the flag.
 Flag: **`byuctf{android_piece_0f_c4ke}`**
 
 ## Baby Android 2
+
 **Description**: If you've never reverse engineered an Android application, now is the time!! Get to it, already!! Learn more about how they work!!
+
 **Download**: https://lautarovculic.com/my_files/baby_android-2.apk
 
 ![[byuctf_babyandroid2_1.png]]
@@ -141,7 +172,9 @@ adb install -r baby_android-2.apk
 ```
 
 We can see a *flag "sanity check"* text input and button.
+
 Let's inspect the **source code** using **jadx**.
+
 We have a *simple code* in the **`MainActivity`** class.
 ```java
 package byuctf.babyandroid;
@@ -198,16 +231,20 @@ public class FlagChecker {
 ```
 
 The app **load a native library** called `babyandroid` (`libbabyandroid.so`).
+
 Let's extract that using **apktool**
 ```bash
 apktool d baby_android-2.apk
 ```
 
 Inside of `baby_android-2/lib/arm64-v8a` directory we can found the `.so` file.
+
 We will use **ghidra** for inspect the library.
+
 Create a *new project* and *import the file*. Then, analyze.
 
 In the *functions* side, we can observe the following function:
+
 **`Java_byuctf_babyandroid_FlagChecker_check()`**
 
 The code is:

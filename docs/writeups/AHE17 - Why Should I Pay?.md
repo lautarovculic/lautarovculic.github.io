@@ -1,9 +1,33 @@
+---
+title: AHE17 - Why Should I Pay?
+description: ""
+tags:
+  - frida
+  - python
+  - crypto
+  - AHE
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - AHE
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/AHE17%20-%20Why%20Should%20I%20Pay%3F/
+---
+
 ### AHE17 : Android Hacking Events 2017
+
 For this challenge, probably we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 For download the **APK**
+
 https://team-sik.org/wp-content/uploads/2017/06/WhyShouldIPay.apk_.zip
 
 ![[whySIP1.png]]
@@ -19,7 +43,9 @@ apktool d WhyShouldIPay.apk
 ```
 
 Load the **apk** to **jadx-gui** for see the **source code**
+
 We can see in the first activity that we have the **VERIFY** button, that give us an **error**.
+
 And the **PREMIUM CONTENT** button, that show us an text label that says **Not activated**.
 
 We can see the **AndroidManifest.xml** file
@@ -55,8 +81,11 @@ We can see the **AndroidManifest.xml** file
 ```
 
 The **package** is `de.fraunhofer.sit.premiumapp`
+
 When we **launch** the **app**, the activity is **LauncherActivity**
+
 This is the **first** activity that is executed when we open the app.
+
 And this is the java code:
 ```java
 public class LauncherActivity extends AppCompatActivity {  
@@ -151,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
 ```
 
 Let's inspect close the **methods**
+
 `verifyClick`
 ```java
 public void verifyClick(View v) {  
@@ -184,7 +214,9 @@ public void verifyClick(View v) {
 ```
 
 This make a **request** to an **in existent** server (the error provides from here) and check the **license code**.
+
 If is **true** (success), the this will be saved in **shared preferences**.
+
 The string **LICENSEKEYOK**, and the **MAC Address** is in **XOR** saved as `activatedKey` in **shared preferences**.
 
 `getMac`
@@ -218,10 +250,13 @@ public void showPremium(View view) {
     }
 ```
 This methods pass the **MAC** obtained from `getMac` and the **KEY** from `getKey`
+
 And, at the end, **launch the MainActivity**.
 
 Then, we can use **frida** for intercept the methods and functions for make the bypass.
+
 First, we need a **precomputed** XOR key with the MAC address.
+
 You can use this code that will generate for you
 ```python
 def xor_bytes(val, key):

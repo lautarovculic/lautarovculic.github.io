@@ -1,3 +1,27 @@
+---
+title: 8kSec - FactsDroid - Your Universal Knowledgebase
+description: "FactsDroid is the ultimate knowledge companion that delivers fascinating facts right to your fingertips!"
+tags:
+  - flutter
+  - blutter
+  - network
+  - iptables
+  - burpsuite
+  - mitm-proxy
+  - bypass
+  - 8ksec
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - apk decompilation
+  - adb exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20FactsDroid%20-%20Your%20Universal%20Knowledgebase/
+---
+
 **Description**: FactsDroid is the ultimate knowledge companion that delivers fascinating facts right to your fingertips!
 
 **Link**: https://academy.8ksec.io/course/android-application-exploitation-challenges
@@ -10,13 +34,17 @@ adb install -r FactsDroid.apk
 ```
 
 We can see that the application get a *random fact* every time that we press the **Random Fact** button.
+
 I don't know if this issue is due to my devices, or is intended.
+
 But I receive the message:
+
 - *Failed to fetch fact. API might be down*
 
 The *High-Rated* button probably is *out of scope* in this challenge. So, we will focus on the first mentioned button.
 
 So, let's inspect the **source code** using **JADX**.
+
 We *didn't find anything interesting in `AndroidManifest.xml`*. But looking at **`MainActivity`** class we noticed that:
 ```java
 public final class MainActivity extends AbstractActivityC0004e {
@@ -44,6 +72,7 @@ public void g(C.a aVar, O.j jVar) {
 ```
 
 So, **we have a root checker** that, in my case, *due to the way I rooted my Android 14 device, does not detect it*.
+
 But this *could be bypassed with a simple Frida script*.
 
 Let's decompile the `.apk` using **apktool**
@@ -62,9 +91,11 @@ FactsDroid/assets/flutter_assets/assets/certs
 ```
 
 So, probably the app originally **make a request** to:
+
 - https://uselessfacts.jsph.pl//api/v2/facts/random
 
 Let's inspect the *libraries* that apktool has extracted.
+
 First, we need *know what architecture our device is*.
 ```bash
 adb shell getprop ro.product.cpu.abi
@@ -83,8 +114,11 @@ FactsDroid/lib/x86_64
 ```
 
 Let's *focus* in `libapp.so` library.
+
 We can use *blutter* tool for decompile and *translate the code into a human-readable* assembly code.
+
 - https://github.com/worawit/blutter
+
 But, for blutter tool use, we need decompile the `arm64-v8a` libraries.
 
 After install it, we can use this command:
@@ -93,6 +127,7 @@ mkdir out_factsdroid_arm64-v8a && python3 blutter.py FactsDroid/lib/arm64-v8a ou
 ```
 
 Inside of `out_factsdroid_arm64-v8a` directory we found some new `.txt` and `.dart` files and directories.  
+
 *Take a personal inspection of each for your curiosity, I will continue for useful code*
 
 Inside of `out_factsdroid_arm64-v8a`, we can search for some useful keywords:
@@ -125,11 +160,13 @@ Output:
 We can confirm the call to the website mentioned above.
 
 To *intercept traffic from an app made in Flutter* and *bypass all protection mechanisms*, the best script we can use today is the one developed by NVISO Security:
+
 - https://github.com/NVISOsecurity/disable-flutter-tls-verification
 
 The NVISO script, **injected with Frida**, locates the **internal BoringSSL function that validates the X.509 string** (`ssl_verify_peer_cert`) in `libflutter.so/libapp.so` using *byte pattern matching and intercepts it*. in the hook, it **forces the return value to 0** (`VERIFIE`D) and *overrides the verification callback*, so that *any certificate* is *accepted without modifying the APK or moving CAs*: Flutter's *pinning* and *TLS validation* are **completely disabled at runtime**.
 
 So, let's execute this frida script.
+
 Running the *FactsDroid* app and your `frida-server` in the device, in our client we must run:
 ```bash
 frida -U "FactsDroid" -l disable-flutter-tls.js
@@ -148,9 +185,11 @@ Attaching...
 ```
 
 Noticed that if you now try get a *Random Fact*, now it's works!
+
 This was thanks to the NVISO script.
 
 But now, **we need to intercept the traffic**!
+
 We can use **BurpSuite for this**. First, *install and configure the proxy*.
 
 *There are already many blogs, websites, and tutorials on how to do this, so I'll move on to capturing the request*
@@ -184,11 +223,13 @@ Content-Length: 279
 ```
 
 We must perform the work under the **text parameter**:
+
 - `"text": "A dragonfly has a lifespan of 24 hours."`
 
 Although we could complete the challenge request, I decided to use **iptables** and **mitmproxy**. Flutter’s `HttpClient` ignores the system proxy; that’s why we use **DNAT** with `iptables/mitmproxy`.
 
 Let's *configure our device* with *iptables* to **redirect traffic to our host and port**.
+
 In your `adb shell` session *as root*, run:
 ```bash
 iptables -t nat -I OUTPUT -p tcp --dport 443 -j DNAT --to $IP:$PORT
@@ -198,10 +239,13 @@ And
 iptables -t nat -I OUTPUT -p tcp --dport 80  -j DNAT --to $IP:$PORT
 ```
 - **OUTPUT** → Everything that *comes out of the device*.
+
 - **DNAT** → Changes the destination to your host.
+
 *In my case -> `$PORT` == 8081*
 
 Now, let's install *mitmproxy* in our computer.
+
 Using `pip3`
 ```bash
 pip3 install mitmproxy
@@ -224,7 +268,9 @@ def response(flow: http.HTTPFlow):
 ```
 
 Important remember:
+
 - Deactivate proxy in your device, and BurpSuite.
+
 - NVISO script must continue running in background.
 
 Run *mitmproxy*

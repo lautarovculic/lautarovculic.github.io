@@ -1,5 +1,30 @@
+---
+title: Google CTF 2016 - Ill Intentions
+description: ""
+tags:
+  - broadcast
+  - patching
+  - adb
+  - intents-extra
+  - logs
+  - GoogleCTF
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - GoogleCTF
+  - Google
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Google%20CTF%202016%20-%20Ill%20Intentions/
+---
+
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/illintentions.apk
@@ -16,6 +41,7 @@ Let's decompile the content with **apktool**.
 apktool d illintentions.apk
 ```
 And let's check the **source code** with **jadx** (GUI version)
+
 We can see that the **package name** is `com.example.hellojni`
 
 So, after read the code some minutes, we have the **MainActivity**
@@ -195,7 +221,9 @@ The **Utilities** class is for **decrypt** the **strings** in `strings.xml` reso
 ```
 
 I don't want waste my time with the **lib** native `libhello-jni.so`
+
 So, I decide create my **own** app that send the **broadcast** to the target app.
+
 But, before, we need change this in the **AndroidManifest.xml** file of the illintentions.apk
 ```XML
 <permission  
@@ -212,6 +240,7 @@ W/BroadcastQueue(  544): Permission Denial: broadcasting Intent { act=com.ctf.IN
 ```
 
 So change **signature** to **normal** and save the **AndroidManifest.xml** file
+
 Then, rebuild the **apk** with **apktool**
 ```bash
 apktool b illintentions
@@ -233,7 +262,9 @@ adb install -r illintentions/dist/illintentions.apk
 ```
 
 So, now we need create **our receiver**.
+
 The files 
+
 `MainActivity.java`
 ```java
 package illintentions.solve;  
@@ -261,6 +292,7 @@ public class MainActivity extends Activity {
 ```
 
 Create a **java class** for receive the intent
+
 `Receiver.java`
 ```java
 package illintentions.solve;  
@@ -314,7 +346,9 @@ And the `AndroidManifest.xml` of our app looks like
 ```
 
 So, compile our app. And wait until this is executed.
+
 When is executed, we can call the **activities** with **adb** of the target app.
+
 We can use `am` (activity manager) for sent a **broadcast** with adb.
 
 Run **logcat** for get the **message logs**
@@ -326,6 +360,7 @@ And in another terminal, run
 adb shell am broadcast -a com.ctf.INCOMING_INTENT -e "msg" "DefinitelyNotThisOne"
 ```
 Press the **BROADCAST INTENT** button in the target app and:
+
 Output: **Message: Told you so!**
 
 Let's try with another activity

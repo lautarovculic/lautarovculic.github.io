@@ -1,25 +1,53 @@
+---
+title: Mobile Hacking Lab - Freshcart
+description: "Welcome to the iOS Application Security Lab: JavaScript-to-Native Bridge Exploitation Challenge. This challenge is centered around a fictitious grocery app called Freshcart. Freshcart contains a critical vulnerability that allows token stealing by exploiting the JavaScript to native bridge. Your objective is to exploit this vulnerability to steal the token used within the app."
+tags:
+  - js-interface
+  - burpsuite
+  - proxy
+  - MobileHackingLab
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Freshcart/
+---
+
 **Description**: Welcome to the **iOS Application Security Lab: JavaScript-to-Native Bridge Exploitation Challenge**. This challenge is centered around a fictitious grocery app called Freshcart. Freshcart contains a critical vulnerability that allows token stealing by exploiting the JavaScript to native bridge. Your objective is to exploit this vulnerability to steal the token used within the app.
 
 **Download**: https://lautarovculic.com/my_files/freshcart.ipa
+
 **Link:** https://www.mobilehackinglab.com/path-player?courseid=lab-freshcart
 
 ![[freshcart1.png]]
 
 Install an **IPA** file can be difficult.
+
 So, for make it more easy, I made a YouTube video with the process using **Sideloadly**.
+
 **LINK**: https://www.youtube.com/watch?v=YPpo9owRKGE
 
 **NOTE**: If you have problems with the keyboard and UI (buttons) when you need to hide it on a physical device, you can fix this problem by using the `KeyboardTools` by `@CrazyMind90` found in the Sileo app store.
 
 Once you have the app installed, let's proceed with the challenge.
+
 **unzip** the **`.ipa`** file.
 
 But first, let's move into the app, knowing functionalities, possible attack points where we can abuse the JS.
+
 After a simple research in the app, (and capturing all traffic with **burpsuite**), I notice that the vulnerable field is the **review description** in **each product**.
 
 ![[freshCart2.png]]
 
 Notice that the title keep the data `<h1>lau</h1><h2>taro</h2>`
+
 Meanwhile the content of the review is interpreted if we use the same 'payload'.
 
 Here's the **request** that the app send to the server
@@ -46,6 +74,7 @@ Sec-Fetch-Dest: empty
 ```
 
 Now that we know where the payload for get the token is, we just need search *javascript* references in the code.
+
 While the `unzip` command was extracting the `Payload` folder, I see another folder called `build`.
 
 ```bash
@@ -99,16 +128,20 @@ Payload/FreshCart.app/build
 ```
 
 Im interested in this file `main.adf11907.js` but it is unreadable.
+
 So, I use https://beautifier.io
+
 Take off the `.js` file out of `.app` folder
 ```bash
 cp main.adf11907.js ../../../../../
 ```
 
 Now we can upload the `.js` file into the webpage.
+
 Then, if you upload the `.js` in the tool, you can copy -and then modify the file- or download a new copy of the javascript code.
 
 I opened the file with **vscode** and, over *22000 lines are presents*.
+
 Let's make some **search in the code** about tokens, and how app works with **reviews** implementation.
 
 And here's the most important code:
@@ -143,7 +176,9 @@ Ao = e => {
 ```
 
 This code is **handling authentication in an iOS WebView** using `window.webkit.messageHandlers`.
+
 - `wo(e, t)` → Attempts **to get the user's token from `localStorage`** or through a **WebKit `messageHandler`** (`retrieveToken`).
+
 - `Ao(e)` → **Store the user's token in `localStorage`** or **pass it to a WebKit `messageHandler`** (`storeToken`).
 
 Let's interpret this code line by line
@@ -232,8 +267,11 @@ children: [
 ```
 
 This code:
+
 - Renders a title (`h3`) with the value of `e.title`.
+
 - If `e.review` contains `<script>`, render a `<p>` with children: `e.review` as **plain text** (i.e., *avoid executing injected HTML code*).
+
 - If `e.review` **does NOT contain** `<script>`, use `dangerouslySetInnerHTML` to **render it as injected HTML**.
 
 Since the **iOS WebView** uses `window.webkit.messageHandlers.retrieveToken.postMessage()`, we can have the page **inject** a `postMessage` to *exfiltrate the token*.

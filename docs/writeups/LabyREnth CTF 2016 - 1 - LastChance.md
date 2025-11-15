@@ -1,9 +1,29 @@
+---
+title: LabyREnth CTF 2016 - 1 - LastChance
+description: ""
+tags:
+  - rev-binaries
+  - LabyREnth
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - LabyREnth
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/LabyREnth%20CTF%202016%20-%201%20-%20LastChance/
+---
+
 Download **IPA**: https://lautarovculic.com/my_files/fbfe8ecef4b5f97c40687fd02f74ae009277538490fba314e61830d75b3b4ac5
+
 **Password**: infected
 
 ![[laby2016_lastchance1.png]]
 
 When you extract the file, we'll have the **.ipa** file, and the `LastChance_Simulator.app` folder.
+
 Inside of this folder we have the `LastChance` executable.
 ```bash
 file LastChance
@@ -12,18 +32,25 @@ LastChance: Mach-O 64-bit x86_64 executable, flags <NOUNDEFS|DYLDLINK|TWOLEVEL|P
 ```
 
 We can use **ghidra** for inspect this binary.
+
 After load, we have the **entry point**.
 
 But, we can search for some **functions or hardcoded strings**.
+
 I found some interesting **strings**.
+
 ![[laby2016_lastchance2.png]]
 
 Let's found where is used.
+
 Taking a look at the **right** of the string, we can see **one reference**
+
 ![[laby2016_lastchance3.png]]
 
 Click on the **XREF** and we can see this function that is calling to the **flag**
+
 ![[laby2016_lastchance4.png]]
+
 And here is the code of **our interest**
 ```C
 void __TFC10LastChance14ViewController9WinWindowfSiT_(undefined8 param_1,undefined8 param_2)
@@ -66,6 +93,7 @@ __TTSg5Vs5UInt8___TFs27_allocateUninitializedArrayurFBwTGSax_Bp_(0x1b);
 ```
 
 There are some **hexadecimal** values.
+
 `0x500x410x4e0x7b0x450x5a0x450x5f0x530x340x310x640x5f0x540x680x310x350x5f0x770x340x730x5f0x450x610x350x790x7d`
 
 If we **convert** this, we get the **flag**

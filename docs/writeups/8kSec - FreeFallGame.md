@@ -1,3 +1,26 @@
+---
+title: 8kSec - FreeFallGame
+description: "Experience the thrill of FreeFall, an addictive iOS ball game that challenges your reflexes and precision! Navigate a fast-moving ball through obstacles using intuitive paddle controls and all under a 60-second time limit."
+tags:
+  - flutter
+  - reflutter
+  - frida-trace
+  - fridump
+  - frida
+  - rev-binaries
+  - 8ksec
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20FreeFallGame/
+---
+
 **Description**: Experience the thrill of FreeFall, an addictive iOS ball game that challenges your reflexes and precision! Navigate a fast-moving ball through obstacles using intuitive paddle controls and all under a 60-second time limit.
 
 **Link**: https://academy.8ksec.io/course/ios-application-exploitation-challenges
@@ -272,12 +295,19 @@ Now if we running again the **`frida-trace`** command, when you *submit the scor
 
 We can see **that the application performs a series of SQL operations with the files we previously found in the Documents directory** (where we extracted the `dump.dart`).
 ### Score flow
+
 1. The player taps the screen to keep the ball in the air.
+
 2. Each collision with an obstacle adds X point.
+
 3. The `GameEngine` maintains a `_score` property, which is *incremented locally*.
+
 4. When the* game ends*, the `_submitScore()` function is called.
+
 5. The **score information is serialized and sent as a `FlutterMethodCall` with the insert method**.
+
 6. In Objective-C (iOS), this method calls **`+[FlutterMethodCall methodCallWithMethodName:arguments:]`**.
+
 7. An SQL call is constructed with the following parameters:
 ```SQL
 INSERT INTO leaderboard (name, score, timestamp, token)

@@ -1,9 +1,33 @@
+---
+title: AHE17 - Flag-Validator
+description: ""
+tags:
+  - python
+  - rev-libraries
+  - crypto
+  - AHE
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - AHE
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/AHE17%20-%20Flag-Validator/
+---
+
 ### AHE17 : Android Hacking Events 2017
+
 For this challenge, probably we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 For download the **APK**
+
 https://team-sik.org/wp-content/uploads/2017/06/FlagValidator.apk_.zip
 
 
@@ -15,6 +39,7 @@ apktool d FlagValidator.apk
 ```
 
 Let's see the content of **MainActivity.java** that say so clear the structure of the flag.
+
 In the **onValidateClick** method
 ```java
 public void onValidateClick(View view) {  
@@ -56,6 +81,7 @@ public void onValidateClick(View view) {
 ```
 
 For **every part** we have a **different method**
+
 Here is the **four methods** in **org.team_sik.flagvalidator.a.a.b**
 ```java
 public static void a(String str) {  
@@ -114,6 +140,7 @@ public static void a(String str) {
 ```
 
 We have the string **cHVtcjRX**
+
 That have this logic
 ```java
 public static String a(String str) {  
@@ -234,7 +261,9 @@ public native String value();
 ```
 
 An string of the **native libraries**.
+
 Let's use **ghidra** for see the **libraries** and what we can found inside.
+
 I'll use this **.so** file
 ```bash
 FlagValidator/lib
@@ -258,14 +287,17 @@ public static void d(String str) {
 ```
 
 This **MD5** is so broke.
+
 You can find in crackstation the **string** according to the **MD5** value
 
 Value: **continue1**
 
 Then the final flag looks like
+
 **W4rmup-ch4ll3ng3-5UcC33D3d-continue1**
 
 Just insert in the text box and
+
 ![[flagValidator3.png]]
 
 I hope you found it useful (:

@@ -1,3 +1,25 @@
+---
+title: 8kSec - ClearRoute
+description: "ClearRoute is an iOS app designed to test your ability to intercept sensitive data without getting caught."
+tags:
+  - obj-c
+  - network
+  - proxy
+  - frida
+  - rev-binaries
+  - 8ksec
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20ClearRoute/
+---
+
 **Description**: ClearRoute is an iOS app designed to test your ability to intercept sensitive data without getting caught.
 
 **Link**: https://academy.8ksec.io/course/ios-application-exploitation-challenges

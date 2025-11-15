@@ -1,3 +1,22 @@
+---
+title: NahamCon CTF 2022 - Click Me!
+description: "I created a cookie clicker application to pass the time. There's a special prize that I can't seem to get."
+tags:
+  - smali
+  - patching
+  - NahamCon
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - NahamCon
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/NahamCon%20CTF%202022%20-%20Click%20Me%21/
+---
+
 **Description**: I created a cookie clicker application to pass the time. There's a special prize that I can't seem to get.
 
 **Download**: https://lautarovculic.com/my_files/click_me.apk
@@ -15,6 +34,7 @@ apktool d click_me.apk
 ```
 
 Then, let's open the **apk** with **jadx** (GUI version) for check **source code**.
+
 The **package name** is `com.example.clickme`. We have the **MainActivity**, and another class called **ActivityMainBinding**. But we'll work with the first one.
 
 We have the *main logic* here:
@@ -30,6 +50,7 @@ public final void getFlagButtonClick(View view) {
 ```
 
 Mmmm... This may be really simple, we just need change `99999999`by `0` haha.
+
 So, come to `smali` directory that **apktool** has drop to us.
 ```bash
 tree click_me/smali/com/example/clickme/
@@ -50,13 +71,17 @@ click_me/smali/com/example/clickme/
 ```
 
 We just need `MainActivity.smali` file.
+
 We can found the **declaration** of *variables*.
+
 ![[nahamCon_2022-ClickMe2.png]]
 
 The `0x5f5e0ff` number is `99999999`.
+
 And `0x0` is `0`.
 
 We just need change `0x5f5e0ff` by `0x0`.
+
 Then, the logic in *java code* must look like:
 ```java
 if (this.CLICKS == 0) {
@@ -67,12 +92,14 @@ if (this.CLICKS == 0) {
 Save the `.smali` file. And it's *rebuild time*!
 
 Come to our directory path where we have the *original apk*.
+
 Then
 ```bash
 apktool b click_me
 ```
 
 This will create a *new apk* (patched) in `click_me/dist/click_me.apk`
+
 Let's **align** the `.apk` with **zipalign**
 ```bash
 zipalign -v -p 4 click_me/dist/click_me.apk clicc_me-aligned.apk

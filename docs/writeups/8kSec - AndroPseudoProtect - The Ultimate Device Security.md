@@ -1,3 +1,26 @@
+---
+title: 8kSec - AndroPseudoProtect - The Ultimate Device Security
+description: "Tired of worrying about your device security? AndroPseudoProtect offers comprehensive protection with just a tap!"
+tags:
+  - broadcast
+  - services
+  - theft-file
+  - examples
+  - java
+  - android-programming
+  - 8ksec
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - 8ksec
+  - mobile writeups
+  - apk decompilation
+  - adb exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/8kSec%20-%20AndroPseudoProtect%20-%20The%20Ultimate%20Device%20Security/
+---
+
 **Description**: Tired of worrying about your device security? AndroPseudoProtect offers comprehensive protection with just a tap!
 
 **Link**: https://academy.8ksec.io/course/android-application-exploitation-challenges
@@ -16,10 +39,13 @@ After some minutes looking for the behavior of the app, and giving the permissio
 That's funny and idk if this is intended, but I don't care because I don't read the source code yet.
 
 After some "QA" test(? I noticed that **when the user reopens AndroPseudoProtect after closing it, pressing the “Start Security” button doesn’t re‑enable protection as expected**; instead, *if encrypted files already exist, the app **decrypts them all***.
+
 This flawed toggle *behavior lets an attacker exploit the exported service that triggers the same logic*, silently restoring *files to plaintext whenever the user interacts with the app*, while the victim believes encryption is still protecting their data. 
 
 Analyzing the logs file, I didn't find nothing useful.
+
 Let's inspect the **source code** using **JADX**.
+
 Looking in the `AndroidManifest.xml` file, we can see the following XML content:
 ```xml
 <activity
@@ -45,23 +71,29 @@ Looking in the `AndroidManifest.xml` file, we can see the following XML content:
 ```
 
 We can see the *Activity*:
+
 - `com.eightksec.andropseudoprotect.MainActivity`
 
 The *service*:
+
 - `com.eightksec.andropseudoprotect.SecurityService`
 
 The *receiver*:
+
 - `com.eightksec.andropseudoprotect.SecurityReceiver`
 
 The *receiver listen* for:
+
 - `com.eightksec.andropseudoprotect.START_SECURITY`
 
 - `com.eightksec.andropseudoprotect.STOP_SECURITY`
 
 As **exported** and **without protections permissions**.
+
 So, **any app can launch the service**!
 
 But first, let's go in *depth into the code we can see with JADX*.
+
 **`MainActivity`** class interesting code:
 ```java
 private boolean isServiceRunning;
@@ -76,6 +108,7 @@ private final void checkServiceRunning() {
 Project “**INSECURE**”/*Start* button enabled **without consulting the `SecurityService`** or the Foreground Service.
 
 1. `updateSecurityStatus(true)` → print “**SECURE**”.
+
 2. Generate **new token** and make `startService(... START_SECURITY ...)`
 ```java
 private final void startSecurity() {
@@ -158,11 +191,15 @@ private final void stopSecurity() {
 If the user thought “Stop” *was pause*, it actually *decrypts everything*.
 
 So, `MainActivity` class:
+
 - Does not ask the `SecurityService` if it was **already running** (by `bindService` or `ServiceManager`).
+
 - Does **not check** for `.encrypted` files to **decide** “*Start*” vs “*Stop*”.
+
 - The `isServiceRunning` flag **is reset to false on every new process**, *enabling the “Start” button* and leading to the *buggy decryption flow*.
 
 Now let's inspect the **`SecurityService`** class!
+
 And we can notice here the problem:
 ```java
 @Override
@@ -200,20 +237,25 @@ public int onStartCommand(Intent intent, int flags, int startId) {
 ```
 
 We can divide the code in four steps:
+
 1. **Predictable Authentication**: The token it *compares is the one it instantly generates itself*.
 (`new SecurityUtils().getSecurityToken())`, so *any process loading the same class gets the correct value*. Also, never *is secret because is invoked every time when intent is coming*.
 And **always is the same token**.
 
 2. **Volatile flag `isServiceRunning`**: Is stored only in memory. (you can also check looking in the *sandbox app directory*).
+
 - Killing the app → *the process dies* → `isServiceRunning` = **false**.
+
 - Files remain as `.encrypted` (which is OK).
 
 3. **Internal Start → Stop → Start sequence**:
+
 - If the user touches “**Start**” *while the flag was true*, it *first enters `stopSecurity()`*, which executes:
 ```java
 fileProcessor.startDecryption();
 ```
 and send the `DECRYPTION_COMPLETE` broadcast.
+
 - It then *passes to `startSecurity()`* and calls
 ```java
 fileProcessor.startEncryption();
@@ -227,8 +269,11 @@ Let's create the **exploit**!
 Requests _notification_ and _storage_ permissions, then launches **`StealService`**.
 #### `StealService`
 - **Mutes** every audio stream.
+
 - Reflects into `com.eightksec.andropseudoprotect` to steal the in‑memory **security token**.
+
 - Spoofs the **victim’s IPC handshake** (`START_SECURITY` ➜ waits for `SECURITY_STARTED` ➜ replies `STOP_SECURITY`).
+
 - After `DECRYPTION_COMPLETE`, **crawls external storage**, copies any ≤ 10 MB “*interesting*” files (e.g. `.txt`, `.pdf`, *secret*) into its *own loot-folder and previews a few lines of up to three text files in Logcat*.
 
 ### Code
@@ -703,9 +748,13 @@ I  stealth exploit completed!!
 ![[8ksec-AndroiPseudoProtect_4.png]]
 
 Steps to reproduce:
+
 - Launch the target app.
+
 - Encrypt the files.
+
 - Put the target app in background.
+
 - Launch the PoC app and see the logs.
 
 **Download PoC**: https://lautarovculic.com/my_files/androPseudoExploit.apk

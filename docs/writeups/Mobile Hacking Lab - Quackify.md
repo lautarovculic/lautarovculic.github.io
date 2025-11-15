@@ -1,3 +1,24 @@
+---
+title: Mobile Hacking Lab - Quackify
+description: "Welcome to Quackify, a music streaming application with premium features locked behind a license validation system. Your mission is to unlock premium access  to get the flag."
+tags:
+  - rev-binaries
+  - swift
+  - MobileHackingLab
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Quackify/
+---
+
 **Description**: Welcome to Quackify, a music streaming application with premium features locked behind a license validation system. Your mission is to unlock premium access  to get the flag.
 
 **Link**: https://www.mobilehackinglab.com/course/lab-quackify-mhc
@@ -7,9 +28,13 @@
 Install an **IPA** file can be difficult. So, for make it more easy, I made a YouTube video with the process using **Sideloadly**. **LINK**: [https://www.youtube.com/watch?v=YPpo9owRKGE](https://www.youtube.com/watch?v=YPpo9owRKGE)
 
 Once you have the app installed, let's proceed with the challenge. **unzip** the **`.ipa`** file.
+
 ### Clarification
+
 Since I don't have access to the challenge device, **the final flag will be created in the last step of the writeup** as a practical example.
+
 ### Recon
+
 This application is a radio app, and by default, **we have the free license**. This *allows us to listen to the radio station for 10 seconds*.
 
 After those 10 seconds, a pop-up will appear to **Upgrade to Premium**.
@@ -205,7 +230,9 @@ class quackify.License: NSObject {
 It confirms this because it inherits from **`NSObject`** which *only classes can do this*.
 
 And these variables are the most important for **craft our license**.
+
 ### Crafting the License
+
 We need use **Swift** for compile the license, and then, generate that.
 ```swift
 import Foundation

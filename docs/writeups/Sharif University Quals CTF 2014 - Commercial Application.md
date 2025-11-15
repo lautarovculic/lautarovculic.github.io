@@ -1,8 +1,28 @@
+---
+title: Sharif University Quals CTF 2014 - Commercial Application
+description: "Flag is a serial number."
+tags:
+  - crypto
+  - SQLite
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Sharif%20University%20Quals%20CTF%202014%20-%20Commercial%20Application/
+---
+
 **Category**: Crypto
+
 **Description**: Flag is a serial number.
 
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/suCTF.apk
@@ -19,16 +39,23 @@ Decompile this with **apktool**
 apktool d suCTF.apk
 ```
 And now we can inspect the **source code** with **jadx**
+
 But, first at all, let's take a look to the app.
 
 We have a list of **3 pictures**.
+
 The first **picture** is "free".
+
 But, the **picture 2** and **3**, we need insert a **Product Key**
+
 ![[commercialApplication2.png]]
+
 Okey, now let's get in action with the **source code**
 
 The **package name** is `edu.sharif.ctf`
+
 And the launcher activity is **MainActivity**.
+
 This is the code (**reduced**)
 ```java
 public class MainActivity extends SherlockFragmentActivity implements ListFragment.OnPictureSelectedListener {
@@ -186,18 +213,25 @@ public class MainActivity extends SherlockFragmentActivity implements ListFragme
 ```
 
 Let's **explain this code**
+
 In the **License Management** topic
+
 - When the user selects the setting menu item (`R.id.setting`), the `checkLicenceKey()` method is called.
+
 - If there is no valid license, an `AlertDialog` is displayed prompting the user to enter a license key.
+
 - The validity of the key is verified by `KeyVerifier.isValidLicenceKey()` using values such as `storedKey` and `iv` retrieved from `DataHelper`.
 
 **Messages**
+
 - The `showAlertDialog()` method is used to display status messages about the validity of the license key.
 
 **License Key Validation** could be a point of interest to exploit, as it may involve reverse engineering techniques or data manipulation.
 
 Looking inside of the **extracted** apk folder, we can see in **assets** an **database**.
+
 That is called **db.db**.
+
 Let's open and see information inside
 ```bash
 sqlite3 db.db
@@ -211,6 +245,7 @@ sqlite>
 ```
 
 Then, we have another **two** java classes that we need.
+
 **KeyVerifier** (simplified)
 ```java
 public class KeyVerifier {
@@ -280,20 +315,27 @@ public class DBHelper extends SQLiteOpenHelper {
 ```
 
 We can conclude that the **key** is former with an **AES** encryption.
+
 That is need for decrypt an **iv** and **secret key**.
+
 We can found this parameters in the **db**.
 
 Which, for standard of **AES**, the
+
 **IV**: `a5efdbd57b84ca36`
+
 **Secret Key**: `37eaae0141f1a3adf8a1dee655853714`
 
 And, in the **KeyVerifier** class, we have the **encrypted** license:
+
 `29a002d9340fc4bd54492f327269f3e051619b889dc8da723e135ce486965d84`
 
 Then, in cyberchef we can **decrypt** the **AES**
+
 ![[commercialApplication3.png]]
 
 **License Key**: fl-ag-IS-se-ri-al-NU-MB-ER
+
 ![[commercialApplication4.png]]
 
 I hope you found it useful (:

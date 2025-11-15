@@ -1,17 +1,44 @@
+---
+title: Mobile Hacking Lab - Time Trap
+description: "Welcome to the Time Trap Challenge. In this challenge, you will explore the vulnerabilities in an internally used application named Time Trap, focusing on Command Injection. Time Trap is a fictional application that showcases insecure practices commonly found in internal applications. Your objective is to exploit the Command Injection vulnerability to gain unauthorized access and execute commands on the iOS device."
+tags:
+  - code-execution
+  - burpsuite
+  - proxy
+  - rev-binaries
+  - MobileHackingLab
+  - ios
+keywords:
+  - ios hacking
+  - ctf writeup
+  - MHL
+  - MobileHackingLab
+  - Mobile Hacking Lab
+  - mobile writeups
+  - ios reversing
+  - ios exploitation
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Mobile%20Hacking%20Lab%20-%20Time%20Trap/
+---
+
 **Description**: Welcome to the **Time Trap Challenge**. In this challenge, you will explore the vulnerabilities in an internally used application named Time Trap, focusing on Command Injection. Time Trap is a fictional application that showcases insecure practices commonly found in internal applications. Your objective is to exploit the Command Injection vulnerability to gain unauthorized access and execute commands on the iOS device.
 
 **Download**: https://lautarovculic.com/my_files/timeTrap.ipa
+
 **Link:** https://www.mobilehackinglab.com/path-player?courseid=lab-time-trap
 
 ![[timeTrap1.png]]
 
 Install an **IPA** file can be difficult.
+
 So, for make it more easy, I made a YouTube video with the process using **Sideloadly**.
+
 **LINK**: https://www.youtube.com/watch?v=YPpo9owRKGE
 
 **NOTE**: If you have problems with the keyboard and UI (buttons) when you need to hide it on a physical device, you can fix this problem by using the `KeyboardTools` by `@CrazyMind90` found in the Sileo app store.
 
 Once you have the app installed, let's proceed with the challenge.
+
 **Unzip** the **`.ipa`** file for analyze the **`Info.plist`**
 ```bash
 cd Payload/Time\ Trap.app && plutil -convert xml1 Info.plist && cat Info.plist
@@ -32,14 +59,19 @@ cd Payload/Time\ Trap.app && plutil -convert xml1 Info.plist && cat Info.plist
 </array>
 ```
 That's interesting.
+
 We have the **Gotham Times** scheme (may be it's login implementation? - due that we can't create a new user account).
 
 *Note*
+
 *You can find the Gotham Times challenge writeup in my website*.
 
 Anyway, that's don't work for me.
+
 But, that's make a kind of supposition about how app talk with the server.
+
 MHL Team says that user "*emp002*" have a *weak password*. But, this user doesn't exists.
+
 Then, I believe and with the hope that another user that actually has solved this challenge has create an user named **`test:test`** and yes, that's works and we are in!
 
 We can **intercept the request** when we try to log in.
@@ -67,6 +99,7 @@ We receive the **JWT** token, which means that its successful!
 *Note: idk if this is because Im using an existent account, but **Check in** button isn't work for me.*
 
 Also, notice that there are a **quickly request** when we are in the main screen.
+
 Which is
 ```HTTP
 GET /time-trap/attendance-list HTTP/2
@@ -119,6 +152,7 @@ And the response will have a body like this
 Obviously this was made by **another user**.
 
 But we can identify that we have an **command injection**.
+
 Let's inspect this behavior in the binary file.
 
 Using burp *request and response information*
@@ -140,9 +174,11 @@ https://mhl.pages.dev/time-trap/attendance
 ```
 
 Notice that there are a **new endpoint**, which is
+
 `https://mhl.pages.dev/time-trap/attendance`
 
 Let's discover more info about this. But now moving into **ghidra**
+
 Here's the **`buttonPressed`** function.
 ```CPP
 void __thiscall
@@ -277,8 +313,11 @@ void Time_Trap::updateAttendance(String uname) {
 ```
 
 We can inject a command in this request.
+
 It seems that the command is sent **via POST**.
+
 First, we need a **valid JWT**
+
 Get it with
 ```bash
 curl -X POST "https://mhl.pages.dev/time-trap/login" \
@@ -287,6 +326,7 @@ curl -X POST "https://mhl.pages.dev/time-trap/login" \
 ```
 
 Copy the **JWT**
+
 And then create this file as payload
 ```JSON
 {

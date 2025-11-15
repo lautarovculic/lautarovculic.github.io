@@ -1,3 +1,23 @@
+---
+title: Google CTF Quals 2018 - Shall We Play A Game?
+description: "Win the game 1,000,000 times to get the flag."
+tags:
+  - smali
+  - patching
+  - GoogleCTF
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - GoogleCTF
+  - Google
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/Google%20CTF%20Quals%202018%20-%20Shall%20We%20Play%20A%20Game%3F/
+---
+
 **Description**: Win the game 1,000,000 times to get the flag.
 
 Download **APK**: https://lautarovculic.com/my_files/shallweplayagame.apk
@@ -10,16 +30,20 @@ adb install -r shallweplayagame.apk
 ```
 
 It seems to be the game of **tic-tac-toe,** and we need `1,000,000` games **won** to **get the flag**.
+
 If we lose, t*he application closes and the counter will return to 0*.
 
 *Our intention will not be to win 1,000,000 games in a row*. But it will be winning `1,000,000` times in one play.
+
 So let's read the source code to understand how the app works using **jadx** (GUI version)
+
 But before, let's decompile the source code with **APKTool**
 ```bash
 apktool d shallweplayagame.apk
 ```
 
 The **package name** is `com.google.ctf.shallweplayagame` and there are just **one activity**, which is `com.google.ctf.shallweplayagame.GameActivity`.
+
 But, there are **three classes** in the app, which is: `a()`, `b()` and `N()`.
 
 Anyways, the most **valuable code** is here
@@ -52,33 +76,43 @@ void n() {
 ```
 
 Where **`m()`** show the **flag**.
+
 **`this.o++;`** increase the *win counter*.
+
 **`if (this.o == 1000000)`** checks if the *counter is 1,000,000*.
 
 I have tried several ways, for example, *that the counter starts directly at 1,000,000* and I also tried to patch the code by modifying that *if we win, we jump to the `m()` function*.
 
 But there was no success because *it makes a series of extra validations*.
+
 And that's because **there is some sort of loop that must be executed 1,000,000 times**.
 
 Then, we will need to **create a loop that tells the application that we have already won 1,000,000 times**.
 
 We need **modify** the **`.smali`** file of **GameActivity**.
+
 We can found that in
+
 `shallweplayagame/smali/com/google/ctf/shallweplayagame`
 
 And the code that we'll introduce/modify is in the `n()` method.
+
 Which start in the **line code** number `666`.
 
 Looking this value `0xf4240` in hex, which mean `1,000,000`.
+
 Here's the **win counter**
+
 ![[shallweplayagame2.png]]
 
 And here the **win check**
+
 ![[shallweplayagame3.png]]
 
 In these section, we need add **a loop** which runs `1,000,000` times.
 
 Go to the `.locals 10` line in the *top of the method* and change `10` by `11`. This is for add a *new local variable* unit.
+
 Under `const/4 v6, 0x2` we need *initialize* the new variable (`v10`) to 0 (`0x0`).
 
 After `add-int/lit8 v0, v0, 0x1` which is in `:cond_1`, add this instruction `move v0, v9`. This will move `1,000,000` in **win counter**.
@@ -93,6 +127,7 @@ add-int/lit8 v10, v10, 0x1 # Increase counter of our new variable by 1
 ```
 
 Must looks like
+
 ![[shallweplayagame4.png]]
 
 Finally, let's go further down in the code, search for `iput-object v0, p0, Lcom/google/ctf/shallweplayagame/GameActivity;->q:[B`.
@@ -105,6 +140,7 @@ goto :goto_3
 ```
 
 Look like
+
 ![[shallweplayagame5.png]]
 
 The **entire `n()` methods is here**
@@ -293,6 +329,7 @@ The **entire `n()` methods is here**
 ```
 
 Now it's **rebuild time**!
+
 With **APKTool**, build
 ```bash
 apktool b shallweplayagame
@@ -319,16 +356,21 @@ adb install -r shallweplayagame-aligned.apk
 ```
 
 When we run the application, and win the *first game*, it will *appear that the application has crashed*.
+
 But **don't worry**, remember that it *must be run 1,000,000 times to win*.
 
 *If Android tells us that the application is not responding, we will tell it to wait*.
 
 We wait a few moments and **we will get the flag**.
+
 ![[shallweplayagame6.png]]
 
 This flag is encoded with a technique that *removes secondary vowels from words*. Interpreting the content, it looks something like this:
+
 “`CTF{TheLossOfInnocenceIsThePriceOfApplause}`”
+
 That is:
+
 “**The Loss Of Innocence Is The Price Of Applause**”.
 
 I hope you found it useful (:

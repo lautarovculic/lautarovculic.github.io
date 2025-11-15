@@ -1,6 +1,27 @@
+---
+title: PoliCTF 2015 - Crack Me If You Can
+description: "John bets nobody can find the passphrase to login!"
+tags:
+  - strings
+  - python
+  - obfuscation
+  - android
+keywords:
+  - android reversing
+  - ctf writeup
+  - mobile writeups
+  - apk decompilation
+  - frida tool
+  - mobile security research
+canonical: https://lautarovculic.github.io/writeups/PoliCTF%202015%20-%20Crack%20Me%20If%20You%20Can/
+---
+
 **Description**: John bets nobody can find the passphrase to login!
+
 **Note**: For this challenge, we need install some things into our Android 5.1 device with Genymotion.
+
 For example, an **ARM Translator**.
+
 https://github.com/m9rco/Genymotion_ARM_Translation
 
 Download **APK**: https://lautarovculic.com/my_files/crack-me-if-you-can.apk
@@ -18,11 +39,17 @@ apktool d crack-me-if-you-can.apk
 ```
 
 We can see the source code with **jadx** (GUI version).
+
 There are some activities so curious..
+
 In fact, in the **MainActivity** (LoginActivity) we have an "**flag**" hardcoded.
+
 `flagging{It_cannot_be_easier_than_this}`
+
 But this is a **fake flag**.
+
 So, let's keep reading the code.
+
 Here we have an **a** method
 ```java
 private boolean a(String str) {  
@@ -46,6 +73,7 @@ If we inspect the `res/values/strings.xml`, these strings in the method are:
 So, we need the message **Good to go!**, then we need **input** the `[[c%l][c{g}[%{%Mc%spdgj=]T%aat%=O%bRu%sc]c%ti[o%n=Wcs%=No[t=T][hct%=buga[d=As%=W]e=T%ho[u%[%g]h%t[%}%` string in the **TextEdit**.
 
 But, the string is **obfuscated**. So, looking more in the code, we can found classes like
+
 `b`
 ```java
 public class b {  
@@ -157,7 +185,7 @@ print(transform_string(input_string))
 ```
 
 And then, the flag is `flag{Maybe_This_Obfuscation_Was_Not_That_Good_As_We_Thought}`
-Put into the **TextEdit** and get the **Good to go! =)** message.
 
+Put into the **TextEdit** and get the **Good to go! =)** message.
 
 I hope you found it useful (:
