@@ -110,17 +110,14 @@ jobs:
 
               if not has_key(lines,s,e,'description'):
                   body='\n'.join(lines[c:])
-                  # quitar H1 visible del body
                   body=re.sub(r'^\s*# .*$', '', body, flags=re.M)
-                  # elegir primer párrafo útil que no sea JSON/HTML
                   paras=[x.strip() for x in re.split(r'\n\s*\n',body) if x.strip()]
                   desc=''
                   for para in paras:
                     stripped = para.lstrip()
-                    if stripped.startswith(('{','<')):  # evita JSON-LD/HTML
+                    if stripped.startswith(('{','<')):
                       continue
                     cand=strip_md(para)
-                    # Saltear si después de limpiar empieza con "Description:"
                     if cand.lower().startswith('description:'):
                       continue
                     if len(cand)>=40:
@@ -139,7 +136,6 @@ jobs:
                   if not in_code and re.match(r'^\s*#\s+.+$', lines[j]):
                       has_h1=True; break
               if not has_h1:
-                  # usar el title del FM si lo hay
                   title_line=None
                   if s!=-1:
                       for k in range(s+1,e):
@@ -152,32 +148,6 @@ jobs:
               p.write_text('\n'.join(lines)+'\n',encoding='utf-8')
           PY
       - run: mkdocs build --clean --site-dir site
-      - name: Generate sitemap.xml
-        run: |
-          python - <<'PY'
-          import os, time, xml.etree.ElementTree as ET
-          base = "https://lautarovculic.github.io"
-          urls=[]
-          for root,_,files in os.walk("site"):
-              for f in files:
-                  if not f.endswith(".html"): continue
-                  path=os.path.join(root,f)
-                  rel=path[len("site/"):]
-                  if rel in ("404.html",): continue
-                  if rel.startswith(("assets/","search/")): continue
-                  url=rel[:-10] if rel.endswith("index.html") else rel
-                  if not url.startswith("/"): url="/"+url
-                  if url.endswith(".html"): url=url
-                  loc=base+url
-                  mtime=time.strftime("%Y-%m-%d", time.gmtime(os.path.getmtime(path)))
-                  urls.append((loc,mtime))
-          urlset=ET.Element("urlset", xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
-          for loc,mtime in sorted(urls):
-              u=ET.SubElement(urlset,"url")
-              ET.SubElement(u,"loc").text=loc
-              ET.SubElement(u,"lastmod").text=mtime
-          ET.ElementTree(urlset).write("site/sitemap.xml", encoding="utf-8", xml_declaration=True)
-          PY
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
